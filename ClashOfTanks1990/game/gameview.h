@@ -2,6 +2,10 @@
 #define GAMEVIEW_H
 
 #include <QWidget>
+#include <QEvent>
+#include "game.h"
+
+
 
 class GameView : public QWidget
 {
@@ -9,7 +13,11 @@ class GameView : public QWidget
 public:
     explicit GameView(QWidget *parent = nullptr);
 
-signals:
+protected:
+    void paintEvent(QPaintEvent*) override;
+
+private:
+    Game game;
 };
 
 #endif // GAMEVIEW_H
