@@ -2,11 +2,25 @@
 #define ENEMYTANK_H
 
 #include "tank.h"
+#include <cstdlib>
+#include <ctime>
 
 class EnemyTank : public Tank
 {
 public:
-    EnemyTank();
+    EnemyTank(const QPointF&, unsigned short, unsigned short, float);
+
+    void update(float) override;
+    void render(QPainter* painter) override;
+    void shoot() override;
+
+private:
+    float shootCooldown = 1.5f;
+    float lastShotTime = 0.0f;
+    float changeTimer = 0.0f;
+
+    Direction currentDirection = DOWN;
+    bool isMoving = true;
 };
 
 #endif // ENEMYTANK_H
