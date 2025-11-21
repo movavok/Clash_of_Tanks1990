@@ -28,7 +28,7 @@ void PlayerTank::update(float deltaTime) {
 
     if (shootRequested && lastShotTime >= shootCooldown) {
         shoot();
-        lastShotTime = 0.0;
+        lastShotTime = 0.0f;
     }
     shootRequested = false;
 }

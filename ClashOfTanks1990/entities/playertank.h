@@ -16,8 +16,8 @@ public:
     void shoot() override;
 
 private:
-    float shootCooldown = 0.5;
-    float lastShotTime = 0.0;
+    float shootCooldown = 0.5f;
+    float lastShotTime = 0.0f;
     bool shootRequested = false;
 
     Direction currentDirection = UP;
