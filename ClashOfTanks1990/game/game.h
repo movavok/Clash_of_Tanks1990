@@ -3,9 +3,9 @@
 
 #include <QList>
 #include <QPainter>
-#include "../entities/entity.h"
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
+#include "../entities/bullet.h"
 
 class Game
 {
@@ -14,6 +14,7 @@ public:
 
     void update(float);
     bool checkCollision(Entity*);
+    void checkIfShotDown();
     void render(QPainter*);
 
     void handleKeyPress(Qt::Key);
