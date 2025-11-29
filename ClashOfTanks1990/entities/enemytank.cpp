@@ -8,12 +8,10 @@ EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt,
 
 void EnemyTank::update(float deltaTime) {
     if (isMoving) move(currentDirection, deltaTime);
-
     lastShotTime += deltaTime;
-    if (lastShotTime >= shootCooldown) {
-        shoot();
-        lastShotTime = 0.0f;
-    }
+
+    Bullet* newBullet = shoot();
+    if (newBullet) emit bulletFired(newBullet);
 
     changeTimer += deltaTime;
     if (changeTimer >= 0.5f) {
@@ -23,8 +21,12 @@ void EnemyTank::update(float deltaTime) {
     }
 }
 
-void EnemyTank::shoot() {
-    qDebug("EnemyTank fired!"); //in progress..
+Bullet* EnemyTank::shoot() {
+    if (lastShotTime >= shootCooldown) {
+        lastShotTime = 0.0f;
+        return new Bullet(position, currentDirection, 200.0f, this);
+    }
+    return nullptr;
 }
 
 void EnemyTank::render(QPainter* painter) {

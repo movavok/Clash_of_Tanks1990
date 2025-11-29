@@ -27,14 +27,18 @@ void PlayerTank::update(float deltaTime) {
     lastShotTime += deltaTime;
 
     if (shootRequested && lastShotTime >= shootCooldown) {
-        shoot();
-        lastShotTime = 0.0f;
+        Bullet* newBullet = shoot();
+        shootRequested = false;
+        if (newBullet) emit bulletFired(newBullet);
     }
-    shootRequested = false;
 }
 
-void PlayerTank::shoot() {
-    qDebug("PlayerTank fired!"); //in progress..
+Bullet* PlayerTank::shoot() {
+    if (lastShotTime >= shootCooldown) {
+        lastShotTime = 0.0f;
+        return new Bullet(position, currentDirection, 200.0f, this);
+    }
+    return nullptr;
 }
 
 void PlayerTank::render(QPainter* painter) {

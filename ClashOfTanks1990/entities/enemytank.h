@@ -1,7 +1,7 @@
 #ifndef ENEMYTANK_H
 #define ENEMYTANK_H
 
-#include "tank.h"
+#include "bullet.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -12,7 +12,7 @@ public:
 
     void update(float) override;
     void render(QPainter* painter) override;
-    void shoot() override;
+    Bullet* shoot() override;
 
 private:
     float shootCooldown = 1.5f;
@@ -21,6 +21,9 @@ private:
 
     Direction currentDirection = DOWN;
     bool isMoving = true;
+
+signals:
+    void bulletFired(Bullet*);
 };
 
 #endif // ENEMYTANK_H
