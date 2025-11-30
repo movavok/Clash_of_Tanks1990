@@ -7,8 +7,9 @@
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
 
-class Game
+class Game : public QObject
 {
+    Q_OBJECT
 public:
     Game();
 

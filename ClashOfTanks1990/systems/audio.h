@@ -5,7 +5,7 @@
 
 class Audio
 {
-    Q_OBJECT
+//    Q_OBJECT
 public:
     Audio();
 };
