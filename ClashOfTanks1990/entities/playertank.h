@@ -5,6 +5,7 @@
 
 class PlayerTank : public Tank
 {
+    Q_OBJECT
 public:
     PlayerTank(const QPointF&, unsigned short, unsigned short, float);
 

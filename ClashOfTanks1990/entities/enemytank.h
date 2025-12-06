@@ -7,6 +7,7 @@
 
 class EnemyTank : public Tank
 {
+    Q_OBJECT
 public:
     EnemyTank(const QPointF&, unsigned short, unsigned short, float);
 

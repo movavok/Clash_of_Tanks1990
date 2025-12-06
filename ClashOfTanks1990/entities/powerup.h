@@ -3,7 +3,7 @@
 
 #include "entity.h"
 
-class PowerUp : public Entity
+class PowerUp //: public Entity
 {
 public:
     PowerUp();
