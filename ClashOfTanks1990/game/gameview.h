@@ -2,10 +2,9 @@
 #define GAMEVIEW_H
 
 #include <QWidget>
-#include <QEvent>
+#include <QTimer>
+#include <QKeyEvent>
 #include "game.h"
-
-
 
 class GameView : public QWidget
 {
@@ -15,6 +14,8 @@ public:
 
 protected:
     void paintEvent(QPaintEvent*) override;
+    void keyPressEvent(QKeyEvent*) override;
+    void keyReleaseEvent(QKeyEvent*) override;
 
 private:
     Game game;
