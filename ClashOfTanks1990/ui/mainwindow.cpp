@@ -6,6 +6,9 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    gameView = new GameView(this);
+
+    setCentralWidget(gameView);
 }
 
 MainWindow::~MainWindow()

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QDateTime>
 #include <QKeyEvent>
 #include "game.h"
 
@@ -19,6 +20,11 @@ protected:
 
 private:
     Game game;
+    QTimer timer;
+    long long lastTime = 0;
+
+private slots:
+    void onTick();
 };
 
 #endif // GAMEVIEW_H
