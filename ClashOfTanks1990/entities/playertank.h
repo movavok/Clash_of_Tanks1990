@@ -13,13 +13,13 @@ public:
     void handleKeyRelease(Qt::Key);
 
     void update(float) override;
-    void render(QPainter* painter) override;
+    void render(QPainter*) override;
     Bullet* shoot() override;
 
 private:
-    float shootCooldown = 0.5f;
+    float shootCooldown = 3.0f;
     float lastShotTime = 0.0f;
-    bool shootRequested = false;
+    bool isShooting = false;
 
     Direction currentDirection = UP;
     bool isMoving = false;

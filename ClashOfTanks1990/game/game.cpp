@@ -6,7 +6,7 @@ Game::Game() {
     addEntity(player);
 
     for (int i = 0; i < 3; i++) {
-        EnemyTank* enemy = new EnemyTank(QPointF(200 + i * 60, 200), 30, 30, 70.0f);
+        EnemyTank* enemy = new EnemyTank(QPointF(200 + i * 60, 200), 30, 30, 100.0f);
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
@@ -61,6 +61,8 @@ void Game::checkIfShotDown() {
 }
 
 bool Game::checkCollision(Entity* entity) {
+    if (dynamic_cast<Bullet*>(entity)) return false;
+
     QRectF eBounds = entity->bounds();
     for (Entity* other : entities) {
         if (other == entity) continue;

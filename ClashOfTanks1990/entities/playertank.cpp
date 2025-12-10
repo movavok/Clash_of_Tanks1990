@@ -9,7 +9,7 @@ void PlayerTank::handleKeyPress(Qt::Key key) {
     case Qt::Key_S: currentDirection = DOWN;  isMoving = true; break;
     case Qt::Key_A: currentDirection = LEFT;  isMoving = true; break;
     case Qt::Key_D: currentDirection = RIGHT; isMoving = true; break;
-    case Qt::Key_Space: shootRequested = true; break;
+    case Qt::Key_Space: isShooting = true; break;
     default: break;
     }
 }
@@ -20,25 +20,22 @@ void PlayerTank::handleKeyRelease(Qt::Key key) {
         (key == Qt::Key_A && currentDirection == LEFT) ||
         (key == Qt::Key_D && currentDirection == RIGHT))
         isMoving = false;
+    if (key == Qt::Key_Space) isShooting = false;
 }
 
 void PlayerTank::update(float deltaTime) {
     if (isMoving) move(currentDirection, deltaTime);
     lastShotTime += deltaTime;
 
-    if (shootRequested && lastShotTime >= shootCooldown) {
+    if (isShooting && lastShotTime >= shootCooldown) {
         Bullet* newBullet = shoot();
-        shootRequested = false;
         if (newBullet) emit bulletFired(newBullet);
     }
 }
 
 Bullet* PlayerTank::shoot() {
-    if (lastShotTime >= shootCooldown) {
-        lastShotTime = 0.0f;
-        return new Bullet(position, currentDirection, 200.0f, this);
-    }
-    return nullptr;
+    lastShotTime = 0.0f;
+    return new Bullet(position, currentDirection, 150.0f, this);
 }
 
 void PlayerTank::render(QPainter* painter) {

@@ -4,6 +4,7 @@
 #include <QPointF>
 #include <QRectF>
 #include <QPainter>
+#include <QDebug>
 
 class Entity
 {

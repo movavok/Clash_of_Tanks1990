@@ -10,8 +10,10 @@ void EnemyTank::update(float deltaTime) {
     if (isMoving) move(currentDirection, deltaTime);
     lastShotTime += deltaTime;
 
-    Bullet* newBullet = shoot();
-    if (newBullet) emit bulletFired(newBullet);
+    if (lastShotTime >= shootCooldown) {
+        Bullet* newBullet = shoot();
+        if (newBullet) emit bulletFired(newBullet);
+    }
 
     changeTimer += deltaTime;
     if (changeTimer >= 0.5f) {
@@ -22,11 +24,8 @@ void EnemyTank::update(float deltaTime) {
 }
 
 Bullet* EnemyTank::shoot() {
-    if (lastShotTime >= shootCooldown) {
-        lastShotTime = 0.0f;
-        return new Bullet(position, currentDirection, 200.0f, this);
-    }
-    return nullptr;
+    lastShotTime = 0.0f;
+    return new Bullet(position, currentDirection, 150.0f, this);
 }
 
 void EnemyTank::render(QPainter* painter) {

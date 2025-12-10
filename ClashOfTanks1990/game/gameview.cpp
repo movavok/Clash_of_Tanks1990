@@ -15,6 +15,8 @@ void GameView::onTick() {
     long long now = QDateTime::currentMSecsSinceEpoch();
     double dt = (now - lastTime) / 1000.0;
 
+    lastTime = now;
+
     game.update(dt);
     QRect bounds(0, 0, width(), height());
     //
@@ -33,5 +35,4 @@ void GameView::paintEvent(QPaintEvent*) {
 void GameView::keyPressEvent(QKeyEvent* event) { game.handleKeyPress(static_cast<Qt::Key>(event->key())); }
 
 void GameView::keyReleaseEvent(QKeyEvent* event) { game.handleKeyRelease(static_cast<Qt::Key>(event->key())); }
-
 
