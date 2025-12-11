@@ -13,8 +13,9 @@ class Game : public QObject
 public:
     Game();
 
-    void update(float);
+    void update(float, const QSize&);
     bool checkCollision(Entity*);
+    bool checkWindowBounds(Entity*, const QSize&);
     void checkIfShotDown();
     void render(QPainter*);
 

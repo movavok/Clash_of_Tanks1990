@@ -5,33 +5,41 @@ Game::Game() {
     connect(player, &PlayerTank::bulletFired, this, &Game::addEntity);
     addEntity(player);
 
-    for (int i = 0; i < 3; i++) {
-        EnemyTank* enemy = new EnemyTank(QPointF(200 + i * 60, 200), 30, 30, 100.0f);
+    for (int index = 0; index < 3; index++) {
+        EnemyTank* enemy = new EnemyTank(QPointF(200 + index * 60, 200), 30, 30, 100.0f);
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
 }
 
-void Game::addEntity(Entity* e) { entities.append(e); }
+void Game::addEntity(Entity* entity) { entities.append(entity); }
 
-void Game::removeEntity(Entity* e)
-{
-    entities.removeOne(e);
-    delete e;
+void Game::removeEntity(Entity* entity) {
+    entities.removeOne(entity);
+    delete entity;
 }
 
-void Game::update(float deltaTime) {
+void Game::update(float deltaTime, const QSize& windowSize) {
     for (Entity* entity : entities) {
+        if (!entity->isAlive()) continue;
+
         QPointF oldPos = entity->getPosition();
         entity->update(deltaTime);
 
-        if (checkCollision(entity)) entity->setPosition(oldPos); //otkat
+        if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
+            if (checkWindowBounds(bullet, windowSize)) bullet->destroy();
+        } else {
+            if (checkCollision(entity) || checkWindowBounds(entity, windowSize))
+                entity->setPosition(oldPos); // otkat
+        }
     }
 
     checkIfShotDown();
 
-    for (int index = entities.size() - 1; index >= 0; --index)
-        if (!entities[index]->isAlive()) removeEntity(entities[index]);
+    for (int index = entities.size() - 1; index >= 0; --index) {
+        if (!entities[index]->isAlive())
+            removeEntity(entities[index]);
+    }
 }
 
 void Game::checkIfShotDown() {
@@ -40,38 +48,48 @@ void Game::checkIfShotDown() {
         if (!bullet || !bullet->isAlive()) continue;
 
         for (Entity* target : entities) {
-            if (bullet == target) continue;
+            if (bullet == target || !target->isAlive()) continue;
 
-            //bullet vs bullet
-            if (Bullet* otherBullet = dynamic_cast<Bullet*>(target))
+            // bullet vs bullet
+            if (Bullet* otherBullet = dynamic_cast<Bullet*>(target)) {
                 if (otherBullet->isAlive() && bullet->bounds().intersects(otherBullet->bounds())) {
                     bullet->destroy();
                     otherBullet->destroy();
                     break;
                 }
-            //bullet vs tank
-            else if (Tank* tank = dynamic_cast<Tank*>(target))
+            }
+            // bullet vs tank
+            else if (Tank* tank = dynamic_cast<Tank*>(target)) {
                 if (tank != bullet->getOwner() && bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
                     tank->destroy();
                     break;
                 }
+            }
         }
     }
 }
 
 bool Game::checkCollision(Entity* entity) {
-    if (dynamic_cast<Bullet*>(entity)) return false;
+    if (dynamic_cast<Bullet*>(entity) || !entity->isAlive()) return false;
 
     QRectF eBounds = entity->bounds();
     for (Entity* other : entities) {
-        if (other == entity) continue;
+        if (other == entity || dynamic_cast<Bullet*>(other) || !other->isAlive()) continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
     return false;
 }
 
-void Game::render(QPainter* painter) { for (Entity* entity : entities) entity->render(painter); }
+bool Game::checkWindowBounds(Entity* entity, const QSize& windowSize) {
+    QRectF eBounds = entity->bounds();
+    return eBounds.left() < 0 || eBounds.top() < 0 || eBounds.right() > windowSize.width() || eBounds.bottom() > windowSize.height();
+}
+
+void Game::render(QPainter* painter) {
+    for (Entity* entity : entities)
+        if (entity->isAlive()) entity->render(painter);
+}
 
 void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key); }
 

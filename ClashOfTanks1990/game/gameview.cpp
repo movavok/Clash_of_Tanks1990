@@ -17,7 +17,7 @@ void GameView::onTick() {
 
     lastTime = now;
 
-    game.update(dt);
+    game.update(dt, size());
     QRect bounds(0, 0, width(), height());
     //
     //should be wimdow collision
