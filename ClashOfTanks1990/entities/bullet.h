@@ -13,12 +13,13 @@ public:
     QRectF bounds() const override;
 
     Tank* getOwner() const;
+    static unsigned short getBulletSize() { return size; }
 
 private:
     Tank* owner;
     Tank::Direction direction;
     float speed;
-    unsigned short size;
+    static unsigned short size;
 };
 
 #endif // BULLET_H

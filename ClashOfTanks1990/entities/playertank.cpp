@@ -35,7 +35,19 @@ void PlayerTank::update(float deltaTime) {
 
 Bullet* PlayerTank::shoot() {
     lastShotTime = 0.0f;
-    return new Bullet(position, currentDirection, 150.0f, this);
+    QPointF bulletPos;
+
+    switch (currentDirection) {
+    case UP:
+        bulletPos = QPointF(position.x() + width/2 - Bullet::getBulletSize()/2, position.y() - Bullet::getBulletSize()); break;
+    case DOWN:
+        bulletPos = QPointF(position.x() + width/2 - Bullet::getBulletSize()/2, position.y() + height); break;
+    case LEFT:
+        bulletPos = QPointF(position.x() - Bullet::getBulletSize(), position.y() + height/2 - Bullet::getBulletSize()/2); break;
+    case RIGHT:
+        bulletPos = QPointF(position.x() + width, position.y() + height/2 - Bullet::getBulletSize()/2); break;
+    }
+    return new Bullet(bulletPos, currentDirection, 150.0f, this);
 }
 
 void PlayerTank::render(QPainter* painter) {

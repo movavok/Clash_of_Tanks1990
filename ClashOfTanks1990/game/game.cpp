@@ -60,7 +60,18 @@ void Game::checkIfShotDown() {
             }
             // bullet vs tank
             else if (Tank* tank = dynamic_cast<Tank*>(target)) {
-                if (tank != bullet->getOwner() && bullet->bounds().intersects(tank->bounds())) {
+                if (tank == bullet->getOwner()) continue;
+
+                bool ownerIsEnemy = dynamic_cast<EnemyTank*>(bullet->getOwner());
+                bool targetIsEnemy = dynamic_cast<EnemyTank*>(tank);
+
+                if (targetIsEnemy && ownerIsEnemy) {
+                    if (bullet->bounds().intersects(tank->bounds()))
+                        bullet->destroy();
+                    continue;
+                }
+
+                if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
                     tank->destroy();
                     break;
