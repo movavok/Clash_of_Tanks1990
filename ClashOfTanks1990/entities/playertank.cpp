@@ -51,6 +51,20 @@ Bullet* PlayerTank::shoot() {
 }
 
 void PlayerTank::render(QPainter* painter) {
-    painter->setBrush(Qt::blue); //in progress..
+    painter->setBrush(Qt::blue);
+    painter->setPen(Qt::NoPen);
     painter->drawRect(bounds());
+
+    // Cooldown bar above the tank
+    float denom = shootCooldown > 0.0f ? shootCooldown : 1.0f;
+    float percent = lastShotTime / denom;
+    if (percent < 0.0f) percent = 0.0f; else if (percent > 1.0f) percent = 1.0f;
+
+    QRectF barBg(position.x(), position.y() - 6.0, width, 4.0);
+    painter->setBrush(QColor(60, 60, 60));
+    painter->drawRect(barBg);
+
+    QRectF barFg(position.x(), position.y() - 6.0, width * percent, 4.0);
+    painter->setBrush(QColor(80, 200, 120));
+    painter->drawRect(barFg);
 }

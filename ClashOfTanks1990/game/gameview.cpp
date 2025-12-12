@@ -9,6 +9,7 @@ GameView::GameView(QWidget *parent)
     timer.start();
 
     setFocusPolicy(Qt::StrongFocus); // working keyboard
+    setFixedSize(25 * 32, 19 * 32);
 }
 
 void GameView::onTick() {
@@ -19,9 +20,6 @@ void GameView::onTick() {
 
     game.update(dt, size());
     QRect bounds(0, 0, width(), height());
-    //
-    //should be wimdow collision
-    //
     update();
 }
 

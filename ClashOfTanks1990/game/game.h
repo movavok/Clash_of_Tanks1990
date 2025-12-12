@@ -6,6 +6,7 @@
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
+#include "../level/level.h"
 
 class Game : public QObject
 {
@@ -28,6 +29,7 @@ public:
 private:
     PlayerTank* player;
     QList<Entity*> entities;
+    Level* level = nullptr;
 };
 
 #endif // GAME_H

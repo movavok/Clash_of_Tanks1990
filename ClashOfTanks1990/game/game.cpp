@@ -10,6 +10,8 @@ Game::Game() {
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
+
+    level = new Level(25, 19, 32);
 }
 
 void Game::addEntity(Entity* entity) { entities.append(entity); }
@@ -27,10 +29,16 @@ void Game::update(float deltaTime, const QSize& windowSize) {
         entity->update(deltaTime);
 
         if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
-            if (checkWindowBounds(bullet, windowSize)) bullet->destroy();
+            if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
+            if (bullet->isAlive() && level && level->intersectsSolid(bullet->bounds())) {
+                level->destroyInRect(bullet->bounds());
+                bullet->destroy();
+            }
         } else {
-            if (checkCollision(entity) || checkWindowBounds(entity, windowSize))
-                entity->setPosition(oldPos); // otkat
+            bool collided = false;
+            if (checkCollision(entity)) collided = true;
+            if (!collided && level && level->intersectsSolid(entity->bounds())) collided = true;
+            if (collided) entity->setPosition(oldPos);
         }
     }
 
@@ -98,6 +106,7 @@ bool Game::checkWindowBounds(Entity* entity, const QSize& windowSize) {
 }
 
 void Game::render(QPainter* painter) {
+    if (level) level->render(painter);
     for (Entity* entity : entities)
         if (entity->isAlive()) entity->render(painter);
 }
