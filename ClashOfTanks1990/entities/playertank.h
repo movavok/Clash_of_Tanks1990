@@ -19,8 +19,8 @@ public:
     void resetControls();
     
     // PowerUps
-    void applySpeedBoost(float durationSeconds, float multiplier);
-    void applyReloadBoost(float durationSeconds);
+    void applySpeedBoost(float, float);
+    void applyReloadBoost(float);
     void addShield();
     bool hasShield() const;
     void consumeShield();
@@ -34,12 +34,16 @@ private:
     Direction currentDirection = UP;
     bool isMoving = false;
     
-    // Power-up state
     float baseSpeed = 0.0f;
     float speedBoostTime = 0.0f;
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
     int shieldCharges = 0;
+
+    void drawShieldAura(QPainter*) const;
+    QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
+    void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
+    void drawCooldownBar(QPainter*) const;
 
 signals:
     void bulletFired(Bullet*);

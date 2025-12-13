@@ -12,8 +12,15 @@ public:
     EnemyTank(const QPointF&, unsigned short, unsigned short, float);
 
     void update(float) override;
-    void render(QPainter* painter) override;
+    void render(QPainter*) override;
     Bullet* shoot() override;
+
+    void applySpeedBoost(float, float);
+    void applyReloadBoost(float);
+    void addShield();
+    bool hasShield() const;
+    void consumeShield();
+    void clearAllBuffs();
 
 private:
     float shootCooldown = 1.5f;
@@ -23,21 +30,16 @@ private:
     Direction currentDirection = DOWN;
     bool isMoving = true;
 
-    // Power-up state (non-stacking)
     float baseSpeed = 0.0f;
     float speedBoostTime = 0.0f;
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
     int shieldCharges = 0;
 
-public:
-    // Effects API used by Game
-    void applySpeedBoost(float durationSeconds, float multiplier);
-    void applyReloadBoost(float durationSeconds);
-    void addShield();
-    bool hasShield() const;
-    void consumeShield();
-    void clearAllBuffs();
+    void drawShieldAura(QPainter*) const;
+    QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
+    void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
+    void drawCooldownBar(QPainter*) const;
 
 signals:
     void bulletFired(Bullet*);
