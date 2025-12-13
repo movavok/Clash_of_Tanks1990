@@ -1,7 +1,10 @@
 #include "playertank.h"
+#include <QPainter>
 
 PlayerTank::PlayerTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd)
-    : Tank(pos, wth, hgt, spd) {}
+    : Tank(pos, wth, hgt, spd) {
+    baseSpeed = spd;
+}
 
 void PlayerTank::handleKeyPress(Qt::Key key) {
     switch(key) {
@@ -24,10 +27,26 @@ void PlayerTank::handleKeyRelease(Qt::Key key) {
 }
 
 void PlayerTank::update(float deltaTime) {
+    if (speedBoostTime > 0.0f) {
+        speedBoostTime -= deltaTime;
+        if (speedBoostTime <= 0.0f) {
+            speedBoostTime = 0.0f;
+            speedMultiplier = 1.0f;
+        }
+    }
+    if (reloadBoostTime > 0.0f) {
+        reloadBoostTime -= deltaTime;
+        if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
+    }
+
+    speed = baseSpeed * speedMultiplier;
+
     if (isMoving) move(currentDirection, deltaTime);
     lastShotTime += deltaTime;
 
-    if (isShooting && lastShotTime >= shootCooldown) {
+    float effectiveCooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
+
+    if (isShooting && lastShotTime >= effectiveCooldown) {
         Bullet* newBullet = shoot();
         if (newBullet) emit bulletFired(newBullet);
     }
@@ -51,12 +70,37 @@ Bullet* PlayerTank::shoot() {
 }
 
 void PlayerTank::render(QPainter* painter) {
-    painter->setBrush(Qt::blue);
+    // Shield visual: change tank color if shield active
+    QColor tankColor = shieldCharges > 0 ? QColor(70, 200, 255) : QColor(0, 0, 255);
+    painter->setBrush(tankColor);
     painter->setPen(Qt::NoPen);
     painter->drawRect(bounds());
 
-    // Cooldown bar above the tank
-    float denom = shootCooldown > 0.0f ? shootCooldown : 1.0f;
+    // Speed trail visual when boost active
+    if (speedBoostTime > 0.0f) {
+        QRectF trail;
+        const qreal trailLen = 10.0;
+        switch (currentDirection) {
+        case UP:
+            trail = QRectF(position.x(), position.y() + height, width, trailLen);
+            break;
+        case DOWN:
+            trail = QRectF(position.x(), position.y() - trailLen, width, trailLen);
+            break;
+        case LEFT:
+            trail = QRectF(position.x() + width, position.y(), trailLen, height);
+            break;
+        case RIGHT:
+            trail = QRectF(position.x() - trailLen, position.y(), trailLen, height);
+            break;
+        }
+        painter->setBrush(QColor(80, 160, 255, 120));
+        painter->drawRect(trail);
+    }
+
+    // Cooldown bar (reflects reload boost)
+    float effective = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
+    float denom = effective > 0.0f ? effective : 1.0f;
     float percent = lastShotTime / denom;
     if (percent < 0.0f) percent = 0.0f; else if (percent > 1.0f) percent = 1.0f;
 
@@ -65,6 +109,33 @@ void PlayerTank::render(QPainter* painter) {
     painter->drawRect(barBg);
 
     QRectF barFg(position.x(), position.y() - 6.0, width * percent, 4.0);
-    painter->setBrush(QColor(80, 200, 120));
+    painter->setBrush(reloadBoostTime > 0.0f ? QColor(255, 170, 50) : QColor(80, 200, 120));
     painter->drawRect(barFg);
+}
+
+void PlayerTank::resetControls() {
+    isMoving = false;
+    isShooting = false;
+}
+
+void PlayerTank::applySpeedBoost(float durationSeconds, float multiplier) {
+    // No stacking: overwrite with latest effect
+    speedBoostTime = durationSeconds;
+    speedMultiplier = multiplier > 0.0f ? multiplier : 1.0f;
+}
+
+void PlayerTank::applyReloadBoost(float durationSeconds) {
+    reloadBoostTime = durationSeconds;
+}
+
+void PlayerTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
+bool PlayerTank::hasShield() const { return shieldCharges > 0; }
+void PlayerTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
+
+void PlayerTank::clearAllBuffs() {
+    speedBoostTime = 0.0f;
+    speedMultiplier = 1.0f;
+    reloadBoostTime = 0.0f;
+    shieldCharges = 0;
+    speed = baseSpeed;
 }

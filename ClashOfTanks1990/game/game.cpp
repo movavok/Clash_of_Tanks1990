@@ -1,4 +1,6 @@
 #include "game.h"
+#include <QRandomGenerator>
+#include <algorithm>
 
 Game::Game()
     : player(nullptr)
@@ -59,19 +61,21 @@ void Game::advanceLevel() {
     }
 
     QList<Entity*> toRemove;
-    for (Entity* e : entities) {
-        if (e != player) toRemove.append(e);
+    for (Entity* entity : entities) {
+        if (entity != player) toRemove.append(entity);
     }
-    for (Entity* e : toRemove) removeEntity(e);
+    for (Entity* entity : toRemove) removeEntity(entity);
 
     delete level;
     level = nextLevel;
     announcedNoEnemies = false;
 
-    if (!player) {
-        spawnPlayerAtTile(2, 2);
-    } else {
+    if (!player) spawnPlayerAtTile(2, 2);
+    else {
         player->setPosition(tileCenter(2, 2));
+        player->resetControls();
+        // Clear buffs on level change
+        player->clearAllBuffs();
     }
 
     spawnEnemiesDefault();
@@ -95,7 +99,7 @@ void Game::removeEntity(Entity* entity) {
 
 void Game::doMessage(int levelIndex) {
     QMessageBox msg;
-    msg.setIcon(QMessageBox::Information);
+    msg.setIcon(QMessageBox::NoIcon);
     msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
     msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
     msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
@@ -108,6 +112,51 @@ void Game::doMessage(int levelIndex) {
 
 void Game::update(float deltaTime, const QSize& windowSize) {
     if (paused) return;
+    updateEntities(deltaTime, windowSize);
+    // Spawn power-ups periodically
+    powerUpSpawnTimer += deltaTime;
+    int activePowerUps = 0;
+    for (Entity* e : entities) if (dynamic_cast<PowerUp*>(e) && e->isAlive()) ++activePowerUps;
+    if (powerUpSpawnTimer >= powerUpSpawnInterval && activePowerUps < 2) {
+        spawnPowerUpRandom();
+        powerUpSpawnTimer = 0.0f;
+    }
+    checkIfShotDown();
+
+    // Check pickups: player and enemies can take power-ups
+    for (Entity* e : entities) {
+        PowerUp* p = dynamic_cast<PowerUp*>(e);
+        if (!p || !p->isAlive()) continue;
+
+        bool consumed = false;
+        if (player && player->bounds().intersects(p->bounds())) {
+            applyPowerUp(p);
+            consumed = true;
+        }
+        if (!consumed) {
+            for (Entity* t : entities) {
+                if (EnemyTank* et = dynamic_cast<EnemyTank*>(t)) {
+                    if (et->isAlive() && et->bounds().intersects(p->bounds())) {
+                        // Apply to enemy with same semantics, different visuals already handled in EnemyTank
+                        switch (p->getType()) {
+                        case PowerUp::Speed:  et->applySpeedBoost(8.0f, 1.5f); break;
+                        case PowerUp::Reload: et->applyReloadBoost(8.0f); break;
+                        case PowerUp::Shield: et->addShield(); break;
+                        }
+                        p->destroy();
+                        consumed = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    cleanupDeadEntities();
+    if (handlePlayerDeath()) return;
+    handleLevelClear();
+}
+
+void Game::updateEntities(float deltaTime, const QSize& windowSize) {
     for (Entity* entity : entities) {
         if (!entity->isAlive()) continue;
 
@@ -127,23 +176,47 @@ void Game::update(float deltaTime, const QSize& windowSize) {
             if (collided) entity->setPosition(oldPos);
         }
     }
+}
 
-    checkIfShotDown();
-
+void Game::cleanupDeadEntities() {
     for (int index = entities.size() - 1; index >= 0; --index) {
         if (!entities[index]->isAlive()) {
             if (entities[index] == player) player = nullptr;
             removeEntity(entities[index]);
         }
     }
+}
 
-    bool enemiesRemain = false;
-    for (Entity* enemy : entities) {
-        if (dynamic_cast<EnemyTank*>(enemy) && enemy->isAlive()) { enemiesRemain = true; }
+bool Game::handlePlayerDeath() {
+    if (!player) {
+        paused = true;
+        // Ensure any lingering input is cleared
+        if (player) player->resetControls();
+        QMessageBox msg;
+        msg.setIcon(QMessageBox::NoIcon);
+        msg.setWindowTitle("Ви загинули");
+        msg.setText("Перезапустити рівень чи вийти?");
+        msg.setStandardButtons(QMessageBox::Retry | QMessageBox::Yes);
+        if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
+        if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText("Вийти");
+        QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
+        if (choice == QMessageBox::Retry) restartLevel();
+        else QCoreApplication::quit();
+        paused = false;
+        return true;
     }
+    return false;
+}
+
+void Game::handleLevelClear() {
+    bool enemiesRemain = false;
+    for (Entity* enemy : entities)
+        if (dynamic_cast<EnemyTank*>(enemy) && enemy->isAlive()) { enemiesRemain = true; }
+
     if (!enemiesRemain && !advancing) {
         advancing = true;
         paused = true;
+        if (player) player->resetControls();
 
         QList<Entity*> bullets;
         for (Entity* entity : entities) if (dynamic_cast<Bullet*>(entity)) bullets.append(entity);
@@ -153,7 +226,6 @@ void Game::update(float deltaTime, const QSize& windowSize) {
 
         paused = false;
         advancing = false;
-        return;
     }
 }
 
@@ -180,14 +252,27 @@ void Game::checkIfShotDown() {
                 bool targetIsEnemy = dynamic_cast<EnemyTank*>(tank);
 
                 if (targetIsEnemy && ownerIsEnemy) {
-                    if (bullet->bounds().intersects(tank->bounds()))
-                        bullet->destroy();
+                    if (bullet->bounds().intersects(tank->bounds())) bullet->destroy();
                     continue;
                 }
 
                 if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
-                    tank->destroy();
+                    if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
+                        if (playerTankHit->hasShield()) {
+                            playerTankHit->consumeShield();
+                        } else {
+                            tank->destroy();
+                        }
+                    } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
+                        if (enemyTankHit->hasShield()) {
+                            enemyTankHit->consumeShield();
+                        } else {
+                            tank->destroy();
+                        }
+                    } else {
+                        tank->destroy();
+                    }
                     break;
                 }
             }
@@ -196,11 +281,11 @@ void Game::checkIfShotDown() {
 }
 
 bool Game::checkCollision(Entity* entity) {
-    if (dynamic_cast<Bullet*>(entity) || !entity->isAlive()) return false;
+    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || !entity->isAlive()) return false;
 
     QRectF eBounds = entity->bounds();
     for (Entity* other : entities) {
-        if (other == entity || dynamic_cast<Bullet*>(other) || !other->isAlive()) continue;
+        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || !other->isAlive()) continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
     return false;
@@ -213,8 +298,23 @@ bool Game::checkWindowBounds(Entity* entity, const QSize& windowSize) {
 
 void Game::render(QPainter* painter) {
     if (level) level->render(painter);
-    for (Entity* entity : entities)
-        if (entity->isAlive()) entity->render(painter);
+
+    double originalOpacity = painter->opacity();
+    for (Entity* entity : entities) {
+        if (!entity->isAlive()) continue;
+
+        double opacity = originalOpacity;
+        if (level->intersectsGrass(entity->bounds())) {
+            if (dynamic_cast<Bullet*>(entity)) opacity = 0.5;
+            else if (entity == player) opacity = 0.5;
+            else if (dynamic_cast<EnemyTank*>(entity)) opacity = 0.0;
+        }
+        painter->setOpacity(opacity);
+        entity->render(painter);
+    }
+    painter->setOpacity(originalOpacity);
+
+    if (level) level->renderForeground(painter);
 }
 
 void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key); }
@@ -229,9 +329,9 @@ void Game::restartLevel() {
     }
 
     QList<Entity*> toRemove;
-    for (Entity* entity : entities) {
+    for (Entity* entity : entities)
         if (entity != player) toRemove.append(entity);
-    }
+
     for (Entity* entity : toRemove) removeEntity(entity);
 
     delete level;
@@ -239,7 +339,59 @@ void Game::restartLevel() {
     announcedNoEnemies = false;
 
     if (!player) spawnPlayerAtTile(2, 2);
-    else player->setPosition(tileCenter(2, 2));
+    else {
+        player->setPosition(tileCenter(2, 2));
+        player->resetControls();
+        // Clear buffs on restart
+        player->clearAllBuffs();
+    }
 
     spawnEnemiesDefault();
+}
+
+void Game::spawnPowerUpRandom() {
+    if (!level) return;
+
+    const int ts = level->getTileSize();
+    const int rows = level->getRows();
+    const int cols = level->getCols();
+
+    int centerX = cols / 2;
+    int centerY = rows / 2;
+
+    // Try a few times to find a non-solid tile near center
+    for (int attempt = 0; attempt < 12; ++attempt) {
+        int deltaTileX = QRandomGenerator::global()->bounded(-3, 4); // [-3,3]
+        int deltaTileY = QRandomGenerator::global()->bounded(-3, 4);
+        int targetTileX = std::max(0, std::min(cols - 1, centerX + deltaTileX));
+        int targetTileY = std::max(0, std::min(rows - 1, centerY + deltaTileY));
+
+        QPointF pos(targetTileX * ts + (ts - 16) / 2.0, targetTileY * ts + (ts - 16) / 2.0);
+        QRectF rect(pos.x(), pos.y(), 16, 16);
+        if (level->intersectsSolid(rect)) continue;
+
+        PowerUp::Type type;
+        int randomTypeIndex = QRandomGenerator::global()->bounded(3);
+        if (randomTypeIndex == 0) type = PowerUp::Speed; else if (randomTypeIndex == 1) type = PowerUp::Reload; else type = PowerUp::Shield;
+
+        PowerUp* p = new PowerUp(pos, type);
+        addEntity(p);
+        return;
+    }
+}
+
+void Game::applyPowerUp(PowerUp* p) {
+    if (!player || !p) return;
+    switch (p->getType()) {
+    case PowerUp::Speed:
+        player->applySpeedBoost(8.0f, 1.5f);
+        break;
+    case PowerUp::Reload:
+        player->applyReloadBoost(8.0f);
+        break;
+    case PowerUp::Shield:
+        player->addShield();
+        break;
+    }
+    p->destroy();
 }

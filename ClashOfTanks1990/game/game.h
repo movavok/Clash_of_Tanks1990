@@ -10,6 +10,7 @@
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
+#include "../entities/powerup.h"
 #include "../level/level.h"
 
 class Game : public QObject
@@ -39,6 +40,10 @@ private:
     bool announcedNoEnemies = false;
     bool paused = false;
 
+    // Power-up spawn control
+    float powerUpSpawnTimer = 0.0f;
+    float powerUpSpawnInterval = 8.0f; // seconds
+
     void initLevel();
     QPointF tileCenter(int, int) const;
 
@@ -46,9 +51,16 @@ private:
     void spawnEnemiesDefault();
 
     void doMessage(int);
+    void updateEntities(float, const QSize&);
+    void cleanupDeadEntities();
+    bool handlePlayerDeath();
+    void handleLevelClear();
 
     void advanceLevel();
     void restartLevel();
+
+    void spawnPowerUpRandom();
+    void applyPowerUp(PowerUp*);
 };
 
 #endif // GAME_H
