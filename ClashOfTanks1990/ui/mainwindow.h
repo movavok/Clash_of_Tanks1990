@@ -21,5 +21,8 @@ public:
 private:
     Ui::MainWindow *ui;
     GameView* gameView;
+
+private slots:
+    void onLevelChanged(int level);
 };
 #endif // MAINWINDOW_H

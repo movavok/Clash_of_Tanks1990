@@ -1,12 +1,7 @@
 #include "powerup.h"
-#include <QPainter>
 
-PowerUp::PowerUp(const QPointF& pos, Type t)
-	: Entity(pos), type(t) {}
-
-void PowerUp::update(float) {
-	// Static collectible; no behavior required.
-}
+PowerUp::PowerUp(const QPointF& position, Type boostType)
+    : Entity(position), type(boostType) {}
 
 void PowerUp::render(QPainter* painter) {
 	QColor color;
@@ -20,7 +15,6 @@ void PowerUp::render(QPainter* painter) {
 	painter->drawRect(bounds());
 }
 
-QRectF PowerUp::bounds() const {
-	return QRectF(position.x(), position.y(), width, height);
-}
+QRectF PowerUp::bounds() const { return QRectF(position.x(), position.y(), width, height); }
 
+PowerUp::Type PowerUp::getType() const { return type; }

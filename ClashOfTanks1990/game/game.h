@@ -2,11 +2,12 @@
 #define GAME_H
 
 #include <QList>
-#include <QPainter>
 #include <QPointF>
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QAbstractButton>
+#include <QRandomGenerator>
+#include <algorithm>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
@@ -40,9 +41,8 @@ private:
     bool announcedNoEnemies = false;
     bool paused = false;
 
-    // Power-up spawn control
-    float powerUpSpawnTimer = 0.0f;
-    float powerUpSpawnInterval = 8.0f; // seconds
+    float powerUpSpawnTimer = 0.0;
+    float powerUpSpawnInterval = 8.0;
 
     void initLevel();
     QPointF tileCenter(int, int) const;
@@ -61,6 +61,9 @@ private:
 
     void spawnPowerUpRandom();
     void applyPowerUp(PowerUp*);
+
+signals:
+    void levelChanged(int);
 };
 
 #endif // GAME_H

@@ -25,6 +25,9 @@ private:
 
 private slots:
     void onTick();
+
+signals:
+    void levelChanged(int);
 };
 
 #endif // GAMEVIEW_H

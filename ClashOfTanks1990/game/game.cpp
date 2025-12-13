@@ -1,6 +1,4 @@
 #include "game.h"
-#include <QRandomGenerator>
-#include <algorithm>
 
 Game::Game()
     : player(nullptr)
@@ -12,6 +10,7 @@ Game::Game()
     initLevel();
     spawnPlayerAtTile(2, 2);
     spawnEnemiesDefault();
+    emit levelChanged(levelIndex);
 }
 
 void Game::initLevel() {
@@ -22,13 +21,13 @@ void Game::initLevel() {
 
 QPointF Game::tileCenter(int tx, int ty) const {
     if (!level) return QPointF(0, 0);
-    const int ts = level->getTileSize();
-    const int offset = (ts - 30) / 2;
-    return QPointF(tx * ts + offset, ty * ts + offset);
+    const int tileSize = level->getTileSize();
+    const int offset = (tileSize - 30) / 2;
+    return QPointF(tx * tileSize + offset, ty * tileSize + offset);
 }
 
-void Game::spawnPlayerAtTile(int tx, int ty) {
-    QPointF playerPos = tileCenter(tx, ty);
+void Game::spawnPlayerAtTile(int tileX, int tileY) {
+    QPointF playerPos = tileCenter(tileX, tileY);
     player = new PlayerTank(playerPos, 30, 30, 100.0f);
     connect(player, &PlayerTank::bulletFired, this, &Game::addEntity);
     addEntity(player);
@@ -41,8 +40,8 @@ void Game::spawnEnemiesDefault() {
         tileCenter(2, level->getRows() - 3),
         tileCenter(level->getCols() - 3, level->getRows() - 3)
     };
-    for (const QPointF& pos : enemySpawns) {
-        EnemyTank* enemy = new EnemyTank(pos, 30, 30, 100.0f);
+    for (const QPointF& position : enemySpawns) {
+        EnemyTank* enemy = new EnemyTank(position, 30, 30, 100.0f);
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
@@ -51,10 +50,9 @@ void Game::spawnEnemiesDefault() {
 
 void Game::advanceLevel() {
     ++levelIndex;
-    const QString nextPath = QString("../../assets/levels/level%1.txt").arg(levelIndex);
-
     Level* nextLevel = new Level(19, 19, 32);
-    if (!nextLevel->loadFromFile(nextPath)) {
+    
+    if (!nextLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
         --levelIndex;
         delete nextLevel;
         return;
@@ -74,19 +72,19 @@ void Game::advanceLevel() {
     else {
         player->setPosition(tileCenter(2, 2));
         player->resetControls();
-        // Clear buffs on level change
         player->clearAllBuffs();
     }
 
     spawnEnemiesDefault();
+    emit levelChanged(levelIndex);
 }
 
 void Game::addEntity(Entity* entity) { entities.append(entity); }
 
 void Game::removeEntity(Entity* entity) {
-    int idx = entities.indexOf(entity);
-    if (idx != -1) {
-        entities.removeAt(idx);
+    int index = entities.indexOf(entity);
+    if (index != -1) {
+        entities.removeAt(index);
         if (Tank* removedTank = dynamic_cast<Tank*>(entity))
             for (Entity* entity : entities)
                 if (Bullet* bullet = dynamic_cast<Bullet*>(entity))
@@ -113,17 +111,15 @@ void Game::doMessage(int levelIndex) {
 void Game::update(float deltaTime, const QSize& windowSize) {
     if (paused) return;
     updateEntities(deltaTime, windowSize);
-    // Spawn power-ups periodically
     powerUpSpawnTimer += deltaTime;
     int activePowerUps = 0;
     for (Entity* e : entities) if (dynamic_cast<PowerUp*>(e) && e->isAlive()) ++activePowerUps;
     if (powerUpSpawnTimer >= powerUpSpawnInterval && activePowerUps < 2) {
         spawnPowerUpRandom();
-        powerUpSpawnTimer = 0.0f;
+        powerUpSpawnTimer = 0.0;
     }
     checkIfShotDown();
 
-    // Check pickups: player and enemies can take power-ups
     for (Entity* e : entities) {
         PowerUp* p = dynamic_cast<PowerUp*>(e);
         if (!p || !p->isAlive()) continue;
@@ -190,7 +186,7 @@ void Game::cleanupDeadEntities() {
 bool Game::handlePlayerDeath() {
     if (!player) {
         paused = true;
-        // Ensure any lingering input is cleared
+        
         if (player) player->resetControls();
         QMessageBox msg;
         msg.setIcon(QMessageBox::NoIcon);
@@ -211,7 +207,7 @@ bool Game::handlePlayerDeath() {
 void Game::handleLevelClear() {
     bool enemiesRemain = false;
     for (Entity* enemy : entities)
-        if (dynamic_cast<EnemyTank*>(enemy) && enemy->isAlive()) { enemiesRemain = true; }
+        if (dynamic_cast<EnemyTank*>(enemy) && enemy->isAlive()) enemiesRemain = true;
 
     if (!enemiesRemain && !advancing) {
         advancing = true;
@@ -259,20 +255,12 @@ void Game::checkIfShotDown() {
                 if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
                     if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
-                        if (playerTankHit->hasShield()) {
-                            playerTankHit->consumeShield();
-                        } else {
-                            tank->destroy();
-                        }
+                        if (playerTankHit->hasShield()) playerTankHit->consumeShield();
+                        else tank->destroy();
                     } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
-                        if (enemyTankHit->hasShield()) {
-                            enemyTankHit->consumeShield();
-                        } else {
-                            tank->destroy();
-                        }
-                    } else {
-                        tank->destroy();
-                    }
+                        if (enemyTankHit->hasShield()) enemyTankHit->consumeShield();
+                        else tank->destroy();
+                    } else tank->destroy();
                     break;
                 }
             }
@@ -342,56 +330,42 @@ void Game::restartLevel() {
     else {
         player->setPosition(tileCenter(2, 2));
         player->resetControls();
-        // Clear buffs on restart
         player->clearAllBuffs();
     }
-
     spawnEnemiesDefault();
+    emit levelChanged(levelIndex);
 }
 
 void Game::spawnPowerUpRandom() {
     if (!level) return;
 
-    const int ts = level->getTileSize();
-    const int rows = level->getRows();
-    const int cols = level->getCols();
+    const int tileSize = level->getTileSize();
+    const int totalRows = level->getRows();
+    const int totalCols = level->getCols();
 
-    int centerX = cols / 2;
-    int centerY = rows / 2;
+    for (int attemptIndex = 0; attemptIndex < 24; ++attemptIndex) {
+        const int tileX = QRandomGenerator::global()->bounded(totalCols);
+        const int tileY = QRandomGenerator::global()->bounded(totalRows);
 
-    // Try a few times to find a non-solid tile near center
-    for (int attempt = 0; attempt < 12; ++attempt) {
-        int deltaTileX = QRandomGenerator::global()->bounded(-3, 4); // [-3,3]
-        int deltaTileY = QRandomGenerator::global()->bounded(-3, 4);
-        int targetTileX = std::max(0, std::min(cols - 1, centerX + deltaTileX));
-        int targetTileY = std::max(0, std::min(rows - 1, centerY + deltaTileY));
+        const QPointF spawnPos(tileX * tileSize + (tileSize - 16) / 2.0,
+                               tileY * tileSize + (tileSize - 16) / 2.0);
+        const QRectF spawnRect(spawnPos.x(), spawnPos.y(), 16, 16);
 
-        QPointF pos(targetTileX * ts + (ts - 16) / 2.0, targetTileY * ts + (ts - 16) / 2.0);
-        QRectF rect(pos.x(), pos.y(), 16, 16);
-        if (level->intersectsSolid(rect)) continue;
+        if (level->intersectsSolid(spawnRect)) continue;
 
-        PowerUp::Type type;
-        int randomTypeIndex = QRandomGenerator::global()->bounded(3);
-        if (randomTypeIndex == 0) type = PowerUp::Speed; else if (randomTypeIndex == 1) type = PowerUp::Reload; else type = PowerUp::Shield;
-
-        PowerUp* p = new PowerUp(pos, type);
-        addEntity(p);
+        const PowerUp::Type chosenType = static_cast<PowerUp::Type>(QRandomGenerator::global()->bounded(3));
+        PowerUp* boost = new PowerUp(spawnPos, chosenType);
+        addEntity(boost);
         return;
     }
 }
 
-void Game::applyPowerUp(PowerUp* p) {
-    if (!player || !p) return;
-    switch (p->getType()) {
-    case PowerUp::Speed:
-        player->applySpeedBoost(8.0f, 1.5f);
-        break;
-    case PowerUp::Reload:
-        player->applyReloadBoost(8.0f);
-        break;
-    case PowerUp::Shield:
-        player->addShield();
-        break;
+void Game::applyPowerUp(PowerUp* boost) {
+    if (!player || !boost) return;
+    switch (boost->getType()) {
+    case PowerUp::Speed: player->applySpeedBoost(8.0f, 1.5f); break;
+    case PowerUp::Reload: player->applyReloadBoost(8.0f); break;
+    case PowerUp::Shield: player->addShield(); break;
     }
-    p->destroy();
+    boost->destroy();
 }

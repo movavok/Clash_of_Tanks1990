@@ -9,7 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
     gameView = new GameView(this);
 
     setCentralWidget(gameView);
+    connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
 }
+
+void MainWindow::onLevelChanged(int level) { setWindowTitle(QString("Clash Of Tanks 1990 | lvl %1").arg(level)); }
 
 MainWindow::~MainWindow()
 {

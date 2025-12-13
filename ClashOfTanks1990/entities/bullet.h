@@ -6,7 +6,7 @@
 class Bullet : public Entity
 {
 public:
-    Bullet(const QPointF&, Tank::Direction, float, Tank*);
+    Bullet(const QPointF&, Tank::Direction, float, Tank*, unsigned short);
 
     void update(float) override;
     void render(QPainter*) override;
@@ -14,13 +14,14 @@ public:
 
     Tank* getOwner() const;
     void clearOwner();
-    static unsigned short getBulletSize() { return size; }
+    static unsigned short getDefaultBulletSize() { return defaultSize; }
 
 private:
     Tank* owner;
     Tank::Direction direction;
     float speed;
-    static unsigned short size;
+    unsigned short size;
+    static unsigned short defaultSize;
 };
 
 #endif // BULLET_H

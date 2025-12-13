@@ -8,7 +8,6 @@ EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt,
 }
 
 void EnemyTank::update(float deltaTime) {
-    // Tick power-up timers
     if (speedBoostTime > 0.0f) {
         speedBoostTime -= deltaTime;
         if (speedBoostTime <= 0.0f) { speedBoostTime = 0.0f; speedMultiplier = 1.0f; }
@@ -18,7 +17,6 @@ void EnemyTank::update(float deltaTime) {
         if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
     }
 
-    // Apply speed multiplier
     speed = baseSpeed * speedMultiplier;
 
     if (isMoving) move(currentDirection, deltaTime);
@@ -41,29 +39,30 @@ void EnemyTank::update(float deltaTime) {
 Bullet* EnemyTank::shoot() {
     lastShotTime = 0.0f;
     QPointF bulletPos;
+    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 8 : Bullet::getDefaultBulletSize();
 
     switch (currentDirection) {
     case UP:
-        bulletPos = QPointF(position.x() + width/2 - Bullet::getBulletSize()/2, position.y() - Bullet::getBulletSize()); break;
+        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() - currentBulletSize); break;
     case DOWN:
-        bulletPos = QPointF(position.x() + width/2 - Bullet::getBulletSize()/2, position.y() + height); break;
+        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() + height); break;
     case LEFT:
-        bulletPos = QPointF(position.x() - Bullet::getBulletSize(), position.y() + height/2 - Bullet::getBulletSize()/2); break;
+        bulletPos = QPointF(position.x() - currentBulletSize, position.y() + height/2 - currentBulletSize/2); break;
     case RIGHT:
-        bulletPos = QPointF(position.x() + width, position.y() + height/2 - Bullet::getBulletSize()/2); break;
+        bulletPos = QPointF(position.x() + width, position.y() + height/2 - currentBulletSize/2); break;
     }
-    return new Bullet(bulletPos, currentDirection, 150.0f, this);
+    return new Bullet(bulletPos, currentDirection, 150.0f, this, currentBulletSize);
 }
 
 void EnemyTank::render(QPainter* painter) {
-    // Shield visual: different color when shield active (purple-red)
+    // Shield
     QColor tankColor = shieldCharges > 0 ? QColor(200, 60, 200) : QColor(220, 0, 0);
     painter->setBrush(tankColor);
     painter->setPen(Qt::NoPen);
     painter->drawRect(bounds());
 
-    // Speed trail visual when boost active (different color from player)
-    if (speedBoostTime > 0.0f) {
+    // Speed trail
+    if (speedBoostTime > 0.0f && isMoving) {
         QRectF trail;
         const qreal trailLen = 10.0;
         switch (currentDirection) {
@@ -76,7 +75,7 @@ void EnemyTank::render(QPainter* painter) {
         painter->drawRect(trail);
     }
 
-    // Cooldown bar above the tank
+    // Cooldown bar
     float denom = (reloadBoostTime > 0.0f ? 1.0f : shootCooldown);
     float percent = lastShotTime / denom;
     if (percent < 0.0f) percent = 0.0f; else if (percent > 1.0f) percent = 1.0f;

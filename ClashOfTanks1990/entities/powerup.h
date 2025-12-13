@@ -8,14 +8,13 @@ class PowerUp : public Entity
 public:
     enum Type { Speed, Reload, Shield };
 
-    PowerUp(const QPointF& pos, Type t);
+    PowerUp(const QPointF&, Type);
 
-    void update(float) override;
+    void update(float) override{};
     void render(QPainter*) override;
-
     QRectF bounds() const override;
 
-    Type getType() const { return type; }
+    Type getType() const;
 
 private:
     unsigned short width = 16;

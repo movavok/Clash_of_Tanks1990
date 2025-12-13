@@ -18,7 +18,7 @@ public:
 
     void resetControls();
     
-    // Power-up effects
+    // PowerUps
     void applySpeedBoost(float durationSeconds, float multiplier);
     void applyReloadBoost(float durationSeconds);
     void addShield();
