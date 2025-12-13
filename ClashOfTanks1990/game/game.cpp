@@ -1,5 +1,4 @@
 #include "game.h"
-#include <QCoreApplication>
 
 Game::Game()
     : player(nullptr)
@@ -45,7 +44,7 @@ void Game::spawnEnemiesDefault() {
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
-    
+
 }
 
 void Game::advanceLevel() {
@@ -94,7 +93,21 @@ void Game::removeEntity(Entity* entity) {
     }
 }
 
+void Game::doMessage(int levelIndex) {
+    QMessageBox msg;
+    msg.setIcon(QMessageBox::Information);
+    msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
+    msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
+    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(levelIndex >= 3 ? "Вийти" : "Так");
+    if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
+    QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
+    if (choice == QMessageBox::Yes) levelIndex >= 3 ? QCoreApplication::quit() : advanceLevel();
+    else restartLevel();
+}
+
 void Game::update(float deltaTime, const QSize& windowSize) {
+    if (paused) return;
     for (Entity* entity : entities) {
         if (!entity->isAlive()) continue;
 
@@ -130,13 +143,17 @@ void Game::update(float deltaTime, const QSize& windowSize) {
     }
     if (!enemiesRemain && !advancing) {
         advancing = true;
+        paused = true;
+
         QList<Entity*> bullets;
         for (Entity* entity : entities) if (dynamic_cast<Bullet*>(entity)) bullets.append(entity);
         for (Entity* bullet : bullets) removeEntity(bullet);
 
-        advanceLevel();
+        doMessage(levelIndex);
+
+        paused = false;
         advancing = false;
-        return; // stop this tick after advancing to avoid mixed state
+        return;
     }
 }
 
@@ -203,3 +220,26 @@ void Game::render(QPainter* painter) {
 void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key); }
 
 void Game::handleKeyRelease(Qt::Key key) { if (player) player->handleKeyRelease(key); }
+
+void Game::restartLevel() {
+    Level* newLevel = new Level(19, 19, 32);
+    if (!newLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
+        delete newLevel;
+        return;
+    }
+
+    QList<Entity*> toRemove;
+    for (Entity* entity : entities) {
+        if (entity != player) toRemove.append(entity);
+    }
+    for (Entity* entity : toRemove) removeEntity(entity);
+
+    delete level;
+    level = newLevel;
+    announcedNoEnemies = false;
+
+    if (!player) spawnPlayerAtTile(2, 2);
+    else player->setPosition(tileCenter(2, 2));
+
+    spawnEnemiesDefault();
+}

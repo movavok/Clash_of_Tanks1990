@@ -4,6 +4,9 @@
 #include <QList>
 #include <QPainter>
 #include <QPointF>
+#include <QCoreApplication>
+#include <QMessageBox>
+#include <QAbstractButton>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
@@ -34,13 +37,18 @@ private:
     int levelIndex = 1;
     bool advancing = false;
     bool announcedNoEnemies = false;
+    bool paused = false;
 
     void initLevel();
     QPointF tileCenter(int, int) const;
-    QPointF findSafeSpawn(int, int) const;
+
     void spawnPlayerAtTile(int, int);
     void spawnEnemiesDefault();
+
+    void doMessage(int);
+
     void advanceLevel();
+    void restartLevel();
 };
 
 #endif // GAME_H
