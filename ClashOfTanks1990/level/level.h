@@ -4,13 +4,16 @@
 #include <QVector>
 #include <QPainter>
 #include <QRectF>
+#include <QStringList>
+#include <QString>
 
 class Level {
 public:
     enum TileType : int {
         Empty = 0,
         Wall = 1,
-        Brick = 2
+        BrickWeak = 2,
+        BrickStrong = 3
     };
 
     Level(int, int, int);
@@ -23,6 +26,9 @@ public:
 
     bool intersectsSolid(const QRectF&) const;
     bool destroyInRect(const QRectF&);
+
+    bool generateFromText(const QStringList&);
+    bool loadFromFile(const QString&);
 
 private:
     int cols;

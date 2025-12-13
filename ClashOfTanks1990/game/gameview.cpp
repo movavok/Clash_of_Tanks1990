@@ -9,7 +9,7 @@ GameView::GameView(QWidget *parent)
     timer.start();
 
     setFocusPolicy(Qt::StrongFocus); // working keyboard
-    setFixedSize(25 * 32, 19 * 32);
+    setFixedSize(19 * 32, 19 * 32);
 }
 
 void GameView::onTick() {

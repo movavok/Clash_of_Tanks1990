@@ -1,18 +1,10 @@
 #include "level.h"
 #include <cmath>
+#include <QFile>
+#include <QTextStream>
 
 Level::Level(int newCollumns, int newRows, int newTileSize)
-    : cols(newCollumns), rows(newRows), tileSize(newTileSize), grid(newCollumns * newRows, Empty)
-{
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < cols; ++x) {
-            bool border = (x == 0 || y == 0 || x == cols - 1 || y == rows - 1);
-            if (border) setTile(x, y, Wall);
-            else if ((x + y) % 5 == 0) setTile(x, y, Brick);
-            else setTile(x, y, Empty);
-        }
-    }
-}
+    : cols(newCollumns), rows(newRows), tileSize(newTileSize), grid(newCollumns * newRows, Empty) {}
 
 int Level::tileAt(int cordX, int cordY) const {
     if (cordX < 0 || cordY < 0 || cordX >= cols || cordY >= rows) return Wall;
@@ -40,8 +32,13 @@ void Level::render(QPainter* painter) const {
                 painter->setPen(Qt::black);
                 painter->drawRect(r);
                 break;
-            case Brick:
-                painter->setBrush(QColor(160,70,50));
+            case BrickWeak:
+                painter->setBrush(QColor(200,120,80)); // lighter
+                painter->setPen(Qt::black);
+                painter->drawRect(r);
+                break;
+            case BrickStrong:
+                painter->setBrush(QColor(160,70,50)); // darker
                 painter->setPen(Qt::black);
                 painter->drawRect(r);
                 break;
@@ -59,7 +56,7 @@ bool Level::intersectsSolid(const QRectF& rect) const {
     for (int ty = top; ty <= bottom; ++ty) {
         for (int tx = left; tx <= right; ++tx) {
             int type = tileAt(tx, ty);
-            if (type == Wall || type == Brick) return true;
+            if (type == Wall || type == BrickWeak || type == BrickStrong) return true;
         }
     }
     return false;
@@ -75,7 +72,10 @@ bool Level::destroyInRect(const QRectF& rect) {
     for (int ty = top; ty <= bottom; ++ty) {
         for (int tx = left; tx <= right; ++tx) {
             int type = tileAt(tx, ty);
-            if (type == Brick) {
+            if (type == BrickStrong) {
+                setTile(tx, ty, BrickWeak);
+                destroyed = true;
+            } else if (type == BrickWeak) {
                 setTile(tx, ty, Empty);
                 destroyed = true;
             }
@@ -85,3 +85,48 @@ bool Level::destroyInRect(const QRectF& rect) {
 }
 
 int Level::indexAt(int cordX, int cordY) const { return cordY * cols + cordX; }
+
+bool Level::generateFromText(const QStringList& lines) {
+    if (lines.isEmpty()) return false;
+    int newRows = lines.size();
+    int newCols = 0;
+    for (const QString& line : lines) newCols = std::max(newCols, static_cast<int>(line.length()));
+    if (newCols <= 0) return false;
+
+    rows = newRows;
+    cols = newCols;
+    grid.resize(cols * rows);
+
+    auto mapChar = [](QChar c) -> int {
+        switch (c.unicode()) {
+        case ' ': case '.': return Empty;
+        case '#': case 'W': return Wall;
+        case 'b': case '1': return BrickWeak;
+        case 'B': case '2': return BrickStrong;
+        default: return Empty;
+        }
+    };
+
+    for (int y = 0; y < rows; ++y) {
+        QString line = lines[y];
+        if (line.length() < cols) line = line + QString(cols - line.length(), QChar(' '));
+        for (int x = 0; x < cols; ++x) {
+            int type = mapChar(line[x]);
+            setTile(x, y, type);
+        }
+    }
+    return true;
+}
+
+bool Level::loadFromFile(const QString& path) {
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    QTextStream in(&f);
+    QStringList lines;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (!line.isNull()) lines.append(line);
+    }
+    f.close();
+    return generateFromText(lines);
+}

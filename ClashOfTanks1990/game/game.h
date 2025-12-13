@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QPainter>
+#include <QPointF>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
@@ -30,6 +31,16 @@ private:
     PlayerTank* player;
     QList<Entity*> entities;
     Level* level = nullptr;
+    int levelIndex = 1;
+    bool advancing = false;
+    bool announcedNoEnemies = false;
+
+    void initLevel();
+    QPointF tileCenter(int, int) const;
+    QPointF findSafeSpawn(int, int) const;
+    void spawnPlayerAtTile(int, int);
+    void spawnEnemiesDefault();
+    void advanceLevel();
 };
 
 #endif // GAME_H

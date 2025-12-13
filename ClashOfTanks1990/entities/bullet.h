@@ -13,6 +13,7 @@ public:
     QRectF bounds() const override;
 
     Tank* getOwner() const;
+    void clearOwner();
     static unsigned short getBulletSize() { return size; }
 
 private:

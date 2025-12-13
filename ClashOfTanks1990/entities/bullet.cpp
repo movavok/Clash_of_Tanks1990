@@ -23,4 +23,6 @@ void Bullet::render(QPainter* painter) {
 
 Tank* Bullet::getOwner() const { return owner; }
 
+void Bullet::clearOwner() { owner = nullptr; }
+
 QRectF Bullet::bounds() const { return QRectF(position.x(), position.y(), size, size); }
