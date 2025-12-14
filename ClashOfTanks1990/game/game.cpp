@@ -1,4 +1,5 @@
 #include "game.h"
+#include "../systems/audio.h"
 
 Game::Game()
     : player(nullptr)
@@ -19,11 +20,11 @@ void Game::initLevel() {
     announcedNoEnemies = false;
 }
 
-QPointF Game::tileCenter(int tx, int ty) const {
+QPointF Game::tileCenter(int tileX, int tileY) const {
     if (!level) return QPointF(0, 0);
     const int tileSize = level->getTileSize();
     const int offset = (tileSize - 30) / 2;
-    return QPointF(tx * tileSize + offset, ty * tileSize + offset);
+    return QPointF(tileX * tileSize + offset, tileY * tileSize + offset);
 }
 
 void Game::spawnPlayerAtTile(int tileX, int tileY) {
@@ -50,6 +51,7 @@ void Game::spawnEnemiesDefault() {
 
 void Game::advanceLevel() {
     ++levelIndex;
+    Audio::stopAll();
     Level* nextLevel = new Level(19, 19, 32);
     
     if (!nextLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
@@ -100,6 +102,7 @@ void Game::doMessage(int levelIndex) {
     msg.setIcon(QMessageBox::NoIcon);
     msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
     msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
+    if (levelIndex >= 3) Audio::play("win");
     msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
     if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(levelIndex >= 3 ? "Вийти" : "Так");
     if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
@@ -113,33 +116,32 @@ void Game::update(float deltaTime, const QSize& windowSize) {
     updateEntities(deltaTime, windowSize);
     powerUpSpawnTimer += deltaTime;
     int activePowerUps = 0;
-    for (Entity* e : entities) if (dynamic_cast<PowerUp*>(e) && e->isAlive()) ++activePowerUps;
+    for (Entity* entity : entities) if (dynamic_cast<PowerUp*>(entity) && entity->isAlive()) ++activePowerUps;
     if (powerUpSpawnTimer >= powerUpSpawnInterval && activePowerUps < 2) {
         spawnPowerUpRandom();
         powerUpSpawnTimer = 0.0;
     }
     checkIfShotDown();
 
-    for (Entity* e : entities) {
-        PowerUp* p = dynamic_cast<PowerUp*>(e);
-        if (!p || !p->isAlive()) continue;
+    for (Entity* entity : entities) {
+        PowerUp* boost = dynamic_cast<PowerUp*>(entity);
+        if (!boost || !boost->isAlive()) continue;
 
         bool consumed = false;
-        if (player && player->bounds().intersects(p->bounds())) {
-            applyPowerUp(p);
+        if (player && player->bounds().intersects(boost->bounds())) {
+            applyPowerUp(boost);
             consumed = true;
         }
         if (!consumed) {
-            for (Entity* t : entities) {
-                if (EnemyTank* et = dynamic_cast<EnemyTank*>(t)) {
-                    if (et->isAlive() && et->bounds().intersects(p->bounds())) {
-                        // Apply to enemy with same semantics, different visuals already handled in EnemyTank
-                        switch (p->getType()) {
-                        case PowerUp::Speed:  et->applySpeedBoost(8.0f, 1.5f); break;
-                        case PowerUp::Reload: et->applyReloadBoost(8.0f); break;
-                        case PowerUp::Shield: et->addShield(); break;
+            for (Entity* entity : entities) {
+                if (EnemyTank* enemy = dynamic_cast<EnemyTank*>(entity)) {
+                    if (enemy->isAlive() && enemy->bounds().intersects(boost->bounds())) {
+                        switch (boost->getType()) {
+                        case PowerUp::Speed:  enemy->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
+                        case PowerUp::Reload: enemy->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+                        case PowerUp::Shield: enemy->addShield(); Audio::play("shieldPowerUp"); break;
                         }
-                        p->destroy();
+                        boost->destroy();
                         consumed = true;
                         break;
                     }
@@ -163,6 +165,7 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
             if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
             if (bullet->isAlive() && level && level->intersectsSolid(bullet->bounds())) {
                 level->destroyInRect(bullet->bounds());
+                Audio::play("bulletToWall");
                 bullet->destroy();
             }
         } else {
@@ -188,6 +191,7 @@ bool Game::handlePlayerDeath() {
         paused = true;
         
         if (player) player->resetControls();
+        Audio::play("lose");
         QMessageBox msg;
         msg.setIcon(QMessageBox::NoIcon);
         msg.setWindowTitle("Ви загинули");
@@ -237,6 +241,7 @@ void Game::checkIfShotDown() {
                 if (otherBullet->isAlive() && bullet->bounds().intersects(otherBullet->bounds())) {
                     bullet->destroy();
                     otherBullet->destroy();
+                    Audio::play("bulletToBullet");
                     break;
                 }
             }
@@ -255,12 +260,19 @@ void Game::checkIfShotDown() {
                 if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
                     if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
-                        if (playerTankHit->hasShield()) playerTankHit->consumeShield();
-                        else tank->destroy();
+                        if (playerTankHit->hasShield()) { playerTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
+                        else { tank->destroy(); /* no tankDestroyed sound on player death */ }
                     } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
-                        if (enemyTankHit->hasShield()) enemyTankHit->consumeShield();
-                        else tank->destroy();
+                        if (enemyTankHit->hasShield()) { enemyTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
+                        else { tank->destroy(); Audio::play("tankDestroyed"); }
                     } else tank->destroy();
+                    // Spawn fading death mark only if the tank actually died
+                    if (!tank->isAlive()) {
+                        QRectF tb = tank->bounds();
+                        QPointF center = tb.center();
+                        float markSize = static_cast<float>(std::max(tb.width(), tb.height()));
+                        addEntity(new DeathMark(center, markSize, 1.5f));
+                    }
                     break;
                 }
             }
@@ -269,11 +281,11 @@ void Game::checkIfShotDown() {
 }
 
 bool Game::checkCollision(Entity* entity) {
-    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || !entity->isAlive()) return false;
+    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<DeathMark*>(entity) || !entity->isAlive()) return false;
 
     QRectF eBounds = entity->bounds();
     for (Entity* other : entities) {
-        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || !other->isAlive()) continue;
+        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<DeathMark*>(other) || !other->isAlive()) continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
     return false;
@@ -290,11 +302,11 @@ void Game::render(QPainter* painter) {
     double originalOpacity = painter->opacity();
     for (Entity* entity : entities) {
         if (!entity->isAlive()) continue;
+        if (dynamic_cast<Bullet*>(entity)) continue;
 
         double opacity = originalOpacity;
         if (level->intersectsGrass(entity->bounds())) {
-            if (dynamic_cast<Bullet*>(entity)) opacity = 0.5;
-            else if (entity == player) opacity = 0.5;
+            if (entity == player) opacity = 0.5;
             else if (dynamic_cast<EnemyTank*>(entity)) opacity = 0.0;
         }
         painter->setOpacity(opacity);
@@ -303,6 +315,17 @@ void Game::render(QPainter* painter) {
     painter->setOpacity(originalOpacity);
 
     if (level) level->renderForeground(painter);
+
+    for (Entity* entity : entities) {
+        if (!entity->isAlive()) continue;
+        Bullet* bullet = dynamic_cast<Bullet*>(entity);
+        DeathMark* mark = dynamic_cast<DeathMark*>(entity);
+        if (!bullet && !mark) continue;
+        painter->setOpacity(1.0);
+        if (bullet) bullet->render(painter);
+        else if (mark) mark->render(painter);
+    }
+    painter->setOpacity(originalOpacity);
 }
 
 void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key); }
@@ -310,6 +333,7 @@ void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key)
 void Game::handleKeyRelease(Qt::Key key) { if (player) player->handleKeyRelease(key); }
 
 void Game::restartLevel() {
+    Audio::stopAll();
     Level* newLevel = new Level(19, 19, 32);
     if (!newLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
         delete newLevel;
@@ -335,6 +359,10 @@ void Game::restartLevel() {
     spawnEnemiesDefault();
     emit levelChanged(levelIndex);
 }
+
+void Game::setPaused(bool p) { paused = p; }
+bool Game::isPaused() const { return paused; }
+void Game::restart() { restartLevel(); }
 
 void Game::spawnPowerUpRandom() {
     if (!level) return;
@@ -363,9 +391,9 @@ void Game::spawnPowerUpRandom() {
 void Game::applyPowerUp(PowerUp* boost) {
     if (!player || !boost) return;
     switch (boost->getType()) {
-    case PowerUp::Speed: player->applySpeedBoost(8.0f, 1.5f); break;
-    case PowerUp::Reload: player->applyReloadBoost(8.0f); break;
-    case PowerUp::Shield: player->addShield(); break;
+    case PowerUp::Speed: player->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
+    case PowerUp::Reload: player->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+    case PowerUp::Shield: player->addShield(); Audio::play("shieldPowerUp"); break;
     }
     boost->destroy();
 }

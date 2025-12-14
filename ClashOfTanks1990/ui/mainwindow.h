@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "game/gameview.h"
+#include "../systems/audio.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,5 +25,6 @@ private:
 
 private slots:
     void onLevelChanged(int level);
+    void showVolumeDialog();
 };
 #endif // MAINWINDOW_H

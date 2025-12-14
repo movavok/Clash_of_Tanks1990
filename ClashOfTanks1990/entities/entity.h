@@ -5,6 +5,7 @@
 #include <QRectF>
 #include <QPainter>
 #include <QDebug>
+#include "../systems/audio.h"
 
 class Entity
 {

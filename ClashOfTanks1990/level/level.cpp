@@ -1,4 +1,5 @@
 #include "level.h"
+#include "../systems/audio.h"
 #include <cmath>
 #include <QFile>
 #include <QTextStream>
@@ -17,50 +18,37 @@ void Level::setTile(int cordX, int cordY, int type) {
 }
 
 void Level::render(QPainter* painter) const {
+    static QPixmap bg(":/tiles/background.png");
+    static QPixmap wall(":/tiles/wall.png");
+    static QPixmap weak(":/tiles/brickWeak.png");
+    static QPixmap strong(":/tiles/brickStrong.png");
+    static QPixmap grass(":/tiles/grass.png");
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
             int type = grid[indexAt(x, y)];
             QRect r(x * tileSize, y * tileSize, tileSize, tileSize);
             switch (type) {
-            case Empty:
-                painter->setBrush(QColor(30,30,30));
-                painter->setPen(Qt::NoPen);
-                painter->drawRect(r);
-                break;
-            case Wall:
-                painter->setBrush(QColor(120,120,120));
-                painter->setPen(Qt::black);
-                painter->drawRect(r);
-                break;
-            case BrickWeak:
-                painter->setBrush(QColor(200,120,80));
-                painter->setPen(Qt::black);
-                painter->drawRect(r);
-                break;
-            case BrickStrong:
-                painter->setBrush(QColor(160,70,50));
-                painter->setPen(Qt::black);
-                painter->drawRect(r);
-                break;
-            case Grass:
-                painter->setBrush(QColor(30,30,30));
-                painter->setPen(Qt::NoPen);
-                painter->drawRect(r);
-                break;
+            case Empty: break;
+            case Wall: painter->drawPixmap(r, wall); break;
+            case BrickWeak: painter->drawPixmap(r, weak); break;
+            case BrickStrong: painter->drawPixmap(r, strong); break;
+            case Grass: painter->drawPixmap(r, bg); break;
             }
         }
     }
 }
 
 void Level::renderForeground(QPainter* painter) const {
-    painter->setPen(Qt::NoPen);
+    static QPixmap grass(":/tiles/grass.png");
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
             int type = grid[indexAt(x, y)];
             if (type != Grass) continue;
             QRect r(x * tileSize, y * tileSize, tileSize, tileSize);
-            painter->setBrush(QColor(34,139,34,160));
-            painter->drawRect(r);
+            painter->save();
+            painter->setOpacity(0.6);
+            painter->drawPixmap(r, grass);
+            painter->restore();
         }
     }
 }
@@ -93,8 +81,8 @@ bool Level::destroyInRect(const QRectF& rect) {
 
     for (const QPoint& p : coords) {
         int type = tileAt(p.x(), p.y());
-        if (type == BrickStrong) { setTile(p.x(), p.y(), BrickWeak); destroyed = true; }
-        else if (type == BrickWeak) { setTile(p.x(), p.y(), Empty); destroyed = true; }
+        if (type == BrickStrong) { setTile(p.x(), p.y(), BrickWeak); destroyed = true; Audio::play("brickBreaking"); }
+        else if (type == BrickWeak) { setTile(p.x(), p.y(), Empty); destroyed = true; Audio::play("brickBreaking"); }
     }
     return destroyed;
 }

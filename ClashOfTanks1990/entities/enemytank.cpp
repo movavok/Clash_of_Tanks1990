@@ -26,6 +26,7 @@ void EnemyTank::update(float deltaTime) {
     if (lastShotTime >= effectiveCooldown) {
         Bullet* newBullet = shoot();
         if (newBullet) emit bulletFired(newBullet);
+        Audio::play("shoot");
     }
 
     changeTimer += deltaTime;
@@ -55,7 +56,7 @@ Bullet* EnemyTank::shoot() {
 }
 
 void EnemyTank::render(QPainter* painter) {
-    static QPixmap enemySprite("../../assets/tanks/enemyTank.png");
+    static QPixmap enemySprite(":/tanks/enemyTank.png");
     drawShieldAura(painter);
 
     if (!enemySprite.isNull()) {
@@ -70,6 +71,30 @@ void EnemyTank::render(QPainter* painter) {
     }
 
     drawCooldownBar(painter);
+
+    // Boost duration bars
+    int barY = static_cast<int>(position.y() - 12.0);
+    if (speedBoostTime > 0.0f && speedBoostDuration > 0.0f) {
+        float pct = speedBoostTime / speedBoostDuration;
+        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
+        QRectF bg(position.x(), barY, width, 4.0);
+        painter->setBrush(QColor(50, 50, 50));
+        painter->drawRect(bg);
+        QRectF fg(position.x(), barY, width * pct, 4.0);
+        painter->setBrush(QColor(200, 90, 255));
+        painter->drawRect(fg);
+        barY -= 6;
+    }
+    if (reloadBoostTime > 0.0f && reloadBoostDuration > 0.0f) {
+        float pct = reloadBoostTime / reloadBoostDuration;
+        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
+        QRectF bg(position.x(), barY, width, 4.0);
+        painter->setBrush(QColor(50, 50, 50));
+        painter->drawRect(bg);
+        QRectF fg(position.x(), barY, width * pct, 4.0);
+        painter->setBrush(QColor(255, 120, 160));
+        painter->drawRect(fg);
+    }
 }
 
 void EnemyTank::drawShieldAura(QPainter* painter) const {
@@ -106,6 +131,8 @@ QPoint EnemyTank::drawRotatedSprite(QPainter* painter, const QPixmap& sprite, QP
 
 void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, const QPixmap& scaledSprite) const {
     if (!(speedBoostTime > 0.0f) || !isMoving) return;
+    // Respect outer painter opacity (e.g., hidden under grass)
+    if (painter->opacity() <= 0.01) return;
     const int offset1 = 10;
     const int offset2 = 20;
     int dx1 = 0, dy1 = 0;
@@ -139,11 +166,13 @@ void EnemyTank::drawCooldownBar(QPainter* painter) const {
 
 void EnemyTank::applySpeedBoost(float durationSeconds, float multiplier) {
     speedBoostTime = durationSeconds;
+    speedBoostDuration = durationSeconds;
     speedMultiplier = multiplier > 0.0f ? multiplier : 1.0f;
 }
 
 void EnemyTank::applyReloadBoost(float durationSeconds) {
     reloadBoostTime = durationSeconds;
+    reloadBoostDuration = durationSeconds;
 }
 
 void EnemyTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
@@ -151,8 +180,10 @@ bool EnemyTank::hasShield() const { return shieldCharges > 0; }
 void EnemyTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
 void EnemyTank::clearAllBuffs() {
     speedBoostTime = 0.0f;
+    speedBoostDuration = 0.0f;
     speedMultiplier = 1.0f;
     reloadBoostTime = 0.0f;
+    reloadBoostDuration = 0.0f;
     shieldCharges = 0;
     speed = baseSpeed;
 }

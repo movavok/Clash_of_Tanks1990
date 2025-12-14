@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,6 +16,7 @@ SOURCES += \
     entities/entity.cpp \
     entities/playertank.cpp \
     entities/powerup.cpp \
+    entities/deathmark.cpp \
     entities/tank.cpp \
     game/game.cpp \
     game/gameview.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     entities/entity.h \
     entities/playertank.h \
     entities/powerup.h \
+    entities/deathmark.h \
     entities/tank.h \
     game/game.h \
     game/gameview.h \

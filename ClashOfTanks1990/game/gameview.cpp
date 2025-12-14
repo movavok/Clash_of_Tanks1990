@@ -1,4 +1,6 @@
 #include "gameview.h"
+#include "../systems/audio.h"
+#include <QMessageBox>
 
 GameView::GameView(QWidget *parent)
     : QWidget{parent} {
@@ -13,6 +15,8 @@ GameView::GameView(QWidget *parent)
 
     // Forward game level changes to whoever listens to GameView
     connect(&game, &Game::levelChanged, this, &GameView::levelChanged);
+
+    Audio::preloadAll();
 }
 
 void GameView::onTick() {
@@ -28,7 +32,9 @@ void GameView::onTick() {
 
 void GameView::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    painter.fillRect(rect(), Qt::black);
+    static QPixmap bg(":/tiles/background.png");
+    if (!bg.isNull()) painter.drawPixmap(rect(), bg);
+    else painter.fillRect(rect(), Qt::black);
 
     game.render(&painter);
 }
@@ -36,4 +42,19 @@ void GameView::paintEvent(QPaintEvent*) {
 void GameView::keyPressEvent(QKeyEvent* event) { game.handleKeyPress(static_cast<Qt::Key>(event->key())); }
 
 void GameView::keyReleaseEvent(QKeyEvent* event) { game.handleKeyRelease(static_cast<Qt::Key>(event->key())); }
+
+void GameView::pauseGame() {
+    game.setPaused(true);
+    QMessageBox msg;
+    msg.setIcon(QMessageBox::NoIcon);
+    msg.setWindowTitle("Пауза");
+    msg.setText("Гра поставлена на паузу");
+    msg.setStandardButtons(QMessageBox::Ok);
+    if (QAbstractButton* ok = msg.button(QMessageBox::Ok)) ok->setText("Продовжити");
+    msg.exec();
+    game.setPaused(false);
+}
+
+void GameView::restartLevel() { game.restart(); }
+Game* GameView::getGame() { return &game; }
 

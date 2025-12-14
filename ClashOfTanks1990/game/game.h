@@ -12,6 +12,7 @@
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
 #include "../entities/powerup.h"
+#include "../entities/deathmark.h"
 #include "../level/level.h"
 
 class Game : public QObject
@@ -31,6 +32,10 @@ public:
 
     void addEntity(Entity*);
     void removeEntity(Entity*);
+
+    void setPaused(bool);
+    bool isPaused() const;
+    void restart();
 
 private:
     PlayerTank* player;

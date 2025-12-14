@@ -26,6 +26,11 @@ private:
 private slots:
     void onTick();
 
+public slots:
+    void pauseGame();
+    void restartLevel();
+    Game* getGame();
+
 signals:
     void levelChanged(int);
 };

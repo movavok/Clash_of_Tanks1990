@@ -46,6 +46,7 @@ void PlayerTank::update(float deltaTime) {
     if (isShooting && lastShotTime >= effectiveCooldown) {
         Bullet* newBullet = shoot();
         if (newBullet) emit bulletFired(newBullet);
+        Audio::play("shoot");
     }
 }
 
@@ -68,7 +69,7 @@ Bullet* PlayerTank::shoot() {
 }
 
 void PlayerTank::render(QPainter* painter) {
-    static QPixmap playerSprite("../../assets/tanks/playerTank.png");
+    static QPixmap playerSprite(":/tanks/playerTank.png");
     drawShieldAura(painter);
     if (!playerSprite.isNull()) {
         QPixmap scaledSprite;
@@ -82,6 +83,30 @@ void PlayerTank::render(QPainter* painter) {
     }
 
     drawCooldownBar(painter);
+
+    // Boost bars
+    int barY = static_cast<int>(position.y() - 12.0);
+    if (speedBoostTime > 0.0f && speedBoostDuration > 0.0f) {
+        float pct = speedBoostTime / speedBoostDuration;
+        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
+        QRectF bg(position.x(), barY, width, 4.0);
+        painter->setBrush(QColor(50, 50, 50));
+        painter->drawRect(bg);
+        QRectF fg(position.x(), barY, width * pct, 4.0);
+        painter->setBrush(QColor(60, 190, 255));
+        painter->drawRect(fg);
+        barY -= 6;
+    }
+    if (reloadBoostTime > 0.0f && reloadBoostDuration > 0.0f) {
+        float pct = reloadBoostTime / reloadBoostDuration;
+        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
+        QRectF bg(position.x(), barY, width, 4.0);
+        painter->setBrush(QColor(50, 50, 50));
+        painter->drawRect(bg);
+        QRectF fg(position.x(), barY, width * pct, 4.0);
+        painter->setBrush(QColor(255, 170, 50));
+        painter->drawRect(fg);
+    }
 }
 
 void PlayerTank::drawShieldAura(QPainter* painter) const {
@@ -157,10 +182,11 @@ void PlayerTank::resetControls() {
 
 void PlayerTank::applySpeedBoost(float durationSeconds, float multiplier) {
     speedBoostTime = durationSeconds;
+    speedBoostDuration = durationSeconds;
     speedMultiplier = multiplier > 0.0f ? multiplier : 1.0f;
 }
 
-void PlayerTank::applyReloadBoost(float durationSeconds) { reloadBoostTime = durationSeconds; }
+void PlayerTank::applyReloadBoost(float durationSeconds) { reloadBoostTime = durationSeconds; reloadBoostDuration = durationSeconds; }
 
 void PlayerTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
 bool PlayerTank::hasShield() const { return shieldCharges > 0; }
@@ -168,8 +194,10 @@ void PlayerTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
 
 void PlayerTank::clearAllBuffs() {
     speedBoostTime = 0.0f;
+    speedBoostDuration = 0.0f;
     speedMultiplier = 1.0f;
     reloadBoostTime = 0.0f;
+    reloadBoostDuration = 0.0f;
     shieldCharges = 0;
     speed = baseSpeed;
 }

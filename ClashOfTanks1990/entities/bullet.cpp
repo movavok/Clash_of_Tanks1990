@@ -17,8 +17,19 @@ void Bullet::update(float deltaTime) {
 }
 
 void Bullet::render(QPainter* painter) {
-    painter->setBrush(Qt::yellow);
-    painter->drawEllipse(bounds());
+    static QPixmap sprite(":/bullets/bullet.png");
+    if (!sprite.isNull()) {
+        QTransform rot;
+        switch (direction) {
+        case Tank::UP:    rot.rotate(0);   break;
+        case Tank::RIGHT: rot.rotate(90);  break;
+        case Tank::DOWN:  rot.rotate(180); break;
+        case Tank::LEFT:  rot.rotate(270); break;
+        }
+        QPixmap rotated = sprite.transformed(rot, Qt::SmoothTransformation);
+        QPixmap scaled = rotated.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        painter->drawPixmap(static_cast<int>(position.x()), static_cast<int>(position.y()), scaled);
+    } else { painter->setBrush(Qt::yellow); painter->drawEllipse(bounds()); }
 }
 
 Tank* Bullet::getOwner() const { return owner; }

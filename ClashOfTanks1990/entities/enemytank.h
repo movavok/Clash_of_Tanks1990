@@ -32,8 +32,10 @@ private:
 
     float baseSpeed = 0.0f;
     float speedBoostTime = 0.0f;
+    float speedBoostDuration = 0.0f;
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
+    float reloadBoostDuration = 0.0f;
     int shieldCharges = 0;
 
     void drawShieldAura(QPainter*) const;

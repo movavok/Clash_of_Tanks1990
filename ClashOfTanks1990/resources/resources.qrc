@@ -1,1 +1,32 @@
-<RCC/>
+<RCC>
+	<qresource prefix="/tanks">
+		<file alias="playerTank.png">../assets/tanks/playerTank.png</file>
+		<file alias="enemyTank.png">../assets/tanks/enemyTank.png</file>
+	</qresource>
+	<qresource prefix="/bullets">
+		<file alias="bullet.png">../assets/bullets/bullet.png</file>
+	</qresource>
+	<qresource prefix="/tiles">
+		<file alias="background.png">../assets/tiles/background.png</file>
+		<file alias="wall.png">../assets/tiles/wall.png</file>
+		<file alias="brickWeak.png">../assets/tiles/brickWeak.png</file>
+		<file alias="brickStrong.png">../assets/tiles/brickStrong.png</file>
+		<file alias="grass.png">../assets/tiles/grass.png</file>
+	</qresource>
+	<qresource prefix="/deathmark">
+		<file alias="deathMark.png">../assets/deathmark/deathMark.png</file>
+	</qresource>
+	<qresource prefix="/sounds">
+		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>
+		<file alias="bulletToBullet.mp3">../assets/sounds/bulletToBullet.mp3</file>
+		<file alias="bulletToWall.mp3">../assets/sounds/bulletToWall.mp3</file>
+		<file alias="reloadPowerUp.mp3">../assets/sounds/reloadPowerUp.mp3</file>
+		<file alias="shieldDestroyed.mp3">../assets/sounds/shieldDestroyed.mp3</file>
+		<file alias="shieldPowerUp.mp3">../assets/sounds/shieldPowerUp.mp3</file>
+		<file alias="speedPowerUp.mp3">../assets/sounds/speedPowerUp.mp3</file>
+		<file alias="tankDestroyed.mp3">../assets/sounds/tankDestroyed.mp3</file>
+		<file alias="shoot.mp3">../assets/sounds/shoot.mp3</file>
+		<file alias="win.mp3">../assets/sounds/win.mp3</file>
+		<file alias="lose.mp3">../assets/sounds/lose.mp3</file>
+	</qresource>
+</RCC>
