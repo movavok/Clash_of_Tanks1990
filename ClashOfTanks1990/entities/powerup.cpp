@@ -4,15 +4,25 @@ PowerUp::PowerUp(const QPointF& position, Type boostType)
     : Entity(position), type(boostType) {}
 
 void PowerUp::render(QPainter* painter) {
-	QColor color;
+	static QPixmap speedPx(":/powerups/speedPowerUp.png");
+	static QPixmap reloadPx(":/powerups/reloadPowerUp.png");
+	static QPixmap shieldPx(":/powerups/shieldPowerUp.png");
+	const QPixmap* sprite = nullptr;
 	switch (type) {
-	case Speed:  color = QColor(80, 160, 255); break;
-	case Reload: color = QColor(255, 200, 60); break;
-	case Shield: color = QColor(120, 220, 120); break;
+	case Speed:  sprite = &speedPx;  break;
+	case Reload: sprite = &reloadPx; break;
+	case Shield: sprite = &shieldPx; break;
 	}
-	painter->setBrush(color);
-	painter->setPen(Qt::NoPen);
-	painter->drawRect(bounds());
+	if (sprite && !sprite->isNull()) {
+		QPixmap scaled = sprite->scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		const int drawX = static_cast<int>(position.x() + (width - scaled.width()) / 2.0f);
+		const int drawY = static_cast<int>(position.y() + (height - scaled.height()) / 2.0f);
+		painter->drawPixmap(drawX, drawY, scaled);
+	} else {
+		painter->setBrush(QColor(200, 200, 200));
+		painter->setPen(Qt::NoPen);
+		painter->drawRect(bounds());
+	}
 }
 
 QRectF PowerUp::bounds() const { return QRectF(position.x(), position.y(), width, height); }

@@ -13,6 +13,11 @@
 		<file alias="brickStrong.png">../assets/tiles/brickStrong.png</file>
 		<file alias="grass.png">../assets/tiles/grass.png</file>
 	</qresource>
+	<qresource prefix="/powerups">
+		<file alias="speedPowerUp.png">../assets/powerups/speedPowerUp.png</file>
+		<file alias="reloadPowerUp.png">../assets/powerups/reloadPowerUp.png</file>
+		<file alias="shieldPowerUp.png">../assets/powerups/shieldPowerUp.png</file>
+	</qresource>
 	<qresource prefix="/deathmark">
 		<file alias="deathMark.png">../assets/deathmark/deathMark.png</file>
 	</qresource>
