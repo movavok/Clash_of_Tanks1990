@@ -18,11 +18,7 @@ void PowerUp::render(QPainter* painter) {
 		const int drawX = static_cast<int>(position.x() + (width - scaled.width()) / 2.0f);
 		const int drawY = static_cast<int>(position.y() + (height - scaled.height()) / 2.0f);
 		painter->drawPixmap(drawX, drawY, scaled);
-	} else {
-		painter->setBrush(QColor(200, 200, 200));
-		painter->setPen(Qt::NoPen);
-		painter->drawRect(bounds());
-	}
+    }
 }
 
 QRectF PowerUp::bounds() const { return QRectF(position.x(), position.y(), width, height); }

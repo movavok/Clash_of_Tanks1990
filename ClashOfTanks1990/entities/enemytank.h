@@ -42,6 +42,7 @@ private:
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
     void drawCooldownBar(QPainter*) const;
+    void drawBoostBar(QPainter*, int&, float, float, const QColor&) const;
 
 signals:
     void bulletFired(Bullet*);

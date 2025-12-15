@@ -1,10 +1,4 @@
 #include "audio.h"
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QHash>
-#include <QVector>
-#include <QUrl>
-#include <QElapsedTimer>
 
 struct PlayerBundle { QMediaPlayer* player; QAudioOutput* output; };
 struct SoundPool {
@@ -13,7 +7,7 @@ struct SoundPool {
 	QElapsedTimer lastPlay;
 };
 static QHash<QString, SoundPool> pools;
-static double g_masterVolume = 1.0; // 0..1
+static double masterVolume = 1.0;
 
 static double volumeFor(const QString& id) {
 	if (id == "brickBreaking") return 0.05;
@@ -44,7 +38,7 @@ static SoundPool getPool(const QString& id) {
 	for (int i = 0; i < poolSize; ++i) {
 		PlayerBundle bundle{new QMediaPlayer, new QAudioOutput};
 		bundle.player->setAudioOutput(bundle.output);
-		bundle.output->setVolume(volumeFor(id) * g_masterVolume);
+        bundle.output->setVolume(volumeFor(id) * masterVolume);
 		if (!path.isEmpty()) bundle.player->setSource(QUrl(path));
 		pool.players.append(bundle);
 	}
@@ -80,12 +74,12 @@ void Audio::preloadAll() {
 	for (const QString& id : ids) {
 		SoundPool pool = getPool(id);
 		for (PlayerBundle& bundle : pool.players) {
-			qreal vol = bundle.output->volume();
+			double originalVolume = bundle.output->volume();
 			bundle.output->setVolume(0.0);
 			bundle.player->setPosition(0);
 			bundle.player->play();
 			bundle.player->stop();
-			bundle.output->setVolume(vol);
+			bundle.output->setVolume(originalVolume);
 		}
 		pools.insert(id, pool);
 	}
@@ -100,17 +94,17 @@ void Audio::stopAll() {
 	}
 }
 
-void Audio::setMasterVolume(double volume01) {
-	if (volume01 < 0.0) volume01 = 0.0; else if (volume01 > 1.0) volume01 = 1.0;
-	g_masterVolume = volume01;
+void Audio::setMasterVolume(double volume) {
+    if (volume < 0.0) volume = 0.0; else if (volume > 1.0) volume = 1.0;
+    masterVolume = volume;
 	for (auto it = pools.begin(); it != pools.end(); ++it) {
 		const QString id = it.key();
 		SoundPool& pool = it.value();
-		double base = volumeFor(id);
-		for (PlayerBundle& b : pool.players) {
-			if (b.output) b.output->setVolume(base * g_masterVolume);
+		double baseVolume = volumeFor(id);
+		for (PlayerBundle& bundle : pool.players) {
+            if (bundle.output) bundle.output->setVolume(baseVolume * masterVolume);
 		}
 	}
 }
 
-double Audio::masterVolume() { return g_masterVolume; }
+double Audio::getMasterVolume() { return masterVolume; }

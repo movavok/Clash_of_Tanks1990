@@ -18,7 +18,6 @@ public:
 
     void resetControls();
     
-    // PowerUps
     void applySpeedBoost(float, float);
     void applyReloadBoost(float);
     void addShield();
@@ -46,6 +45,7 @@ private:
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
     void drawCooldownBar(QPainter*) const;
+    void drawBoostBar(QPainter*, int& barY, float time, float duration, const QColor& color) const;
 
 signals:
     void bulletFired(Bullet*);

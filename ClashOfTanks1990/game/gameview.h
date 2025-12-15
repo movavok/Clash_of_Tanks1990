@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QKeyEvent>
+#include "../systems/audio.h"
+#include <QMessageBox>
 #include "game.h"
 
 class GameView : public QWidget

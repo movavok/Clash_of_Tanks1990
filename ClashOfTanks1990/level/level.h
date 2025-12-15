@@ -6,6 +6,10 @@
 #include <QRectF>
 #include <QStringList>
 #include <QString>
+#include <cmath>
+#include <QFile>
+#include <QTextStream>
+#include "../systems/audio.h"
 
 class Level {
 public:

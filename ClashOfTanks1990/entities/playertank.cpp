@@ -86,33 +86,14 @@ void PlayerTank::render(QPainter* painter) {
 
     // Boost bars
     int barY = static_cast<int>(position.y() - 12.0);
-    if (speedBoostTime > 0.0f && speedBoostDuration > 0.0f) {
-        float pct = speedBoostTime / speedBoostDuration;
-        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
-        QRectF bg(position.x(), barY, width, 4.0);
-        painter->setBrush(QColor(50, 50, 50));
-        painter->drawRect(bg);
-        QRectF fg(position.x(), barY, width * pct, 4.0);
-        painter->setBrush(QColor(60, 190, 255));
-        painter->drawRect(fg);
-        barY -= 6;
-    }
-    if (reloadBoostTime > 0.0f && reloadBoostDuration > 0.0f) {
-        float pct = reloadBoostTime / reloadBoostDuration;
-        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
-        QRectF bg(position.x(), barY, width, 4.0);
-        painter->setBrush(QColor(50, 50, 50));
-        painter->drawRect(bg);
-        QRectF fg(position.x(), barY, width * pct, 4.0);
-        painter->setBrush(QColor(255, 170, 50));
-        painter->drawRect(fg);
-    }
+    drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(60, 190, 255));
+    drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(255, 170, 50));
 }
 
 void PlayerTank::drawShieldAura(QPainter* painter) const {
     if (!hasShield()) return;
     painter->save();
-    const qreal shieldMargin = 6.0;
+    const double shieldMargin = 6.0;
     QRectF shieldRect(position.x() - shieldMargin,
                       position.y() - shieldMargin,
                       width + shieldMargin * 2.0,
@@ -175,6 +156,19 @@ void PlayerTank::drawCooldownBar(QPainter* painter) const {
     painter->drawRect(barFg);
 }
 
+void PlayerTank::drawBoostBar(QPainter* painter, int& barY, float time, float duration, const QColor& color) const {
+    if (time <= 0.0f || duration <= 0.0f) return;
+    float progress = time / duration;
+    if (progress < 0.0f) progress = 0.0f; else if (progress > 1.0f) progress = 1.0f;
+    QRectF bg(position.x(), barY, width, 4.0);
+    painter->setBrush(QColor(50, 50, 50));
+    painter->drawRect(bg);
+    QRectF fg(position.x(), barY, width * progress, 4.0);
+    painter->setBrush(color);
+    painter->drawRect(fg);
+    barY -= 6;
+}
+
 void PlayerTank::resetControls() {
     isMoving = false;
     isShooting = false;
@@ -189,7 +183,9 @@ void PlayerTank::applySpeedBoost(float durationSeconds, float multiplier) {
 void PlayerTank::applyReloadBoost(float durationSeconds) { reloadBoostTime = durationSeconds; reloadBoostDuration = durationSeconds; }
 
 void PlayerTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
+
 bool PlayerTank::hasShield() const { return shieldCharges > 0; }
+
 void PlayerTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
 
 void PlayerTank::clearAllBuffs() {

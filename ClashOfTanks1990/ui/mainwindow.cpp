@@ -1,13 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QSlider>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -40,12 +32,12 @@ void MainWindow::showVolumeDialog() {
     QLabel* label = new QLabel("Гучність:", &dlg);
     QSlider* slider = new QSlider(Qt::Horizontal, &dlg);
     slider->setRange(0, 100);
-    slider->setValue(static_cast<int>(Audio::masterVolume() * 100.0));
+    slider->setValue(static_cast<int>(Audio::getMasterVolume() * 100.0));
     row->addWidget(label);
     row->addWidget(slider);
     layout->addLayout(row);
 
-    connect(slider, &QSlider::valueChanged, this, [](int v){ Audio::setMasterVolume(v / 100.0); });
+    connect(slider, &QSlider::valueChanged, this, [](int volume){ Audio::setMasterVolume(volume / 100.0); });
 
     dlg.setLayout(layout);
     dlg.exec();

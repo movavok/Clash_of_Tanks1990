@@ -10,7 +10,10 @@ EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt,
 void EnemyTank::update(float deltaTime) {
     if (speedBoostTime > 0.0f) {
         speedBoostTime -= deltaTime;
-        if (speedBoostTime <= 0.0f) { speedBoostTime = 0.0f; speedMultiplier = 1.0f; }
+        if (speedBoostTime <= 0.0f) {
+            speedBoostTime = 0.0f;
+            speedMultiplier = 1.0f;
+        }
     }
     if (reloadBoostTime > 0.0f) {
         reloadBoostTime -= deltaTime;
@@ -74,33 +77,14 @@ void EnemyTank::render(QPainter* painter) {
 
     // Boost duration bars
     int barY = static_cast<int>(position.y() - 12.0);
-    if (speedBoostTime > 0.0f && speedBoostDuration > 0.0f) {
-        float pct = speedBoostTime / speedBoostDuration;
-        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
-        QRectF bg(position.x(), barY, width, 4.0);
-        painter->setBrush(QColor(50, 50, 50));
-        painter->drawRect(bg);
-        QRectF fg(position.x(), barY, width * pct, 4.0);
-        painter->setBrush(QColor(200, 90, 255));
-        painter->drawRect(fg);
-        barY -= 6;
-    }
-    if (reloadBoostTime > 0.0f && reloadBoostDuration > 0.0f) {
-        float pct = reloadBoostTime / reloadBoostDuration;
-        if (pct < 0.0f) pct = 0.0f; else if (pct > 1.0f) pct = 1.0f;
-        QRectF bg(position.x(), barY, width, 4.0);
-        painter->setBrush(QColor(50, 50, 50));
-        painter->drawRect(bg);
-        QRectF fg(position.x(), barY, width * pct, 4.0);
-        painter->setBrush(QColor(255, 120, 160));
-        painter->drawRect(fg);
-    }
+    drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(200, 90, 255));
+    drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(255, 120, 160));
 }
 
 void EnemyTank::drawShieldAura(QPainter* painter) const {
     if (!hasShield()) return;
     painter->save();
-    const qreal shieldMargin = 6.0;
+    const double shieldMargin = 6.0;
     QRectF shieldRect(position.x() - shieldMargin,
                       position.y() - shieldMargin,
                       width + shieldMargin * 2.0,
@@ -131,7 +115,6 @@ QPoint EnemyTank::drawRotatedSprite(QPainter* painter, const QPixmap& sprite, QP
 
 void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, const QPixmap& scaledSprite) const {
     if (!(speedBoostTime > 0.0f) || !isMoving) return;
-    // Respect outer painter opacity (e.g., hidden under grass)
     if (painter->opacity() <= 0.01) return;
     const int offset1 = 10;
     const int offset2 = 20;
@@ -155,13 +138,28 @@ void EnemyTank::drawCooldownBar(QPainter* painter) const {
     float effective = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
     float denom = effective > 0.0f ? effective : 1.0f;
     float percent = lastShotTime / denom;
-    if (percent < 0.0f) percent = 0.0f; else if (percent > 1.0f) percent = 1.0f;
+    if (percent < 0.0f) percent = 0.0f;
+    else if (percent > 1.0f) percent = 1.0f;
     QRectF barBg(position.x(), position.y() - 6.0, width, 4.0);
     painter->setBrush(QColor(60, 60, 60));
     painter->drawRect(barBg);
     QRectF barFg(position.x(), position.y() - 6.0, width * percent, 4.0);
     painter->setBrush(reloadBoostTime > 0.0f ? QColor(255, 100, 180) : QColor(240, 180, 60));
     painter->drawRect(barFg);
+}
+
+void EnemyTank::drawBoostBar(QPainter* painter, int& barY, float time, float duration, const QColor& color) const {
+    if (time <= 0.0f || duration <= 0.0f) return;
+    float progress = time / duration;
+    if (progress < 0.0f) progress = 0.0f;
+    else if (progress > 1.0f) progress = 1.0f;
+    QRectF bg(position.x(), barY, width, 4.0);
+    painter->setBrush(QColor(50, 50, 50));
+    painter->drawRect(bg);
+    QRectF fg(position.x(), barY, width * progress, 4.0);
+    painter->setBrush(color);
+    painter->drawRect(fg);
+    barY -= 6;
 }
 
 void EnemyTank::applySpeedBoost(float durationSeconds, float multiplier) {
@@ -176,8 +174,11 @@ void EnemyTank::applyReloadBoost(float durationSeconds) {
 }
 
 void EnemyTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
+
 bool EnemyTank::hasShield() const { return shieldCharges > 0; }
+
 void EnemyTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
+
 void EnemyTank::clearAllBuffs() {
     speedBoostTime = 0.0f;
     speedBoostDuration = 0.0f;

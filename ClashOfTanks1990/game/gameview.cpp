@@ -1,6 +1,4 @@
 #include "gameview.h"
-#include "../systems/audio.h"
-#include <QMessageBox>
 
 GameView::GameView(QWidget *parent)
     : QWidget{parent} {
@@ -13,7 +11,6 @@ GameView::GameView(QWidget *parent)
     setFocusPolicy(Qt::StrongFocus); // working keyboard
     setFixedSize(19 * 32, 19 * 32);
 
-    // Forward game level changes to whoever listens to GameView
     connect(&game, &Game::levelChanged, this, &GameView::levelChanged);
 
     Audio::preloadAll();

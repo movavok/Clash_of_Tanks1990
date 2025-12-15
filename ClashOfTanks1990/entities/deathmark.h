@@ -2,12 +2,15 @@
 #define DEATHMARK_H
 
 #include "entity.h"
+#include <QPen>
+#include <QColor>
+#include <QPixmap>
 
 class DeathMark : public Entity {
 public:
-    DeathMark(const QPointF& center, float size, float lifetimeSeconds);
-    void update(float deltaTime) override;
-    void render(QPainter* painter) override;
+    DeathMark(const QPointF&, float, float);
+    void update(float) override;
+    void render(QPainter*) override;
     QRectF bounds() const override;
 
 private:

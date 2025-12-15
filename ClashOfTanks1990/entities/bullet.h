@@ -2,6 +2,7 @@
 #define BULLET_H
 
 #include "tank.h"
+#include "enemytank.h"
 
 class Bullet : public Entity
 {
@@ -14,6 +15,7 @@ public:
 
     Tank* getOwner() const;
     void clearOwner();
+    bool isFromEnemy() const;
     static unsigned short getDefaultBulletSize() { return defaultSize; }
 
 private:
@@ -21,6 +23,7 @@ private:
     Tank::Direction direction;
     float speed;
     unsigned short size;
+    bool fromEnemy = false;
     static unsigned short defaultSize;
 };
 

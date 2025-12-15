@@ -7,13 +7,14 @@
 #include <QMessageBox>
 #include <QAbstractButton>
 #include <QRandomGenerator>
-#include <algorithm>
+//#include <algorithm>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
 #include "../entities/powerup.h"
 #include "../entities/deathmark.h"
 #include "../level/level.h"
+#include "../systems/audio.h"
 
 class Game : public QObject
 {

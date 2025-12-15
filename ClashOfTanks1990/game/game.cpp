@@ -1,5 +1,4 @@
 #include "game.h"
-#include "../systems/audio.h"
 
 Game::Game()
     : player(nullptr)
@@ -61,9 +60,8 @@ void Game::advanceLevel() {
     }
 
     QList<Entity*> toRemove;
-    for (Entity* entity : entities) {
+    for (Entity* entity : entities)
         if (entity != player) toRemove.append(entity);
-    }
     for (Entity* entity : toRemove) removeEntity(entity);
 
     delete level;
@@ -248,8 +246,7 @@ void Game::checkIfShotDown() {
             else if (Tank* tank = dynamic_cast<Tank*>(target)) {
                 if (tank == bullet->getOwner()) continue;
 
-                Tank* ownerTank = dynamic_cast<Tank*>(bullet->getOwner());
-                bool ownerIsEnemy = ownerTank && dynamic_cast<EnemyTank*>(ownerTank);
+                bool ownerIsEnemy = bullet->isFromEnemy();
                 bool targetIsEnemy = dynamic_cast<EnemyTank*>(tank);
 
                 if (targetIsEnemy && ownerIsEnemy) {
@@ -261,16 +258,15 @@ void Game::checkIfShotDown() {
                     bullet->destroy();
                     if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
                         if (playerTankHit->hasShield()) { playerTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
-                        else { tank->destroy(); /* no tankDestroyed sound on player death */ }
+                        else tank->destroy();
                     } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
                         if (enemyTankHit->hasShield()) { enemyTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
                         else { tank->destroy(); Audio::play("tankDestroyed"); }
                     } else tank->destroy();
-                    // Spawn fading death mark only if the tank actually died
                     if (!tank->isAlive()) {
-                        QRectF tb = tank->bounds();
-                        QPointF center = tb.center();
-                        float markSize = static_cast<float>(std::max(tb.width(), tb.height()));
+                        QRectF tankBounds = tank->bounds();
+                        QPointF center = tankBounds.center();
+                        float markSize = static_cast<float>(std::max(tankBounds.width(), tankBounds.height()));
                         addEntity(new DeathMark(center, markSize, 1.5f));
                     }
                     break;
@@ -281,11 +277,13 @@ void Game::checkIfShotDown() {
 }
 
 bool Game::checkCollision(Entity* entity) {
-    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<DeathMark*>(entity) || !entity->isAlive()) return false;
+    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<DeathMark*>(entity) || !entity->isAlive())
+        return false;
 
     QRectF eBounds = entity->bounds();
     for (Entity* other : entities) {
-        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<DeathMark*>(other) || !other->isAlive()) continue;
+        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<DeathMark*>(other) || !other->isAlive())
+            continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
     return false;

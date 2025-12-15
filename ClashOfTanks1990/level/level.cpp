@@ -1,8 +1,4 @@
 #include "level.h"
-#include "../systems/audio.h"
-#include <cmath>
-#include <QFile>
-#include <QTextStream>
 
 Level::Level(int newCollumns, int newRows, int newTileSize)
     : cols(newCollumns), rows(newRows), tileSize(newTileSize), grid(newCollumns * newRows, Empty) {}
@@ -57,8 +53,8 @@ bool Level::intersectsSolid(const QRectF& rect) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
-    for (const QPoint& p : coords) {
-        int type = tileAt(p.x(), p.y());
+    for (const QPoint& point : coords) {
+        int type = tileAt(point.x(), point.y());
         if (type == Wall || type == BrickWeak || type == BrickStrong) return true;
     }
     return false;
@@ -68,8 +64,8 @@ bool Level::intersectsGrass(const QRectF& rect) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
-    for (const QPoint& p : coords)
-        if (tileAt(p.x(), p.y()) == Grass) return true;
+    for (const QPoint& point : coords)
+        if (tileAt(point.x(), point.y()) == Grass) return true;
     return false;
 }
 

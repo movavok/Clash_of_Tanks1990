@@ -3,7 +3,10 @@
 unsigned short Bullet::defaultSize = 5;
 
 Bullet::Bullet(const QPointF& pos, Tank::Direction dir, float spd, Tank* own, unsigned short sz)
-    : Entity(pos), direction(dir), speed(spd), owner(own), size(sz) {}
+    : Entity(pos), direction(dir), speed(spd), owner(own), size(sz)
+{
+    fromEnemy = (own && dynamic_cast<EnemyTank*>(own) != nullptr);
+}
 
 void Bullet::update(float deltaTime) {
     float distance = speed * deltaTime;
@@ -29,11 +32,16 @@ void Bullet::render(QPainter* painter) {
         QPixmap rotated = sprite.transformed(rot, Qt::SmoothTransformation);
         QPixmap scaled = rotated.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         painter->drawPixmap(static_cast<int>(position.x()), static_cast<int>(position.y()), scaled);
-    } else { painter->setBrush(Qt::yellow); painter->drawEllipse(bounds()); }
+    } else {
+        painter->setBrush(Qt::yellow);
+        painter->drawEllipse(bounds());
+    }
 }
 
 Tank* Bullet::getOwner() const { return owner; }
 
 void Bullet::clearOwner() { owner = nullptr; }
+
+bool Bullet::isFromEnemy() const { return fromEnemy; }
 
 QRectF Bullet::bounds() const { return QRectF(position.x(), position.y(), size, size); }
