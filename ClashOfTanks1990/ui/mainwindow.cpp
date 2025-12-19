@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(gameView);
     setWindowTitle("Clash Of Tanks 1990 | lvl 1");
+    setWindowIcon(QIcon(":/icon/icon.png"));
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
 
     connect(ui->act_pause, &QAction::triggered, gameView, &GameView::pauseGame);

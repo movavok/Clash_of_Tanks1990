@@ -21,6 +21,12 @@
 	<qresource prefix="/deathmark">
 		<file alias="deathMark.png">../assets/deathmark/deathMark.png</file>
 	</qresource>
+		<qresource prefix="/icon">
+		        <file alias="icon.png">../assets/icon/icon.png</file>
+			<file alias="pause.png">../assets/icon/pause.png</file>
+			<file alias="win.png">../assets/icon/win.png</file>
+			<file alias="lose.png">../assets/icon/lose.png</file>
+		</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>
 		<file alias="bulletToBullet.mp3">../assets/sounds/bulletToBullet.mp3</file>

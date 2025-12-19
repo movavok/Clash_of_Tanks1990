@@ -7,7 +7,6 @@
 #include <QMessageBox>
 #include <QAbstractButton>
 #include <QRandomGenerator>
-//#include <algorithm>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
 #include "../entities/bullet.h"
