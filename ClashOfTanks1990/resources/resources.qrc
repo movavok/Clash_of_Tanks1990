@@ -26,6 +26,7 @@
 			<file alias="pause.png">../assets/icon/pause.png</file>
 			<file alias="win.png">../assets/icon/win.png</file>
 			<file alias="lose.png">../assets/icon/lose.png</file>
+			<file alias="volume.png">../assets/icon/volume.png</file>
 		</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>

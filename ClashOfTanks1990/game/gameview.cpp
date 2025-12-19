@@ -44,7 +44,7 @@ void GameView::pauseGame() {
     game.setPaused(true);
     QMessageBox msg;
     msg.setIcon(QMessageBox::NoIcon);
-    msg.setWindowIcon(QPixmap(":/icon/pause.png"));
+    msg.setWindowIcon(QIcon(":/icon/pause.png"));
     msg.setWindowTitle("Пауза");
     msg.setText("Гра поставлена на паузу");
     msg.setStandardButtons(QMessageBox::Ok);

@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QSlider>
+#include <QIcon>
 #include "game/gameview.h"
 #include "../systems/audio.h"
 
@@ -30,9 +31,11 @@ public:
 private:
     Ui::MainWindow *ui;
     GameView* gameView;
+    QLabel* l_percent;
 
 private slots:
     void onLevelChanged(int level);
     void showVolumeDialog();
+    void volumeValueChanged(int volume);
 };
 #endif // MAINWINDOW_H

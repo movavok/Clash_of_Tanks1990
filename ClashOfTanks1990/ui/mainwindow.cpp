@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -29,18 +28,26 @@ MainWindow::~MainWindow()
 void MainWindow::showVolumeDialog() {
     QDialog dlg(this);
     dlg.setWindowTitle("Гучність звуку");
+    dlg.setWindowIcon(QIcon(":/icon/volume.png"));
     QVBoxLayout* layout = new QVBoxLayout(&dlg);
     QHBoxLayout* row = new QHBoxLayout();
-    QLabel* label = new QLabel("Гучність:", &dlg);
+    QLabel* l_volume = new QLabel("Гучність:", &dlg);
     QSlider* slider = new QSlider(Qt::Horizontal, &dlg);
     slider->setRange(0, 100);
     slider->setValue(static_cast<int>(Audio::getMasterVolume() * 100.0));
-    row->addWidget(label);
+    l_percent = new QLabel(QString::number(slider->value()) + '%', &dlg);
+    row->addWidget(l_volume);
     row->addWidget(slider);
+    row->addWidget(l_percent);
     layout->addLayout(row);
 
-    connect(slider, &QSlider::valueChanged, this, [](int volume){ Audio::setMasterVolume(volume / 100.0); });
+    connect(slider, &QSlider::valueChanged, this, &MainWindow::volumeValueChanged);
 
     dlg.setLayout(layout);
     dlg.exec();
+}
+
+void MainWindow::volumeValueChanged(int volume) {
+    Audio::setMasterVolume(volume / 100.0);
+    l_percent->setText(QString::number(volume) + '%');
 }

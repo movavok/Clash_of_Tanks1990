@@ -98,7 +98,7 @@ void Game::removeEntity(Entity* entity) {
 void Game::doMessage(int levelIndex) {
     QMessageBox msg;
     msg.setIcon(QMessageBox::NoIcon);
-    msg.setWindowIcon(QPixmap(":/icon/win.png"));
+    msg.setWindowIcon(QIcon(":/icon/win.png"));
     msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
     msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
     if (levelIndex >= 3) Audio::play("win");
@@ -193,7 +193,7 @@ bool Game::handlePlayerDeath() {
         Audio::play("lose");
         QMessageBox msg;
         msg.setIcon(QMessageBox::NoIcon);
-        msg.setWindowIcon(QPixmap(":/icon/lose.png"));
+        msg.setWindowIcon(QIcon(":/icon/lose.png"));
         msg.setWindowTitle("Ви загинули");
         msg.setText("Перезапустити рівень чи вийти?");
         msg.setStandardButtons(QMessageBox::Retry | QMessageBox::Yes);
