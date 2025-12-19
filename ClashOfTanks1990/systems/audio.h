@@ -1,13 +1,21 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <QObject>
+#include <QString>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QHash>
+#include <QVector>
+#include <QUrl>
+#include <QElapsedTimer>
 
-class Audio
-{
-    Q_OBJECT
+class Audio {
 public:
-    Audio();
+    static void play(const QString& id);
+    static void preloadAll();
+    static void stopAll();
+    static void setMasterVolume(double);
+    static double getMasterVolume();
 };
 
-#endif // AUDIO_H
+#endif

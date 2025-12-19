@@ -2,6 +2,17 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSlider>
+#include <QIcon>
+#include "game/gameview.h"
+#include "../systems/audio.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,5 +30,12 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    GameView* gameView;
+    QLabel* l_percent;
+
+private slots:
+    void onLevelChanged(int level);
+    void showVolumeDialog();
+    void volumeValueChanged(int volume);
 };
 #endif // MAINWINDOW_H
