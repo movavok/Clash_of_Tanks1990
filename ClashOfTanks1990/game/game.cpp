@@ -15,7 +15,7 @@ Game::Game()
 
 void Game::initLevel() {
     level = new Level(19, 19, 32);
-    level->loadFromFile("../../assets/levels/level1.txt");
+    level->loadFromFile(":/levels/level1.txt");
     announcedNoEnemies = false;
 }
 
@@ -53,7 +53,7 @@ void Game::advanceLevel() {
     Audio::stopAll();
     Level* nextLevel = new Level(19, 19, 32);
     
-    if (!nextLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
+    if (!nextLevel->loadFromFile(QString(":/levels/level%1.txt").arg(levelIndex))) {
         --levelIndex;
         delete nextLevel;
         return;
@@ -335,7 +335,7 @@ void Game::handleKeyRelease(Qt::Key key) { if (player) player->handleKeyRelease(
 void Game::restartLevel() {
     Audio::stopAll();
     Level* newLevel = new Level(19, 19, 32);
-    if (!newLevel->loadFromFile(QString("../../assets/levels/level%1.txt").arg(levelIndex))) {
+    if (!newLevel->loadFromFile(QString(":/levels/level%1.txt").arg(levelIndex))) {
         delete newLevel;
         return;
     }

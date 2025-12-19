@@ -13,6 +13,11 @@
 		<file alias="brickStrong.png">../assets/tiles/brickStrong.png</file>
 		<file alias="grass.png">../assets/tiles/grass.png</file>
 	</qresource>
+	<qresource prefix="/levels">
+	        <file alias="level1.txt">../assets/levels/level1.txt</file>
+		<file alias="level2.txt">../assets/levels/level2.txt</file>
+		<file alias="level3.txt">../assets/levels/level3.txt</file>
+	</qresource>
 	<qresource prefix="/powerups">
 		<file alias="speedPowerUp.png">../assets/powerups/speedPowerUp.png</file>
 		<file alias="reloadPowerUp.png">../assets/powerups/reloadPowerUp.png</file>
