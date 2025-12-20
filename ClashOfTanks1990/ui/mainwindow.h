@@ -34,8 +34,10 @@ private:
     QLabel* l_percent;
 
 private slots:
-    void onLevelChanged(int level);
+    void onLevelChanged(int);
     void showVolumeDialog();
-    void volumeValueChanged(int volume);
+    void volumeValueChanged(int);
+
+    void stopPlayer();
 };
 #endif // MAINWINDOW_H

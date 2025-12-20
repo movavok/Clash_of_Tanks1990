@@ -4,8 +4,6 @@
 #include <QList>
 #include <QPointF>
 #include <QCoreApplication>
-#include <QMessageBox>
-#include <QAbstractButton>
 #include <QRandomGenerator>
 #include "../entities/playertank.h"
 #include "../entities/enemytank.h"
@@ -35,6 +33,12 @@ public:
 
     void setPaused(bool);
     bool isPaused() const;
+
+    void advance();
+    void finishBox();
+
+    void resetPlayerControls();
+
     void restart();
 
 private:
@@ -55,7 +59,6 @@ private:
     void spawnPlayerAtTile(int, int);
     void spawnEnemiesDefault();
 
-    void doMessage(int);
     void updateEntities(float, const QSize&);
     void cleanupDeadEntities();
     bool handlePlayerDeath();
@@ -69,6 +72,8 @@ private:
 
 signals:
     void levelChanged(int);
+    void doMessageBox();
+    void doLevelChoiceBox(int);
 };
 
 #endif // GAME_H

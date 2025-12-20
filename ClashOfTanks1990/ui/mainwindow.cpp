@@ -16,9 +16,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->act_pause, &QAction::triggered, gameView, &GameView::pauseGame);
     connect(ui->act_restart, &QAction::triggered, gameView, &GameView::restartLevel);
     connect(ui->act_set, &QAction::triggered, this, &MainWindow::showVolumeDialog);
+
+    // stop playerTank if clicked on qmenu
+    connect(ui->menu, &QMenu::aboutToShow, this, &MainWindow::stopPlayer);
+    connect(ui->menu_sound, &QMenu::aboutToShow, this, &MainWindow::stopPlayer);
+    connect(ui->menu, &QMenu::aboutToHide, this, &MainWindow::stopPlayer);
+    connect(ui->menu_sound, &QMenu::aboutToHide, this, &MainWindow::stopPlayer);
 }
 
 void MainWindow::onLevelChanged(int level) { setWindowTitle(QString("Clash Of Tanks 1990 | lvl %1").arg(level)); }
+
+void MainWindow::stopPlayer() { gameView->getGame()->resetPlayerControls(); }
 
 MainWindow::~MainWindow()
 {
@@ -27,6 +35,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::showVolumeDialog() {
     QDialog dlg(this);
+    gameView->getGame()->resetPlayerControls();
     dlg.setWindowTitle("Гучність звуку");
     dlg.setWindowIcon(QIcon(":/icon/volume.png"));
     QVBoxLayout* layout = new QVBoxLayout(&dlg);

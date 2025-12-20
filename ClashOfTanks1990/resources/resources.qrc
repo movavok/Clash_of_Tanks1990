@@ -14,7 +14,7 @@
 		<file alias="grass.png">../assets/tiles/grass.png</file>
 	</qresource>
 	<qresource prefix="/levels">
-	        <file alias="level1.txt">../assets/levels/level1.txt</file>
+	    <file alias="level1.txt">../assets/levels/level1.txt</file>
 		<file alias="level2.txt">../assets/levels/level2.txt</file>
 		<file alias="level3.txt">../assets/levels/level3.txt</file>
 	</qresource>

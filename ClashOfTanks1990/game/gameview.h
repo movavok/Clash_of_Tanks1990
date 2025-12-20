@@ -7,6 +7,8 @@
 #include <QKeyEvent>
 #include "../systems/audio.h"
 #include <QMessageBox>
+#include <QAbstractButton>
+#include <QCoreApplication>
 #include "game.h"
 
 class GameView : public QWidget
@@ -27,6 +29,8 @@ private:
 
 private slots:
     void onTick();
+    void onMessageBox();
+    void onLevelChoiceBox(int);
 
 public slots:
     void pauseGame();

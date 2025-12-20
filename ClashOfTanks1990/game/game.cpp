@@ -95,21 +95,6 @@ void Game::removeEntity(Entity* entity) {
     }
 }
 
-void Game::doMessage(int levelIndex) {
-    QMessageBox msg;
-    msg.setIcon(QMessageBox::NoIcon);
-    msg.setWindowIcon(QIcon(":/icon/win.png"));
-    msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
-    msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
-    if (levelIndex >= 3) Audio::play("win");
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
-    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(levelIndex >= 3 ? "Вийти" : "Так");
-    if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
-    QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
-    if (choice == QMessageBox::Yes) levelIndex >= 3 ? QCoreApplication::quit() : advanceLevel();
-    else restartLevel();
-}
-
 void Game::update(float deltaTime, const QSize& windowSize) {
     if (paused) return;
     updateEntities(deltaTime, windowSize);
@@ -188,21 +173,8 @@ void Game::cleanupDeadEntities() {
 bool Game::handlePlayerDeath() {
     if (!player) {
         paused = true;
-        
-        if (player) player->resetControls();
         Audio::play("lose");
-        QMessageBox msg;
-        msg.setIcon(QMessageBox::NoIcon);
-        msg.setWindowIcon(QIcon(":/icon/lose.png"));
-        msg.setWindowTitle("Ви загинули");
-        msg.setText("Перезапустити рівень чи вийти?");
-        msg.setStandardButtons(QMessageBox::Retry | QMessageBox::Yes);
-        if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
-        if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText("Вийти");
-        QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
-        if (choice == QMessageBox::Retry) restartLevel();
-        else QCoreApplication::quit();
-        paused = false;
+        emit doMessageBox();
         return true;
     }
     return false;
@@ -222,10 +194,7 @@ void Game::handleLevelClear() {
         for (Entity* entity : entities) if (dynamic_cast<Bullet*>(entity)) bullets.append(entity);
         for (Entity* bullet : bullets) removeEntity(bullet);
 
-        doMessage(levelIndex);
-
-        paused = false;
-        advancing = false;
+        emit doLevelChoiceBox(levelIndex);
     }
 }
 
@@ -343,7 +312,6 @@ void Game::restartLevel() {
     QList<Entity*> toRemove;
     for (Entity* entity : entities)
         if (entity != player) toRemove.append(entity);
-
     for (Entity* entity : toRemove) removeEntity(entity);
 
     delete level;
@@ -360,8 +328,14 @@ void Game::restartLevel() {
     emit levelChanged(levelIndex);
 }
 
-void Game::setPaused(bool p) { paused = p; }
+void Game::setPaused(bool p) { paused = p; resetPlayerControls(); }
 bool Game::isPaused() const { return paused; }
+
+void Game::advance() { advanceLevel(); }
+void Game::finishBox() { paused = false; advancing = false; }
+
+void Game::resetPlayerControls() { player->resetControls(); }
+
 void Game::restart() { restartLevel(); }
 
 void Game::spawnPowerUpRandom() {
