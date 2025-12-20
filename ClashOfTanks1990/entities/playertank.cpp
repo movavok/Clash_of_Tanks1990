@@ -53,7 +53,7 @@ void PlayerTank::update(float deltaTime) {
 Bullet* PlayerTank::shoot() {
     lastShotTime = 0.0f;
     QPointF bulletPos;
-    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 8 : Bullet::getDefaultBulletSize();
+    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
 
     switch (currentDirection) {
     case UP:

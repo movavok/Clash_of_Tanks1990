@@ -1,6 +1,6 @@
 #include "bullet.h"
 
-unsigned short Bullet::defaultSize = 5;
+unsigned short Bullet::defaultSize = 8;
 
 Bullet::Bullet(const QPointF& pos, Tank::Direction dir, float spd, Tank* own, unsigned short sz)
     : Entity(pos), direction(dir), owner(own), speed(spd), size(sz)
