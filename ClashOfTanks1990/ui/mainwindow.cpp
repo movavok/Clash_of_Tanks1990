@@ -6,9 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    gameView = new GameView(this);
-
-    setCentralWidget(gameView);
+    gameView = ui->page_gameView;
+    
     setWindowTitle("Clash Of Tanks 1990 | lvl 1");
     setWindowIcon(QIcon(":/icon/icon.png"));
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);

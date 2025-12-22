@@ -66,11 +66,6 @@ void EnemyTank::render(QPainter* painter) {
         QPixmap scaledSprite;
         QPoint drawPos = drawRotatedSprite(painter, enemySprite, scaledSprite);
         drawSpeedTrail(painter, drawPos, scaledSprite);
-    } else {
-        QColor tankColor = shieldCharges > 0 ? QColor(200, 60, 200) : QColor(220, 0, 0);
-        painter->setBrush(tankColor);
-        painter->setPen(Qt::NoPen);
-        painter->drawRect(bounds());
     }
 
     drawCooldownBar(painter);
@@ -78,7 +73,7 @@ void EnemyTank::render(QPainter* painter) {
     // Boost duration bars
     int barY = static_cast<int>(position.y() - 12.0);
     drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(200, 90, 255));
-    drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(255, 120, 160));
+    drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(247, 129, 32));
 }
 
 void EnemyTank::drawShieldAura(QPainter* painter) const {
@@ -144,7 +139,7 @@ void EnemyTank::drawCooldownBar(QPainter* painter) const {
     painter->setBrush(QColor(60, 60, 60));
     painter->drawRect(barBg);
     QRectF barFg(position.x(), position.y() - 6.0, width * percent, 4.0);
-    painter->setBrush(reloadBoostTime > 0.0f ? QColor(255, 100, 180) : QColor(240, 180, 60));
+    painter->setBrush(reloadBoostTime > 0.0f ? QColor(235, 61, 139) : QColor(240, 180, 60));
     painter->drawRect(barFg);
 }
 

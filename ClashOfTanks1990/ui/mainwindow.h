@@ -11,7 +11,7 @@
 #include <QLabel>
 #include <QSlider>
 #include <QIcon>
-#include "game/gameview.h"
+#include "../game/gameview.h"
 #include "../systems/audio.h"
 
 QT_BEGIN_NAMESPACE
