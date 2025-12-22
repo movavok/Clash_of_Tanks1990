@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <QList>
+#include <QDir>
 #include <QPointF>
 #include <QCoreApplication>
 #include <QRandomGenerator>
@@ -34,11 +35,13 @@ public:
     void setPaused(bool);
     bool isPaused() const;
 
+    int getMaxLevel() const;
     void advance();
     void finishBox();
 
     void resetPlayerControls();
 
+    void newGame();
     void restart();
 
 private:
@@ -46,6 +49,7 @@ private:
     QList<Entity*> entities;
     Level* level = nullptr;
     int levelIndex = 1;
+    int maxLevel;
     bool advancing = false;
     bool announcedNoEnemies = false;
     bool paused = false;
@@ -64,6 +68,7 @@ private:
     bool handlePlayerDeath();
     void handleLevelClear();
 
+    void detectMaxLevel();
     void advanceLevel();
     void restartLevel();
 

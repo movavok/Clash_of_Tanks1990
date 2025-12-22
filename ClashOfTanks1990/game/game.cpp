@@ -8,6 +8,7 @@ Game::Game()
     , announcedNoEnemies(false)
 {
     initLevel();
+    detectMaxLevel();
     spawnPlayerAtTile(2, 2);
     spawnEnemiesDefault();
     emit levelChanged(levelIndex);
@@ -18,6 +19,11 @@ void Game::initLevel() {
     level->loadFromFile(":/levels/level1.txt");
     announcedNoEnemies = false;
 }
+
+void Game::detectMaxLevel() { maxLevel = QDir(":/levels").entryList(QStringList() << "*.txt", QDir::Files).size(); }
+int Game::getMaxLevel() const { return maxLevel; }
+
+void Game::newGame() { levelIndex = 1; restartLevel(); }
 
 QPointF Game::tileCenter(int tileX, int tileY) const {
     if (!level) return QPointF(0, 0);
@@ -49,6 +55,7 @@ void Game::spawnEnemiesDefault() {
 }
 
 void Game::advanceLevel() {
+    if (levelIndex >= maxLevel) return;
     ++levelIndex;
     Audio::stopAll();
     Level* nextLevel = new Level(19, 19, 32);

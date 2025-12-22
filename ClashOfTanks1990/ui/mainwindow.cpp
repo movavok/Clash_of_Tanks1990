@@ -7,14 +7,21 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     gameView = ui->page_gameView;
+    gameView->getGame()->setPaused(true);
     
     setWindowTitle("Clash Of Tanks 1990 | lvl 1");
     setWindowIcon(QIcon(":/icon/icon.png"));
+    ui->l_numberLevelAmount->setText(QString::number(gameView->getGame()->getMaxLevel()));
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
+    connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::onPageChanged);
 
     connect(ui->act_pause, &QAction::triggered, gameView, &GameView::pauseGame);
     connect(ui->act_restart, &QAction::triggered, gameView, &GameView::restartLevel);
     connect(ui->act_set, &QAction::triggered, this, &MainWindow::showVolumeDialog);
+    connect(ui->act_startScreen, &QAction::triggered, this, &MainWindow::toStartScreen);
+
+    connect(ui->b_startGame, &QPushButton::clicked, this, &MainWindow::startNewGame);
+    connect(ui->b_continue, &QPushButton::clicked, this, &MainWindow::continueGame);
 
     // stop playerTank if clicked on qmenu
     connect(ui->menu, &QMenu::aboutToShow, this, &MainWindow::stopPlayer);
@@ -24,6 +31,33 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::onLevelChanged(int level) { setWindowTitle(QString("Clash Of Tanks 1990 | lvl %1").arg(level)); }
+
+void MainWindow::onPageChanged(int index) {
+    bool inGame = (ui->stackedWidget->widget(index) == ui->page_gameView);
+
+    ui->act_pause->setEnabled(inGame);
+    ui->act_restart->setEnabled(inGame);
+
+    if (inGame) {
+        gameView->getGame()->setPaused(false);
+        gameView->setFocus();
+    } else gameView->getGame()->setPaused(true);
+}
+
+void MainWindow::openGame(bool restart) {
+    if(restart) {
+        gameView->getGame()->newGame();
+        ui->b_continue->setEnabled(canContinue = true);
+    }
+    ui->stackedWidget->setCurrentWidget(ui->page_gameView);
+    gameView->getGame()->setPaused(false);
+    gameView->setFocus();
+}
+
+void MainWindow::startNewGame() { openGame(true); }
+void MainWindow::continueGame() { openGame(false); }
+
+void MainWindow::toStartScreen() { ui->stackedWidget->setCurrentWidget(ui->page_startScreen); }
 
 void MainWindow::stopPlayer() { gameView->getGame()->resetPlayerControls(); }
 

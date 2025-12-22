@@ -33,8 +33,17 @@ private:
     GameView* gameView;
     QLabel* l_percent;
 
+    bool canContinue = false;
+
 private slots:
     void onLevelChanged(int);
+    void onPageChanged(int);
+
+    void openGame(bool);
+    void startNewGame();
+    void continueGame();
+    void toStartScreen();
+
     void showVolumeDialog();
     void volumeValueChanged(int);
 

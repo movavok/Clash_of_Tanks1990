@@ -38,7 +38,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>608</width>
+      <width>611</width>
       <height>608</height>
      </rect>
     </property>
@@ -52,11 +52,11 @@
      <number>0</number>
     </property>
     <widget class="QWidget" name="page_startScreen">
-     <layout class="QVBoxLayout" name="verticalLayout_10">
+     <layout class="QVBoxLayout" name="verticalLayout_12">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <layout class="QVBoxLayout" name="verticalLayout_10">
         <item>
-         <spacer name="verticalSpacer">
+         <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
           </property>
@@ -69,7 +69,7 @@
          </spacer>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
@@ -84,7 +84,7 @@
            </spacer>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
+           <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
@@ -239,43 +239,17 @@
             <item>
              <widget class="QGroupBox" name="gb_startGame">
               <property name="title">
-               <string/>
+               <string>Запуск</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout">
+              <layout class="QVBoxLayout" name="verticalLayout_8">
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                 <item>
-                  <spacer name="horizontalSpacer">
-                   <property name="orientation">
-                    <enum>Qt::Orientation::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
                  <item>
                   <widget class="QPushButton" name="b_startGame">
                    <property name="text">
                     <string>Почати гру</string>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Orientation::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item>
                   <widget class="QPushButton" name="b_continue">
@@ -286,19 +260,6 @@
                     <string>Продовжити</string>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer_3">
-                   <property name="orientation">
-                    <enum>Qt::Orientation::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                 </layout>
                </item>
@@ -323,7 +284,7 @@
          </layout>
         </item>
         <item>
-         <spacer name="verticalSpacer_3">
+         <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Orientation::Vertical</enum>
           </property>
@@ -341,6 +302,17 @@
     </widget>
     <widget class="GameView" name="page_gameView"/>
    </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout"/>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -355,7 +327,7 @@
     <property name="title">
      <string>Меню</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="act_startScreen"/>
     <addaction name="act_pause"/>
     <addaction name="act_restart"/>
    </widget>
@@ -389,7 +361,7 @@
     <string>Налаштувати</string>
    </property>
   </action>
-  <action name="action">
+  <action name="act_startScreen">
    <property name="enabled">
     <bool>true</bool>
    </property>
