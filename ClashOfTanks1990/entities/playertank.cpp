@@ -4,24 +4,26 @@ PlayerTank::PlayerTank(const QPointF& pos, unsigned short wth, unsigned short hg
     : Tank(pos, wth, hgt, spd) { baseSpeed = spd; }
 
 void PlayerTank::handleKeyPress(Qt::Key key) {
-    switch(key) {
-    case Qt::Key_W: currentDirection = UP;    isMoving = true; break;
-    case Qt::Key_S: currentDirection = DOWN;  isMoving = true; break;
-    case Qt::Key_A: currentDirection = LEFT;  isMoving = true; break;
-    case Qt::Key_D: currentDirection = RIGHT; isMoving = true; break;
-    case Qt::Key_Space: isShooting = true; break;
-    default: break;
-    }
+    if (key == keyUp) { currentDirection = UP;    isMoving = true; }
+    else if (key == keyDown) { currentDirection = DOWN;  isMoving = true; }
+    else if (key == keyLeft) { currentDirection = LEFT;  isMoving = true; }
+    else if (key == keyRight) { currentDirection = RIGHT; isMoving = true; }
+    else if (key == keyShoot) { isShooting = true; }
 }
 
 void PlayerTank::handleKeyRelease(Qt::Key key) {
-    if ((key == Qt::Key_W && currentDirection == UP) ||
-        (key == Qt::Key_S && currentDirection == DOWN) ||
-        (key == Qt::Key_A && currentDirection == LEFT) ||
-        (key == Qt::Key_D && currentDirection == RIGHT))
+    if ((key == keyUp && currentDirection == UP) ||
+        (key == keyDown && currentDirection == DOWN) ||
+        (key == keyLeft && currentDirection == LEFT) ||
+        (key == keyRight && currentDirection == RIGHT))
         isMoving = false;
-    if (key == Qt::Key_Space) isShooting = false;
+    if (key == keyShoot) isShooting = false;
 }
+
+void PlayerTank::useWasdKeys() { keyUp = Qt::Key_W; keyDown = Qt::Key_S; keyLeft = Qt::Key_A; keyRight = Qt::Key_D; }
+void PlayerTank::useArrowKeys() { keyUp = Qt::Key_Up; keyDown = Qt::Key_Down; keyLeft = Qt::Key_Left; keyRight = Qt::Key_Right; }
+
+void PlayerTank::setKeyShoot(Qt::Key key) { keyShoot = key; }
 
 void PlayerTank::update(float deltaTime) {
     if (speedBoostTime > 0.0f) {
@@ -53,7 +55,7 @@ void PlayerTank::update(float deltaTime) {
 Bullet* PlayerTank::shoot() {
     lastShotTime = 0.0f;
     QPointF bulletPos;
-    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
+    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 8 : Bullet::getDefaultBulletSize();
 
     switch (currentDirection) {
     case UP:

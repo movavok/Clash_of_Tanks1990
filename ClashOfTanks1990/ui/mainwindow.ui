@@ -91,13 +91,13 @@
                <widget class="QGroupBox" name="gb_control">
                 <property name="minimumSize">
                  <size>
-                  <width>250</width>
+                  <width>225</width>
                   <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>250</width>
+                  <width>225</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -165,7 +165,7 @@
                <widget class="QGroupBox" name="gb_info">
                 <property name="minimumSize">
                  <size>
-                  <width>230</width>
+                  <width>0</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -185,6 +185,12 @@
                     <layout class="QVBoxLayout" name="verticalLayout_5">
                      <item>
                       <widget class="QLabel" name="l_levelAmount">
+                       <property name="maximumSize">
+                        <size>
+                         <width>115</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
                        <property name="text">
                         <string>Кількість рівнів:</string>
                        </property>
@@ -201,8 +207,25 @@
                    </item>
                    <item>
                     <layout class="QVBoxLayout" name="verticalLayout_6">
+                     <property name="spacing">
+                      <number>7</number>
+                     </property>
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+                     </property>
                      <item>
                       <widget class="QLabel" name="l_numberLevelAmount">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <bold>true</bold>
+                        </font>
+                       </property>
                        <property name="text">
                         <string>1</string>
                        </property>
@@ -210,6 +233,26 @@
                      </item>
                      <item>
                       <widget class="QPushButton" name="b_aboutBoosts">
+                       <property name="minimumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>25</width>
+                         <height>25</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>WhatsThisCursor</cursorShape>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: #e1e1e1;
+border: 2px #adadad;
+border-radius: 12px;</string>
+                       </property>
                        <property name="text">
                         <string>?</string>
                        </property>
@@ -246,6 +289,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_11">
                  <item>
                   <widget class="QPushButton" name="b_startGame">
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
                    <property name="text">
                     <string>Почати гру</string>
                    </property>
@@ -255,6 +301,9 @@
                   <widget class="QPushButton" name="b_continue">
                    <property name="enabled">
                     <bool>false</bool>
+                   </property>
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
                    </property>
                    <property name="text">
                     <string>Продовжити</string>
@@ -302,7 +351,7 @@
     </widget>
     <widget class="GameView" name="page_gameView"/>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -323,7 +372,13 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
    <widget class="QMenu" name="menu">
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="title">
      <string>Меню</string>
     </property>
@@ -332,6 +387,9 @@
     <addaction name="act_restart"/>
    </widget>
    <widget class="QMenu" name="menu_sound">
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="title">
      <string>Звук</string>
     </property>

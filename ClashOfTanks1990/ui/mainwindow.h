@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QSlider>
 #include <QIcon>
+#include <QKeyCombination>
 #include "../game/gameview.h"
 #include "../systems/audio.h"
 

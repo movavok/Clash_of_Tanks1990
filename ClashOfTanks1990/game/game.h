@@ -28,6 +28,7 @@ public:
 
     void handleKeyPress(Qt::Key);
     void handleKeyRelease(Qt::Key);
+    void setMovementScheme(int, Qt::Key);
 
     void addEntity(Entity*);
     void removeEntity(Entity*);

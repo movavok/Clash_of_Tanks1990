@@ -308,6 +308,14 @@ void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key)
 
 void Game::handleKeyRelease(Qt::Key key) { if (player) player->handleKeyRelease(key); }
 
+void Game::setMovementScheme(int scheme, Qt::Key customShootKey) { 
+    if (player) {
+        if (scheme == 0) player->useWasdKeys();
+        else if (scheme == 1) player->useArrowKeys();
+        player->setKeyShoot(customShootKey);
+    }
+}
+
 void Game::restartLevel() {
     Audio::stopAll();
     Level* newLevel = new Level(19, 19, 32);

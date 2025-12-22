@@ -8,10 +8,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     gameView = ui->page_gameView;
     gameView->getGame()->setPaused(true);
-    
+
     setWindowTitle("Clash Of Tanks 1990 | lvl 1");
     setWindowIcon(QIcon(":/icon/icon.png"));
-    ui->l_numberLevelAmount->setText(QString::number(gameView->getGame()->getMaxLevel()));
+    ui->l_numberLevelAmount->setText("<b>" + QString::number(gameView->getGame()->getMaxLevel()) + "</b>");
+    ui->b_aboutBoosts->setToolTip(
+        "Підсилювачі:\n"
+        "• Швидкість: +50% до руху на 8 с.\n"
+        "• Перезарядка: швидша стрільба та більші кулі на 8 с.\n"
+        "• Щит: поглинає один влучний постріл.\n\n"
+        "Підбираються як гравцем, так і ворогами."
+        );
+
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
     connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::onPageChanged);
 
@@ -50,8 +58,7 @@ void MainWindow::openGame(bool restart) {
         ui->b_continue->setEnabled(canContinue = true);
     }
     ui->stackedWidget->setCurrentWidget(ui->page_gameView);
-    gameView->getGame()->setPaused(false);
-    gameView->setFocus();
+    gameView->getGame()->setMovementScheme(ui->cb_movement->currentIndex(), ui->kse_shoot->keySequence()[0].key());
 }
 
 void MainWindow::startNewGame() { openGame(true); }

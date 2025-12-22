@@ -11,6 +11,9 @@ public:
 
     void handleKeyPress(Qt::Key);
     void handleKeyRelease(Qt::Key);
+    void useWasdKeys();
+    void useArrowKeys();
+    void setKeyShoot(Qt::Key);
 
     void update(float) override;
     void render(QPainter*) override;
@@ -30,6 +33,7 @@ private:
     float lastShotTime = 0.0f;
     bool isShooting = false;
 
+    Qt::Key keyUp = Qt::Key_W, keyDown = Qt::Key_S, keyLeft = Qt::Key_A, keyRight = Qt::Key_D, keyShoot = Qt::Key_Space;
     Direction currentDirection = UP;
     bool isMoving = false;
     
