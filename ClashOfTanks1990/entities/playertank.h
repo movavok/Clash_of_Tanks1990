@@ -27,6 +27,7 @@ public:
     bool hasShield() const;
     void consumeShield();
     void clearAllBuffs();
+    void setShootKey(Qt::Key);
 
 private:
     float shootCooldown = 3.0f;

@@ -51,6 +51,10 @@ private:
     Level* level = nullptr;
     int levelIndex = 1;
     int maxLevel;
+
+    int movementScheme = 0;
+    Qt::Key shootKey = Qt::Key_Space;
+
     bool advancing = false;
     bool announcedNoEnemies = false;
     bool paused = false;

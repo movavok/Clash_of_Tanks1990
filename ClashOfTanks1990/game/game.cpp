@@ -35,6 +35,7 @@ QPointF Game::tileCenter(int tileX, int tileY) const {
 void Game::spawnPlayerAtTile(int tileX, int tileY) {
     QPointF playerPos = tileCenter(tileX, tileY);
     player = new PlayerTank(playerPos, 30, 30, 100.0f);
+    setMovementScheme(movementScheme, shootKey);
     connect(player, &PlayerTank::bulletFired, this, &Game::addEntity);
     addEntity(player);
 }
@@ -59,7 +60,7 @@ void Game::advanceLevel() {
     ++levelIndex;
     Audio::stopAll();
     Level* nextLevel = new Level(19, 19, 32);
-    
+
     if (!nextLevel->loadFromFile(QString(":/levels/level%1.txt").arg(levelIndex))) {
         --levelIndex;
         delete nextLevel;
@@ -308,7 +309,9 @@ void Game::handleKeyPress(Qt::Key key) { if (player) player->handleKeyPress(key)
 
 void Game::handleKeyRelease(Qt::Key key) { if (player) player->handleKeyRelease(key); }
 
-void Game::setMovementScheme(int scheme, Qt::Key customShootKey) { 
+void Game::setMovementScheme(int scheme, Qt::Key customShootKey) {
+    movementScheme = scheme;
+    shootKey = customShootKey;
     if (player) {
         if (scheme == 0) player->useWasdKeys();
         else if (scheme == 1) player->useArrowKeys();

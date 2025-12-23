@@ -74,17 +74,17 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::showVolumeDialog() {
-    QDialog dlg(this);
+    QDialog dialog(this);
     gameView->getGame()->resetPlayerControls();
-    dlg.setWindowTitle("Гучність звуку");
-    dlg.setWindowIcon(QIcon(":/icon/volume.png"));
-    QVBoxLayout* layout = new QVBoxLayout(&dlg);
+    dialog.setWindowTitle("Гучність звуку");
+    dialog.setWindowIcon(QIcon(":/icon/volume.png"));
+    QVBoxLayout* layout = new QVBoxLayout(&dialog);
     QHBoxLayout* row = new QHBoxLayout();
-    QLabel* l_volume = new QLabel("Гучність:", &dlg);
-    QSlider* slider = new QSlider(Qt::Horizontal, &dlg);
+    QLabel* l_volume = new QLabel("Гучність:", &dialog);
+    QSlider* slider = new QSlider(Qt::Horizontal, &dialog);
     slider->setRange(0, 100);
     slider->setValue(static_cast<int>(Audio::getMasterVolume() * 100.0));
-    l_percent = new QLabel(QString::number(slider->value()) + '%', &dlg);
+    l_percent = new QLabel(QString::number(slider->value()) + '%', &dialog);
     row->addWidget(l_volume);
     row->addWidget(slider);
     row->addWidget(l_percent);
@@ -92,8 +92,8 @@ void MainWindow::showVolumeDialog() {
 
     connect(slider, &QSlider::valueChanged, this, &MainWindow::volumeValueChanged);
 
-    dlg.setLayout(layout);
-    dlg.exec();
+    dialog.setLayout(layout);
+    dialog.exec();
 }
 
 void MainWindow::volumeValueChanged(int volume) {

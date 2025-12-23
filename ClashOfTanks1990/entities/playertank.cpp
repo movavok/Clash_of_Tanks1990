@@ -8,7 +8,7 @@ void PlayerTank::handleKeyPress(Qt::Key key) {
     else if (key == keyDown) { currentDirection = DOWN;  isMoving = true; }
     else if (key == keyLeft) { currentDirection = LEFT;  isMoving = true; }
     else if (key == keyRight) { currentDirection = RIGHT; isMoving = true; }
-    else if (key == keyShoot) { isShooting = true; }
+    if (key == keyShoot) { isShooting = true; }
 }
 
 void PlayerTank::handleKeyRelease(Qt::Key key) {
@@ -24,6 +24,7 @@ void PlayerTank::useWasdKeys() { keyUp = Qt::Key_W; keyDown = Qt::Key_S; keyLeft
 void PlayerTank::useArrowKeys() { keyUp = Qt::Key_Up; keyDown = Qt::Key_Down; keyLeft = Qt::Key_Left; keyRight = Qt::Key_Right; }
 
 void PlayerTank::setKeyShoot(Qt::Key key) { keyShoot = key; }
+void PlayerTank::setShootKey(Qt::Key key) { keyShoot = key; }
 
 void PlayerTank::update(float deltaTime) {
     if (speedBoostTime > 0.0f) {
@@ -55,7 +56,7 @@ void PlayerTank::update(float deltaTime) {
 Bullet* PlayerTank::shoot() {
     lastShotTime = 0.0f;
     QPointF bulletPos;
-    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 8 : Bullet::getDefaultBulletSize();
+    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
 
     switch (currentDirection) {
     case UP:
