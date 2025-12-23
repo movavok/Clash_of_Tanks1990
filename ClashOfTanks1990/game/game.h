@@ -74,6 +74,7 @@ private:
     void handleLevelClear();
 
     void detectMaxLevel();
+    bool loadLevel(int);
     void advanceLevel();
     void restartLevel();
 

@@ -26,8 +26,172 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/*
-   </string>
+   <string notr="true">/* Pixel theme for start screen */
+
+/* Tile the background to keep pixel crispness */
+#page_startScreen {
+    border-image: url(:/startScreen/background.png) 0 0 0 0 stretch stretch;
+}
+
+/* Tooltip styling (pixel theme) */
+QToolTip {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0;          /* crisp pixel edges */
+    padding: 4px 6px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+/* QMessageBox pixel theme (lighter gray palette) */
+QMessageBox {
+    background-color: #3e3e3e;   /* lighter gray */
+    color: #f0f0f0;
+    border: 2px solid #dcdcdc;   /* light border */
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 11pt;
+}
+/* Primary text label inside QMessageBox */
+QLabel#qt_msgbox_label {
+    color: #f0f0f0;
+    background: transparent;
+    padding: 6px 2px;            /* breathing room */
+}
+/* Detailed text label if present */
+QLabel#qt_msgboxex_detailedtext_label {
+    color: #dcdcdc;
+    background: transparent;
+}
+/* Center the buttons and add spacing */
+QMessageBox QDialogButtonBox {
+    qproperty-centerButtons: true;
+    padding-top: 10px;
+}
+QMessageBox QPushButton {
+    background-color: #5a5a5a;
+    border: 2px solid #1e1e1e;
+    border-radius: 0;
+    padding: 6px 12px;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+QMessageBox QPushButton:hover {
+    background-color: #6a6a6a;
+}
+QMessageBox QPushButton:pressed {
+    background-color: #4a4a4a;
+    border-left-color: #2a2a2a;
+    border-top-color: #2a2a2a;
+    border-right-color: #777777;
+    border-bottom-color: #777777;
+}
+
+#page_startScreen QLabel,
+#page_startScreen QPushButton,
+#page_startScreen QGroupBox,
+#page_startScreen QComboBox,
+#page_startScreen QKeySequenceEdit {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    color: #ffffff;
+}
+
+/* GroupBox with pixel border and title */
+#page_startScreen QGroupBox {
+    border: 2px solid #000000;
+    border-radius: 0;
+    margin-top: 10px;
+    background-color: rgba(0,0,0,0.35);
+}
+#page_startScreen QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 6px 2px 6px;
+    background-color: rgba(0,0,0,0.6);
+    color: #ffffff;
+}
+
+/* Buttons */
+#page_startScreen QPushButton {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 6px 10px;
+    color: #ffffff;
+}
+#page_startScreen QPushButton:hover {
+    background-color: #4a4a4a;
+}
+#page_startScreen QPushButton:pressed {
+    background-color: #2a2a2a;
+    border-left-color: #111111;
+    border-top-color: #111111;
+    border-right-color: #555555;
+    border-bottom-color: #555555;
+}
+
+/* Continue button states */
+QPushButton#b_continue:disabled {
+    background-color: #1f1f1f;
+    border: 2px solid #444444;
+    color: #888888;
+}
+QPushButton#b_continue:enabled {
+    background-color: #2e5f2e;
+    border: 2px solid #163816;
+    color: #c8ffc8;
+}
+
+/* ComboBox */
+#page_startScreen QComboBox {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 6px;
+    color: #ffffff;
+}
+#page_startScreen QComboBox::drop-down {
+    width: 18px;
+    border-left: 2px solid #000000;
+    background-color: #3a3a3a;
+}
+#page_startScreen QComboBox::down-arrow {
+    image: none;
+}
+
+/* KeySequenceEdit */
+#page_startScreen QKeySequenceEdit {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 6px;
+    color: #ffffff;
+}
+
+/* Labels */
+#page_startScreen QLabel {
+    background-color: transparent;
+}
+
+/* Specific small '?' button */
+QPushButton#b_aboutBoosts {
+    background-color: transparent; /* transparent fill */
+    border: 2px solid #ffffff;     /* white outline */
+    border-radius: 12px;           /* circle for 25x25 */
+    color: #ffffff;
+    font-weight: bold;
+    padding: 0;                    /* prevent size inflation */
+    margin: 0;                     /* keep compact */
+}
+QPushButton#b_aboutBoosts:hover {
+    background-color: transparent;
+    border: 2px solid #ffffff;   /* keep size consistent */
+}
+     </string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QStackedWidget" name="stackedWidget">
@@ -89,9 +253,15 @@
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QGroupBox" name="gb_control">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="minimumSize">
                  <size>
-                  <width>225</width>
+                  <width>0</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -171,7 +341,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>230</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -187,7 +357,7 @@
                       <widget class="QLabel" name="l_levelAmount">
                        <property name="maximumSize">
                         <size>
-                         <width>115</width>
+                         <width>16777215</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -199,7 +369,7 @@
                      <item>
                       <widget class="QLabel" name="l_aboutBoosts">
                        <property name="text">
-                        <string>Про посилювачі</string>
+                        <string>Про підсилювачі</string>
                        </property>
                       </widget>
                      </item>
@@ -223,6 +393,8 @@
                        </property>
                        <property name="font">
                         <font>
+                         <family>Fixedsys</family>
+                         <pointsize>10</pointsize>
                          <bold>true</bold>
                         </font>
                        </property>
@@ -233,25 +405,26 @@
                      </item>
                      <item>
                       <widget class="QPushButton" name="b_aboutBoosts">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="minimumSize">
                         <size>
-                         <width>25</width>
-                         <height>25</height>
+                         <width>20</width>
+                         <height>20</height>
                         </size>
                        </property>
                        <property name="maximumSize">
                         <size>
-                         <width>25</width>
-                         <height>25</height>
+                         <width>20</width>
+                         <height>20</height>
                         </size>
                        </property>
                        <property name="cursor">
                         <cursorShape>WhatsThisCursor</cursorShape>
                        </property>
-                       <property name="styleSheet">
-                        <string notr="true">background-color: #e1e1e1;
-border: 2px #adadad;
-border-radius: 12px;</string>
+                       <property name="toolTip">
+                        <string>Про посилювачі</string>
                        </property>
                        <property name="text">
                         <string>?</string>

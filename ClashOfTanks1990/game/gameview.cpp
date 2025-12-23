@@ -73,18 +73,20 @@ void GameView::onMessageBox() {
 }
 
 void GameView::onLevelChoiceBox(int levelIndex) {
+    int maxLevel = game.getMaxLevel();
+    bool outOfMax = (levelIndex >= maxLevel);
     QMessageBox msg(parentWidget());
     msg.setIcon(QMessageBox::NoIcon);
     msg.setWindowIcon(QIcon(":/icon/win.png"));
-    msg.setWindowTitle(levelIndex >= 3 ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
-    msg.setText(levelIndex >= 3 ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
-    if (levelIndex >= 3) Audio::play("win");
+    msg.setWindowTitle(outOfMax ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
+    msg.setText(outOfMax ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
+    if (outOfMax) Audio::play("win");
     msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
-    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(levelIndex >= 3 ? "Вийти" : "Так");
+    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(outOfMax ? "Вийти" : "Так");
     if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
     QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
     if (choice == QMessageBox::Yes) {
-        if (levelIndex >= 3) QCoreApplication::quit();
+        if (outOfMax) QCoreApplication::quit();
         else { game.advance(); game.finishBox(); }
     } else { game.restart(); game.finishBox(); }
 }

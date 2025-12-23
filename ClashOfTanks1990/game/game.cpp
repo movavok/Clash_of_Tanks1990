@@ -55,22 +55,21 @@ void Game::spawnEnemiesDefault() {
 
 }
 
-void Game::advanceLevel() {
-    if (levelIndex >= maxLevel) return;
-    ++levelIndex;
+bool Game::loadLevel(int index) {
     Audio::stopAll();
-    Level* nextLevel = new Level(19, 19, 32);
 
-    if (!nextLevel->loadFromFile(QString(":/levels/level%1.txt").arg(levelIndex))) {
-        --levelIndex;
+    Level* nextLevel = new Level(19, 19, 32);
+    if (!nextLevel->loadFromFile(QString(":/levels/level%1.txt").arg(index))) {
         delete nextLevel;
-        return;
+        return false;
     }
 
     QList<Entity*> toRemove;
     for (Entity* entity : entities)
         if (entity != player) toRemove.append(entity);
-    for (Entity* entity : toRemove) removeEntity(entity);
+
+    for (Entity* entity : toRemove)
+        removeEntity(entity);
 
     delete level;
     level = nextLevel;
@@ -85,7 +84,17 @@ void Game::advanceLevel() {
 
     spawnEnemiesDefault();
     emit levelChanged(levelIndex);
+    return true;
 }
+
+void Game::advanceLevel()
+{
+    if (levelIndex >= maxLevel) return;
+    ++levelIndex;
+    if (!loadLevel(levelIndex)) --levelIndex;
+}
+
+void Game::restartLevel() { loadLevel(levelIndex); }
 
 void Game::addEntity(Entity* entity) { entities.append(entity); }
 
@@ -317,33 +326,6 @@ void Game::setMovementScheme(int scheme, Qt::Key customShootKey) {
         else if (scheme == 1) player->useArrowKeys();
         player->setKeyShoot(customShootKey);
     }
-}
-
-void Game::restartLevel() {
-    Audio::stopAll();
-    Level* newLevel = new Level(19, 19, 32);
-    if (!newLevel->loadFromFile(QString(":/levels/level%1.txt").arg(levelIndex))) {
-        delete newLevel;
-        return;
-    }
-
-    QList<Entity*> toRemove;
-    for (Entity* entity : entities)
-        if (entity != player) toRemove.append(entity);
-    for (Entity* entity : toRemove) removeEntity(entity);
-
-    delete level;
-    level = newLevel;
-    announcedNoEnemies = false;
-
-    if (!player) spawnPlayerAtTile(2, 2);
-    else {
-        player->setPosition(tileCenter(2, 2));
-        player->resetControls();
-        player->clearAllBuffs();
-    }
-    spawnEnemiesDefault();
-    emit levelChanged(levelIndex);
 }
 
 void Game::setPaused(bool p) { paused = p; resetPlayerControls(); }
