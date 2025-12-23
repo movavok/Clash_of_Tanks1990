@@ -90,6 +90,58 @@ QMessageBox QPushButton:pressed {
     border-bottom-color: #777777;
 }
 
+/* QDialog pixel theme (lighter gray) */
+QDialog {
+    background-color: #4a4a4a;   /* darker gray */
+    color: #f0f0f0;
+    border: 2px solid #1e1e1e;
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+QDialog QLabel {
+    color: #f0f0f0;
+    background: transparent;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+}
+
+/* Horizontal slider — thin, fixed size, full range */
+
+QDialog QSlider:horizontal {
+    min-height: 12px;
+    max-height: 12px;       
+}
+
+QDialog QSlider::groove:horizontal {
+    height: 2.5px;             
+    background: #5a5a5a;
+    border: 1px solid #1e1e1e;
+}
+
+QDialog QSlider::sub-page:horizontal {
+    border: 1px solid #163816;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 rgb(40,200,40),
+        stop:1 rgb(80,200,80)
+    );
+}
+
+QDialog QSlider::add-page:horizontal {
+    background: #5a5a5a;
+    border: 1px solid #1e1e1e;
+}
+
+QDialog QSlider::handle:horizontal {
+    width: 6px;
+    height: 10px;
+    background: #3a3a3a;
+    border: 1px solid #000000;
+    margin: -4px -1px -4px -1px; /* center handle on groove */  
+}
+
+
 #page_startScreen QLabel,
 #page_startScreen QPushButton,
 #page_startScreen QGroupBox,

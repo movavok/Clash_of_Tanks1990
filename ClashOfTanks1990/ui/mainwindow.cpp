@@ -81,9 +81,10 @@ void MainWindow::showVolumeDialog() {
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
     QHBoxLayout* row = new QHBoxLayout();
     QLabel* l_volume = new QLabel("Гучність:", &dialog);
-    QSlider* slider = new QSlider(Qt::Horizontal, &dialog);
+    slider = new QSlider(Qt::Horizontal, &dialog);
     slider->setRange(0, 100);
     slider->setValue(static_cast<int>(Audio::getMasterVolume() * 100.0));
+    slider->setFixedSize(100, 12);
     l_percent = new QLabel(QString::number(slider->value()) + '%', &dialog);
     row->addWidget(l_volume);
     row->addWidget(slider);
@@ -99,4 +100,16 @@ void MainWindow::showVolumeDialog() {
 void MainWindow::volumeValueChanged(int volume) {
     Audio::setMasterVolume(volume / 100.0);
     l_percent->setText(QString::number(volume) + '%');
+
+    int gradient = 100 + volume;
+    slider->setStyleSheet(QString(R"(
+        QDialog QSlider::sub-page:horizontal {
+            border: 1px solid #163816;
+            background: qlineargradient(
+                x1:0, y1:0, x2:1, y2:0,
+                stop:0 rgb(40,%1,40),
+                stop:1 rgb(80,%1,80)
+            );
+        }
+    )").arg(gradient));
 }

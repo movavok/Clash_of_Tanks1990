@@ -33,6 +33,7 @@ private:
     Ui::MainWindow *ui;
     GameView* gameView;
     QLabel* l_percent;
+    QSlider* slider;
 
     bool canContinue = false;
 

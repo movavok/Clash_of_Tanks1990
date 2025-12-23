@@ -334,7 +334,7 @@ bool Game::isPaused() const { return paused; }
 void Game::advance() { advanceLevel(); }
 void Game::finishBox() { paused = false; advancing = false; }
 
-void Game::resetPlayerControls() { player->resetControls(); }
+void Game::resetPlayerControls() { if (player) player->resetControls(); }
 
 void Game::restart() { restartLevel(); }
 
