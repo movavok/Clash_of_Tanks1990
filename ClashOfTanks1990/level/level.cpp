@@ -8,7 +8,7 @@ int Level::tileAt(int cordX, int cordY) const {
     return grid[indexAt(cordX, cordY)];
 }
 
-void Level::setTile(int cordX, int cordY, int type) {
+void Level::setTile(int cordX, int cordY, char type) {
     if (cordX < 0 || cordY < 0 || cordX >= cols || cordY >= rows) return;
     grid[indexAt(cordX, cordY)] = type;
 }
@@ -18,20 +18,20 @@ void Level::render(QPainter* painter) const {
     static QPixmap wall(":/tiles/wall.png");
     static QPixmap weak(":/tiles/brickWeak.png");
     static QPixmap strong(":/tiles/brickStrong.png");
-    static QPixmap grass(":/tiles/grass.png");
-    for (int y = 0; y < rows; ++y) {
+    static QPixmap water(":/tiles/water.png");
+    for (int y = 0; y < rows; ++y)
         for (int x = 0; x < cols; ++x) {
             int type = grid[indexAt(x, y)];
-            QRect r(x * tileSize, y * tileSize, tileSize, tileSize);
+            QRect rect(x * tileSize, y * tileSize, tileSize, tileSize);
             switch (type) {
             case Empty: break;
-            case Wall: painter->drawPixmap(r, wall); break;
-            case BrickWeak: painter->drawPixmap(r, weak); break;
-            case BrickStrong: painter->drawPixmap(r, strong); break;
-            case Grass: painter->drawPixmap(r, bg); break;
+            case Wall: painter->drawPixmap(rect, wall); break;
+            case BrickWeak: painter->drawPixmap(rect, weak); break;
+            case BrickStrong: painter->drawPixmap(rect, strong); break;
+            case Grass: painter->drawPixmap(rect, bg); break; //grass rendered in foreground
+            case Water: painter->drawPixmap(rect, water); break;
             }
         }
-    }
 }
 
 void Level::renderForeground(QPainter* painter) const {
@@ -40,10 +40,10 @@ void Level::renderForeground(QPainter* painter) const {
         for (int x = 0; x < cols; ++x) {
             int type = grid[indexAt(x, y)];
             if (type != Grass) continue;
-            QRect r(x * tileSize, y * tileSize, tileSize, tileSize);
+            QRect rect(x * tileSize, y * tileSize, tileSize, tileSize);
             painter->save();
             painter->setOpacity(0.6);
-            painter->drawPixmap(r, grass);
+            painter->drawPixmap(rect, grass);
             painter->restore();
         }
     }
@@ -55,17 +55,17 @@ bool Level::intersectsSolid(const QRectF& rect) const {
 
     for (const QPoint& point : coords) {
         int type = tileAt(point.x(), point.y());
-        if (type == Wall || type == BrickWeak || type == BrickStrong) return true;
+        if (type == Wall || type == BrickWeak || type == BrickStrong || type == Water) return true;
     }
     return false;
 }
 
-bool Level::intersectsGrass(const QRectF& rect) const {
+bool Level::intersectsTile(const QRectF& rect, char tile) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
     for (const QPoint& point : coords)
-        if (tileAt(point.x(), point.y()) == Grass) return true;
+        if (tileAt(point.x(), point.y()) == tile) return true;
     return false;
 }
 
@@ -75,10 +75,10 @@ bool Level::destroyInRect(const QRectF& rect) {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
-    for (const QPoint& p : coords) {
-        int type = tileAt(p.x(), p.y());
-        if (type == BrickStrong) { setTile(p.x(), p.y(), BrickWeak); destroyed = true; Audio::play("brickBreaking"); }
-        else if (type == BrickWeak) { setTile(p.x(), p.y(), Empty); destroyed = true; Audio::play("brickBreaking"); }
+    for (const QPoint& point : coords) {
+        int type = tileAt(point.x(), point.y());
+        if (type == BrickStrong) { setTile(point.x(), point.y(), BrickWeak); destroyed = true; Audio::play("brickBreaking"); }
+        else if (type == BrickWeak) { setTile(point.x(), point.y(), Empty); destroyed = true; Audio::play("brickBreaking"); }
     }
     return destroyed;
 }
@@ -102,6 +102,7 @@ int mapTileChar(QChar symbol) {
     case 'b': return Level::BrickWeak;
     case 'B': return Level::BrickStrong;
     case 'g': return Level::Grass;
+    case '~': return Level::Water;
     default:  return Level::Empty;
     }
 }

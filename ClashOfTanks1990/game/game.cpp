@@ -164,11 +164,11 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
 
         if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
             if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
-            if (bullet->isAlive() && level && level->intersectsSolid(bullet->bounds())) {
+            if (bullet->isAlive() && (level->intersectsSolid(bullet->bounds()) && !level->intersectsTile(bullet->bounds(), '~'))) {
                 level->destroyInRect(bullet->bounds());
                 Audio::play("bulletToWall");
                 bullet->destroy();
-            }
+            }   
         } else {
             bool collided = false;
             if (checkCollision(entity)) collided = true;
@@ -291,7 +291,7 @@ void Game::render(QPainter* painter) {
         if (dynamic_cast<Bullet*>(entity)) continue;
 
         double opacity = originalOpacity;
-        if (level->intersectsGrass(entity->bounds())) {
+        if (level->intersectsTile(entity->bounds(), 'g')) {
             if (entity == player) opacity = 0.5;
             else if (dynamic_cast<EnemyTank*>(entity)) opacity = 0.0;
         }

@@ -13,12 +13,13 @@
 
 class Level {
 public:
-    enum TileType : int {
-        Empty = 0,
-        Wall = 1,
-        BrickWeak = 2,
-        BrickStrong = 3,
-        Grass = 4
+    enum TileType : char {
+        Empty = ' ',
+        Wall = 'w',
+        BrickWeak = 'b',
+        BrickStrong = 'B',
+        Grass = 'g',
+        Water = '~'
     };
 
     Level(int, int, int);
@@ -31,7 +32,7 @@ public:
     int getRows() const { return rows; }
 
     bool intersectsSolid(const QRectF&) const;
-    bool intersectsGrass(const QRectF&) const;
+    bool intersectsTile(const QRectF&, char) const;
     bool destroyInRect(const QRectF&);
 
     bool generateFromText(const QStringList&);
@@ -45,7 +46,7 @@ private:
 
     int indexAt(int, int) const;
     int tileAt(int, int) const;
-    void setTile(int, int, int);
+    void setTile(int, int, char);
     void tilesInRect(const QRectF&, QVector<QPoint>&) const;
 };
 

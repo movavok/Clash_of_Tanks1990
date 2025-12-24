@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     gameView = ui->page_gameView;
     gameView->getGame()->setPaused(true);
 
-    setWindowTitle("Clash Of Tanks 1990 | lvl 1");
+    setWindowTitle("Clash Of Tanks 1990");
     setWindowIcon(QIcon(":/icon/icon.png"));
     ui->l_numberLevelAmount->setText("<b>" + QString::number(gameView->getGame()->getMaxLevel()) + "</b>");
     ui->b_aboutBoosts->setToolTip(
