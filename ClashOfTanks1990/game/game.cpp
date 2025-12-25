@@ -11,7 +11,7 @@ Game::Game()
     detectMaxLevel();
     spawnPlayerAtTile(2, 2);
     spawnEnemiesDefault();
-    emit levelChanged(levelIndex);
+    //emit levelChanged(levelIndex);
 }
 
 void Game::initLevel() {
@@ -164,7 +164,7 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
 
         if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
             if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
-            if (bullet->isAlive() && (level->intersectsSolid(bullet->bounds()) && !level->intersectsTile(bullet->bounds(), '~'))) {
+            if (bullet->isAlive() && (level->intersectsBulletSolid(bullet->bounds()))) {
                 level->destroyInRect(bullet->bounds());
                 Audio::play("bulletToWall");
                 bullet->destroy();
@@ -172,7 +172,7 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
         } else {
             bool collided = false;
             if (checkCollision(entity)) collided = true;
-            if (!collided && level && level->intersectsSolid(entity->bounds())) collided = true;
+            if (!collided && level && level->intersectsTankSolid(entity->bounds())) collided = true;
             if (collided) entity->setPosition(oldPos);
         }
     }
@@ -291,7 +291,7 @@ void Game::render(QPainter* painter) {
         if (dynamic_cast<Bullet*>(entity)) continue;
 
         double opacity = originalOpacity;
-        if (level->intersectsTile(entity->bounds(), 'g')) {
+        if (level->intersectsAnyTiles(entity->bounds(), { Level::TileType::Grass })) {
             if (entity == player) opacity = 0.5;
             else if (dynamic_cast<EnemyTank*>(entity)) opacity = 0.0;
         }
@@ -353,7 +353,7 @@ void Game::spawnPowerUpRandom() {
                                tileY * tileSize + (tileSize - 16) / 2.0);
         const QRectF spawnRect(spawnPos.x(), spawnPos.y(), 16, 16);
 
-        if (level->intersectsSolid(spawnRect)) continue;
+        if (level->intersectsTankSolid(spawnRect)) continue;
 
         const PowerUp::Type chosenType = static_cast<PowerUp::Type>(QRandomGenerator::global()->bounded(3));
         PowerUp* boost = new PowerUp(spawnPos, chosenType);

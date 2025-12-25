@@ -1,19 +1,19 @@
-##~~~~~~~~~~~~~~~##
-#     BbBbBbB     #
-~     bgggggb     ~
-~     ggggggg     ~
-~    gggbBbggg    ~
-~   gggbB#Bbggg   ~
-~   gg   #   gg   ~
-~~  gg   #   gg  ~~
-~~~~bb~~~#~~~bb~~~~
-~~~~bb~~~#~~~bb~~~~
-~~~~bb~~~#~~~bb~~~~
-~~  gg   #   gg  ~~
-~   gg   #   gg   ~
-~   gggbB#Bbggg   ~
-~    gggbBbggg    ~
-~     ggggggg     ~
-~     bgggggb     ~
-#     BbBbBbB     #
-##~~~~~~~~~~~~~~~##
+###################
+#~~~~~~bB#Bb~~~~~~#
+#~       #       ~#
+#~     ggbgg     ~#
+#~    gggbggg    ~#
+#~   ggg # ggg   ~#
+#~  ggg  #  ggg  ~#
+#~  gg   #   gg  ~#
+#~~~bb~~~~~~~bb~~~#
+##~~bb~~~#~~~bb~~##
+#~~~bb~~~~~~~bb~~~#
+#~  gg   #   gg  ~#
+#~  ggg  #  ggg  ~#
+#~   ggg # ggg   ~#
+#~    gggbggg    ~#
+#~     ggbgg     ~#
+#~       #       ~#
+#~~~~~~bB#Bb~~~~~~#
+###################

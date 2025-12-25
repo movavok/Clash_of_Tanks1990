@@ -1,14 +1,14 @@
 #include "level.h"
 
 Level::Level(int newCollumns, int newRows, int newTileSize)
-    : cols(newCollumns), rows(newRows), tileSize(newTileSize), grid(newCollumns * newRows, Empty) {}
+    : cols(newCollumns), rows(newRows), tileSize(newTileSize), grid(newCollumns * newRows, TileType::Empty) {}
 
-int Level::tileAt(int cordX, int cordY) const {
-    if (cordX < 0 || cordY < 0 || cordX >= cols || cordY >= rows) return Wall;
+Level::TileType Level::tileAt(int cordX, int cordY) const {
+    if (cordX < 0 || cordY < 0 || cordX >= cols || cordY >= rows) return TileType::Wall;
     return grid[indexAt(cordX, cordY)];
 }
 
-void Level::setTile(int cordX, int cordY, char type) {
+void Level::setTile(int cordX, int cordY, TileType type) {
     if (cordX < 0 || cordY < 0 || cordX >= cols || cordY >= rows) return;
     grid[indexAt(cordX, cordY)] = type;
 }
@@ -21,15 +21,15 @@ void Level::render(QPainter* painter) const {
     static QPixmap water(":/tiles/water.png");
     for (int y = 0; y < rows; ++y)
         for (int x = 0; x < cols; ++x) {
-            int type = grid[indexAt(x, y)];
+            TileType type = grid[indexAt(x, y)];
             QRect rect(x * tileSize, y * tileSize, tileSize, tileSize);
             switch (type) {
-            case Empty: break;
-            case Wall: painter->drawPixmap(rect, wall); break;
-            case BrickWeak: painter->drawPixmap(rect, weak); break;
-            case BrickStrong: painter->drawPixmap(rect, strong); break;
-            case Grass: painter->drawPixmap(rect, bg); break; //grass rendered in foreground
-            case Water: painter->drawPixmap(rect, water); break;
+            case TileType::Empty: break;
+            case TileType::Wall: painter->drawPixmap(rect, wall); break;
+            case TileType::BrickWeak: painter->drawPixmap(rect, weak); break;
+            case TileType::BrickStrong: painter->drawPixmap(rect, strong); break;
+            case TileType::Grass: painter->drawPixmap(rect, bg); break; //grass rendered in foreground
+            case TileType::Water: painter->drawPixmap(rect, water); break;
             }
         }
 }
@@ -38,8 +38,8 @@ void Level::renderForeground(QPainter* painter) const {
     static QPixmap grass(":/tiles/grass.png");
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
-            int type = grid[indexAt(x, y)];
-            if (type != Grass) continue;
+            TileType type = grid[indexAt(x, y)];
+            if (type != TileType::Grass) continue;
             QRect rect(x * tileSize, y * tileSize, tileSize, tileSize);
             painter->save();
             painter->setOpacity(0.6);
@@ -49,23 +49,25 @@ void Level::renderForeground(QPainter* painter) const {
     }
 }
 
-bool Level::intersectsSolid(const QRectF& rect) const {
-    QVector<QPoint> coords;
-    tilesInRect(rect, coords);
-
-    for (const QPoint& point : coords) {
-        int type = tileAt(point.x(), point.y());
-        if (type == Wall || type == BrickWeak || type == BrickStrong || type == Water) return true;
-    }
-    return false;
+bool Level::intersectsTankSolid(const QRectF& rect) const {
+    return intersectsAnyTiles(rect, {TileType::Wall,
+                                     TileType::BrickWeak,
+                                     TileType::BrickStrong,
+                                     TileType::Water});
 }
 
-bool Level::intersectsTile(const QRectF& rect, char tile) const {
+bool Level::intersectsBulletSolid(const QRectF& rect) const {
+    return intersectsAnyTiles(rect, {TileType::Wall,
+                                     TileType::BrickWeak,
+                                     TileType::BrickStrong});
+}
+
+bool Level::intersectsAnyTiles(const QRectF& rect, const QVector<TileType>& tiles) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
     for (const QPoint& point : coords)
-        if (tileAt(point.x(), point.y()) == tile) return true;
+        if (tiles.contains(tileAt(point.x(), point.y()))) return true;
     return false;
 }
 
@@ -76,9 +78,9 @@ bool Level::destroyInRect(const QRectF& rect) {
     tilesInRect(rect, coords);
 
     for (const QPoint& point : coords) {
-        int type = tileAt(point.x(), point.y());
-        if (type == BrickStrong) { setTile(point.x(), point.y(), BrickWeak); destroyed = true; Audio::play("brickBreaking"); }
-        else if (type == BrickWeak) { setTile(point.x(), point.y(), Empty); destroyed = true; Audio::play("brickBreaking"); }
+        TileType type = tileAt(point.x(), point.y());
+        if (type == TileType::BrickStrong) { setTile(point.x(), point.y(), TileType::BrickWeak); destroyed = true; Audio::play("brickBreaking"); }
+        else if (type == TileType::BrickWeak) { setTile(point.x(), point.y(), TileType::Empty); destroyed = true; Audio::play("brickBreaking"); }
     }
     return destroyed;
 }
@@ -96,14 +98,14 @@ void Level::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
             out.append(QPoint(tx, ty));
 }
 
-int mapTileChar(QChar symbol) {
+Level::TileType Level::mapTileChar(QChar symbol) const {
     switch (symbol.toLatin1()) {
-    case '#': return Level::Wall;
-    case 'b': return Level::BrickWeak;
-    case 'B': return Level::BrickStrong;
-    case 'g': return Level::Grass;
-    case '~': return Level::Water;
-    default:  return Level::Empty;
+    case '#': return TileType::Wall;
+    case 'b': return TileType::BrickWeak;
+    case 'B': return TileType::BrickStrong;
+    case 'g': return TileType::Grass;
+    case '~': return TileType::Water;
+    default:  return TileType::Empty;
     }
 }
 
@@ -122,7 +124,7 @@ bool Level::generateFromText(const QStringList& lines) {
         QString line = lines[y];
         if (line.length() < cols) line = line + QString(cols - line.length(), QChar(' '));
         for (int x = 0; x < cols; ++x) {
-            int type = mapTileChar(line[x]);
+            TileType type = mapTileChar(line[x]);
             setTile(x, y, type);
         }
     }
