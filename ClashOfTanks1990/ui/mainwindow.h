@@ -37,6 +37,9 @@ private:
 
     bool canContinue = false;
 
+protected:
+    bool event(QEvent*) override;
+
 private slots:
     void onLevelChanged(int);
     void onPageChanged(int);

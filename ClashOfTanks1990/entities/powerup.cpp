@@ -1,6 +1,6 @@
 #include "powerup.h"
 
-PowerUp::PowerUp(const QPointF& position, Type boostType)
+PowerUp::PowerUp(const QPointF& position, BoostType boostType)
     : Entity(position), type(boostType) {}
 
 void PowerUp::render(QPainter* painter) {
@@ -9,9 +9,9 @@ void PowerUp::render(QPainter* painter) {
 	static QPixmap shieldPx(":/powerups/shieldPowerUp.png");
 	const QPixmap* sprite = nullptr;
 	switch (type) {
-	case Speed:  sprite = &speedPx;  break;
-	case Reload: sprite = &reloadPx; break;
-	case Shield: sprite = &shieldPx; break;
+    case BoostType::Speed:  sprite = &speedPx;  break;
+    case BoostType::Reload: sprite = &reloadPx; break;
+    case BoostType::Shield: sprite = &shieldPx; break;
 	}
 	if (sprite && !sprite->isNull()) {
 		QPixmap scaled = sprite->scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -23,4 +23,4 @@ void PowerUp::render(QPainter* painter) {
 
 QRectF PowerUp::bounds() const { return QRectF(position.x(), position.y(), width, height); }
 
-PowerUp::Type PowerUp::getType() const { return type; }
+PowerUp::BoostType PowerUp::getType() const { return type; }

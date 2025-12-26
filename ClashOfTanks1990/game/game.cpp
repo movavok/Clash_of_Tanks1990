@@ -11,7 +11,6 @@ Game::Game()
     detectMaxLevel();
     spawnPlayerAtTile(2, 2);
     spawnEnemiesDefault();
-    //emit levelChanged(levelIndex);
 }
 
 void Game::initLevel() {
@@ -65,7 +64,7 @@ bool Game::loadLevel(int index) {
     }
 
     QList<Entity*> toRemove;
-    for (Entity* entity : entities)
+    for (Entity* &entity : entities)
         if (entity != player) toRemove.append(entity);
 
     for (Entity* entity : toRemove)
@@ -103,7 +102,7 @@ void Game::removeEntity(Entity* entity) {
     if (index != -1) {
         entities.removeAt(index);
         if (Tank* removedTank = dynamic_cast<Tank*>(entity))
-            for (Entity* entity : entities)
+            for (Entity* &entity : entities)
                 if (Bullet* bullet = dynamic_cast<Bullet*>(entity))
                     if (bullet->getOwner() == removedTank) bullet->clearOwner();
 
@@ -124,7 +123,7 @@ void Game::update(float deltaTime, const QSize& windowSize) {
     }
     checkIfShotDown();
 
-    for (Entity* entity : entities) {
+    for (Entity* &entity : entities) {
         PowerUp* boost = dynamic_cast<PowerUp*>(entity);
         if (!boost || !boost->isAlive()) continue;
 
@@ -134,13 +133,13 @@ void Game::update(float deltaTime, const QSize& windowSize) {
             consumed = true;
         }
         if (!consumed) {
-            for (Entity* entity : entities) {
+            for (Entity* &entity : entities) {
                 if (EnemyTank* enemy = dynamic_cast<EnemyTank*>(entity)) {
                     if (enemy->isAlive() && enemy->bounds().intersects(boost->bounds())) {
                         switch (boost->getType()) {
-                        case PowerUp::Speed:  enemy->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
-                        case PowerUp::Reload: enemy->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
-                        case PowerUp::Shield: enemy->addShield(); Audio::play("shieldPowerUp"); break;
+                        case PowerUp::BoostType::Speed:  enemy->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
+                        case PowerUp::BoostType::Reload: enemy->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+                        case PowerUp::BoostType::Shield: enemy->addShield(); Audio::play("shieldPowerUp"); break;
                         }
                         boost->destroy();
                         consumed = true;
@@ -156,7 +155,7 @@ void Game::update(float deltaTime, const QSize& windowSize) {
 }
 
 void Game::updateEntities(float deltaTime, const QSize& windowSize) {
-    for (Entity* entity : entities) {
+    for (Entity* &entity : entities) {
         if (!entity->isAlive()) continue;
 
         QPointF oldPos = entity->getPosition();
@@ -199,7 +198,7 @@ bool Game::handlePlayerDeath() {
 
 void Game::handleLevelClear() {
     bool enemiesRemain = false;
-    for (Entity* enemy : entities)
+    for (Entity* &enemy : entities)
         if (dynamic_cast<EnemyTank*>(enemy) && enemy->isAlive()) enemiesRemain = true;
 
     if (!enemiesRemain && !advancing) {
@@ -208,19 +207,19 @@ void Game::handleLevelClear() {
         if (player) player->resetControls();
 
         QList<Entity*> bullets;
-        for (Entity* entity : entities) if (dynamic_cast<Bullet*>(entity)) bullets.append(entity);
-        for (Entity* bullet : bullets) removeEntity(bullet);
+        for (Entity* &entity : entities) if (dynamic_cast<Bullet*>(entity)) bullets.append(entity);
+        for (Entity* &bullet : bullets) removeEntity(bullet);
 
         emit doLevelChoiceBox(levelIndex);
     }
 }
 
 void Game::checkIfShotDown() {
-    for (Entity* entity : entities) {
+    for (Entity* &entity : entities) {
         Bullet* bullet = dynamic_cast<Bullet*>(entity);
         if (!bullet || !bullet->isAlive()) continue;
 
-        for (Entity* target : entities) {
+        for (Entity* &target : entities) {
             if (bullet == target || !target->isAlive()) continue;
 
             if (Bullet* otherBullet = dynamic_cast<Bullet*>(target)) {
@@ -269,7 +268,7 @@ bool Game::checkCollision(Entity* entity) {
         return false;
 
     QRectF eBounds = entity->bounds();
-    for (Entity* other : entities) {
+    for (Entity* &other : entities) {
         if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<DeathMark*>(other) || !other->isAlive())
             continue;
         if (eBounds.intersects(other->bounds())) return true;
@@ -302,7 +301,7 @@ void Game::render(QPainter* painter) {
 
     if (level) level->renderForeground(painter);
 
-    for (Entity* entity : entities) {
+    for (Entity* &entity : entities) {
         if (!entity->isAlive()) continue;
         Bullet* bullet = dynamic_cast<Bullet*>(entity);
         DeathMark* mark = dynamic_cast<DeathMark*>(entity);
@@ -355,7 +354,7 @@ void Game::spawnPowerUpRandom() {
 
         if (level->intersectsTankSolid(spawnRect)) continue;
 
-        const PowerUp::Type chosenType = static_cast<PowerUp::Type>(QRandomGenerator::global()->bounded(3));
+        const PowerUp::BoostType chosenType = static_cast<PowerUp::BoostType>(QRandomGenerator::global()->bounded(3));
         PowerUp* boost = new PowerUp(spawnPos, chosenType);
         addEntity(boost);
         return;
@@ -365,9 +364,9 @@ void Game::spawnPowerUpRandom() {
 void Game::applyPowerUp(PowerUp* boost) {
     if (!player || !boost) return;
     switch (boost->getType()) {
-    case PowerUp::Speed: player->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
-    case PowerUp::Reload: player->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
-    case PowerUp::Shield: player->addShield(); Audio::play("shieldPowerUp"); break;
+    case PowerUp::BoostType::Speed: player->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
+    case PowerUp::BoostType::Reload: player->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+    case PowerUp::BoostType::Shield: player->addShield(); Audio::play("shieldPowerUp"); break;
     }
     boost->destroy();
 }

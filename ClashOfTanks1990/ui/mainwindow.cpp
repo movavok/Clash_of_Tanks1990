@@ -52,6 +52,17 @@ void MainWindow::onPageChanged(int index) {
     } else gameView->getGame()->setPaused(true);
 }
 
+bool MainWindow::event(QEvent* event) {
+    if (event->type() == QEvent::WindowActivate &&
+        gameView->getGame()->isPaused() &&
+        ui->stackedWidget->currentWidget() == ui->page_gameView) gameView->getGame()->setPaused(false);
+    else if (event->type() == QEvent::WindowDeactivate &&
+             !gameView->getGame()->isPaused() &&
+             ui->stackedWidget->currentWidget() == ui->page_gameView) gameView->getGame()->setPaused(true);
+
+    return QMainWindow::event(event);
+}
+
 void MainWindow::openGame(bool restart) {
     if(restart) {
         gameView->getGame()->newGame();
