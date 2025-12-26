@@ -43,6 +43,7 @@ protected:
 private slots:
     void onLevelChanged(int);
     void onPageChanged(int);
+    void onFinishedGame();
 
     void openGame(bool);
     void startNewGame();

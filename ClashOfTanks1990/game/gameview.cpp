@@ -12,7 +12,7 @@ GameView::GameView(QWidget *parent)
     setFixedSize(19 * 32, 19 * 32);
 
     connect(&game, &Game::levelChanged, this, &GameView::levelChanged);
-    connect(&game, &Game::doMessageBox, this, &GameView::onMessageBox);
+    connect(&game, &Game::doPlayerDeathBox, this, &GameView::onPlayerDeathBox);
     connect(&game, &Game::doLevelChoiceBox, this, &GameView::onLevelChoiceBox);
 
     Audio::preloadAll();
@@ -58,36 +58,49 @@ void GameView::pauseGame() {
 void GameView::restartLevel() { game.restart(); }
 Game* GameView::getGame() { return &game; }
 
-void GameView::onMessageBox() {
+void GameView::onPlayerDeathBox() {
     QMessageBox msg(parentWidget());
     msg.setIcon(QMessageBox::NoIcon);
     msg.setWindowIcon(QIcon(":/icon/lose.png"));
     msg.setWindowTitle("Ви загинули");
     msg.setText("Перезапустити рівень чи вийти?");
-    msg.setStandardButtons(QMessageBox::Retry | QMessageBox::Yes);
-    if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
-    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText("Вийти");
-    QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
-    if (choice == QMessageBox::Retry) { game.restart(); game.finishBox(); }
-    else QCoreApplication::quit();
+
+    QAbstractButton* retryBtn = msg.addButton("Перезапустити рівень", QMessageBox::AcceptRole);
+    QAbstractButton* exitBtn = msg.addButton("Вийти", QMessageBox::DestructiveRole);
+    msg.exec();
+
+    QAbstractButton* clicked = msg.clickedButton();
+    if (clicked == retryBtn) { game.restart(); game.finishBox(); }
+    else if (clicked == exitBtn) QCoreApplication::quit();
 }
 
 void GameView::onLevelChoiceBox(int levelIndex) {
     int maxLevel = game.getMaxLevel();
     bool outOfMax = (levelIndex >= maxLevel);
+
     QMessageBox msg(parentWidget());
     msg.setIcon(QMessageBox::NoIcon);
     msg.setWindowIcon(QIcon(":/icon/win.png"));
-    msg.setWindowTitle(outOfMax ? "Вітаємо! Ви пройшли гру" : QString("Рівень %1 пройдено").arg(levelIndex));
-    msg.setText(outOfMax ? "Вийти або перезапустити рівень?" : "Перейти до наступного рівня?");
+    msg.setWindowTitle(outOfMax
+                           ? "Вітаємо! Ви пройшли гру"
+                           : QString("Рівень %1 пройдено").arg(levelIndex));
+    msg.setText(outOfMax
+                    ? "Вийти або перезапустити рівень?"
+                    : "Перейти до наступного рівня?");
     if (outOfMax) Audio::play("win");
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Retry);
-    if (QAbstractButton* yes = msg.button(QMessageBox::Yes)) yes->setText(outOfMax ? "Вийти" : "Так");
-    if (QAbstractButton* retry = msg.button(QMessageBox::Retry)) retry->setText("Перезапустити рівень");
-    QMessageBox::StandardButton choice = static_cast<QMessageBox::StandardButton>(msg.exec());
-    if (choice == QMessageBox::Yes) {
+
+    QAbstractButton* yesBtn   = msg.addButton(outOfMax ? "Вийти" : "Так", QMessageBox::AcceptRole);
+    QAbstractButton* retryBtn = msg.addButton("Перезапустити рівень", QMessageBox::ActionRole);
+    QAbstractButton* menuBtn  = nullptr;
+    if (outOfMax) menuBtn = msg.addButton("Початковий екран", QMessageBox::ActionRole);
+    msg.exec();
+
+    QAbstractButton* clicked = msg.clickedButton();
+    if (clicked == yesBtn) {
         if (outOfMax) QCoreApplication::quit();
         else { game.advance(); game.finishBox(); }
-    } else { game.restart(); game.finishBox(); }
+    }
+    else if (clicked == retryBtn) { game.restart(); game.finishBox(); }
+    else if (clicked == menuBtn) { game.finishBox(); emit finishGameSession(); }
 }
 

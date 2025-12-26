@@ -83,7 +83,7 @@ private:
 
 signals:
     void levelChanged(int);
-    void doMessageBox();
+    void doPlayerDeathBox();
     void doLevelChoiceBox(int);
 };
 

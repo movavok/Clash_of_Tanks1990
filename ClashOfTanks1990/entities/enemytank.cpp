@@ -46,13 +46,13 @@ Bullet* EnemyTank::shoot() {
     unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
 
     switch (currentDirection) {
-    case UP:
+    case Direction::UP:
         bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() - currentBulletSize); break;
-    case DOWN:
+    case Direction::DOWN:
         bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() + height); break;
-    case LEFT:
+    case Direction::LEFT:
         bulletPos = QPointF(position.x() - currentBulletSize, position.y() + height/2 - currentBulletSize/2); break;
-    case RIGHT:
+    case Direction::RIGHT:
         bulletPos = QPointF(position.x() + width, position.y() + height/2 - currentBulletSize/2); break;
     }
     return new Bullet(bulletPos, currentDirection, 150.0f, this, currentBulletSize);
@@ -93,10 +93,10 @@ void EnemyTank::drawShieldAura(QPainter* painter) const {
 QPoint EnemyTank::drawRotatedSprite(QPainter* painter, const QPixmap& sprite, QPixmap& outScaled) const {
     int angleDeg = 0;
     switch (currentDirection) {
-    case UP:    angleDeg = 0;   break;
-    case RIGHT: angleDeg = 90;  break;
-    case DOWN:  angleDeg = 180; break;
-    case LEFT:  angleDeg = 270; break;
+    case Direction::UP:    angleDeg = 0;   break;
+    case Direction::RIGHT: angleDeg = 90;  break;
+    case Direction::DOWN:  angleDeg = 180; break;
+    case Direction::LEFT:  angleDeg = 270; break;
     }
     QTransform rotation;
     rotation.rotate(angleDeg);
@@ -116,10 +116,10 @@ void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, con
     int dx1 = 0, dy1 = 0;
     int dx2 = 0, dy2 = 0;
     switch (currentDirection) {
-    case UP:    dy1 = offset1; dy2 = offset2; break;
-    case DOWN:  dy1 = -offset1; dy2 = -offset2; break;
-    case LEFT:  dx1 = offset1; dx2 = offset2; break;
-    case RIGHT: dx1 = -offset1; dx2 = -offset2; break;
+    case Direction::UP:    dy1 = offset1; dy2 = offset2; break;
+    case Direction::DOWN:  dy1 = -offset1; dy2 = -offset2; break;
+    case Direction::LEFT:  dx1 = offset1; dx2 = offset2; break;
+    case Direction::RIGHT: dx1 = -offset1; dx2 = -offset2; break;
     }
     painter->save();
     painter->setOpacity(0.35);

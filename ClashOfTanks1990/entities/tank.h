@@ -12,7 +12,7 @@ class Tank : public QObject, public Entity
 public:
     Tank(const QPointF&, unsigned short, unsigned short, float);
 
-    enum Direction { UP, DOWN, LEFT, RIGHT } direction;
+    enum class Direction { UP, DOWN, LEFT, RIGHT } direction;
 
     void move(Direction, float);
     virtual Bullet* shoot() = 0;

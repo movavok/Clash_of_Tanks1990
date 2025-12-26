@@ -12,10 +12,10 @@ void Bullet::update(float deltaTime) {
     float distance = speed * deltaTime;
 
     switch(direction) {
-    case Tank::UP:    position.ry() -= distance; break;
-    case Tank::DOWN:  position.ry() += distance; break;
-    case Tank::LEFT:  position.rx() -= distance; break;
-    case Tank::RIGHT: position.rx() += distance; break;
+    case Tank::Direction::UP:    position.ry() -= distance; break;
+    case Tank::Direction::DOWN:  position.ry() += distance; break;
+    case Tank::Direction::LEFT:  position.rx() -= distance; break;
+    case Tank::Direction::RIGHT: position.rx() += distance; break;
     }
 }
 
@@ -24,10 +24,10 @@ void Bullet::render(QPainter* painter) {
     if (!sprite.isNull()) {
         QTransform rot;
         switch (direction) {
-        case Tank::UP:    rot.rotate(0);   break;
-        case Tank::RIGHT: rot.rotate(90);  break;
-        case Tank::DOWN:  rot.rotate(180); break;
-        case Tank::LEFT:  rot.rotate(270); break;
+        case Tank::Direction::UP:    rot.rotate(0);   break;
+        case Tank::Direction::RIGHT: rot.rotate(90);  break;
+        case Tank::Direction::DOWN:  rot.rotate(180); break;
+        case Tank::Direction::LEFT:  rot.rotate(270); break;
         }
         QPixmap rotated = sprite.transformed(rot, Qt::SmoothTransformation);
         QPixmap scaled = rotated.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);

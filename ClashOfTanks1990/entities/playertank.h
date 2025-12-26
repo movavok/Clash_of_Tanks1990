@@ -35,7 +35,7 @@ private:
     bool isShooting = false;
 
     Qt::Key keyUp = Qt::Key_W, keyDown = Qt::Key_S, keyLeft = Qt::Key_A, keyRight = Qt::Key_D, keyShoot = Qt::Key_Space;
-    Direction currentDirection = UP;
+    Direction currentDirection = Direction::UP;
     bool isMoving = false;
     
     float baseSpeed = 0.0f;

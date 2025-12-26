@@ -27,7 +27,7 @@ private:
     float lastShotTime = 0.0f;
     float changeTimer = 0.0f;
 
-    Direction currentDirection = DOWN;
+    Direction currentDirection = Direction::DOWN;
     bool isMoving = true;
 
     float baseSpeed = 0.0f;

@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
         );
 
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
+    connect(gameView, &GameView::finishGameSession, this, &MainWindow::onFinishedGame);
     connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::onPageChanged);
 
     connect(ui->act_pause, &QAction::triggered, gameView, &GameView::pauseGame);
@@ -76,6 +77,13 @@ void MainWindow::startNewGame() { openGame(true); }
 void MainWindow::continueGame() { openGame(false); }
 
 void MainWindow::toStartScreen() { ui->stackedWidget->setCurrentWidget(ui->page_startScreen); }
+
+void MainWindow::onFinishedGame() {
+    canContinue = false;
+    ui->b_continue->setEnabled(canContinue);
+    setWindowTitle("Clash Of Tanks 1990");
+    toStartScreen();
+}
 
 void MainWindow::stopPlayer() { gameView->getGame()->resetPlayerControls(); }
 

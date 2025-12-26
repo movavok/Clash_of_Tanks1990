@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include "../systems/audio.h"
 #include <QMessageBox>
+#include <QPushButton>
 #include <QAbstractButton>
 #include <QCoreApplication>
 #include "game.h"
@@ -29,7 +30,7 @@ private:
 
 private slots:
     void onTick();
-    void onMessageBox();
+    void onPlayerDeathBox();
     void onLevelChoiceBox(int);
 
 public slots:
@@ -39,6 +40,7 @@ public slots:
 
 signals:
     void levelChanged(int);
+    void finishGameSession();
 };
 
 #endif // GAMEVIEW_H
