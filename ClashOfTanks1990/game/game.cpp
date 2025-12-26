@@ -22,7 +22,7 @@ void Game::initLevel() {
 void Game::detectMaxLevel() { maxLevel = QDir(":/levels").entryList(QStringList() << "*.txt", QDir::Files).size(); }
 int Game::getMaxLevel() const { return maxLevel; }
 
-void Game::newGame() { levelIndex = 4; restartLevel(); }
+void Game::newGame() { levelIndex = 1; restartLevel(); }
 
 QPointF Game::tileCenter(int tileX, int tileY) const {
     if (!level) return QPointF(0, 0);

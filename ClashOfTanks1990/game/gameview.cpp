@@ -65,13 +65,16 @@ void GameView::onPlayerDeathBox() {
     msg.setWindowTitle("Ви загинули");
     msg.setText("Перезапустити рівень чи вийти?");
 
-    QAbstractButton* retryBtn = msg.addButton("Перезапустити рівень", QMessageBox::AcceptRole);
-    QAbstractButton* exitBtn = msg.addButton("Вийти", QMessageBox::DestructiveRole);
+    QAbstractButton* ab_retry = msg.addButton("Перезапустити рівень", QMessageBox::ActionRole);
+    QAbstractButton* ab_exit = msg.addButton("Вийти", QMessageBox::DestructiveRole);
+    if (ab_retry) ab_retry->setObjectName("ab_retry");
+    if (ab_exit)  ab_exit->setObjectName("ab_exit");
+    msg.setStyleSheet(msg.styleSheet());
     msg.exec();
 
     QAbstractButton* clicked = msg.clickedButton();
-    if (clicked == retryBtn) { game.restart(); game.finishBox(); }
-    else if (clicked == exitBtn) QCoreApplication::quit();
+    if (clicked == ab_retry) { game.restart(); game.finishBox(); }
+    else if (clicked == ab_exit) QCoreApplication::quit();
 }
 
 void GameView::onLevelChoiceBox(int levelIndex) {
@@ -85,22 +88,23 @@ void GameView::onLevelChoiceBox(int levelIndex) {
                            ? "Вітаємо! Ви пройшли гру"
                            : QString("Рівень %1 пройдено").arg(levelIndex));
     msg.setText(outOfMax
-                    ? "Вийти або перезапустити рівень?"
+                    ? "Повернутись до початкового екрану\nчи перезапустити рівень?"
                     : "Перейти до наступного рівня?");
     if (outOfMax) Audio::play("win");
 
-    QAbstractButton* yesBtn   = msg.addButton(outOfMax ? "Вийти" : "Так", QMessageBox::AcceptRole);
-    QAbstractButton* retryBtn = msg.addButton("Перезапустити рівень", QMessageBox::ActionRole);
-    QAbstractButton* menuBtn  = nullptr;
-    if (outOfMax) menuBtn = msg.addButton("Початковий екран", QMessageBox::ActionRole);
+    QAbstractButton* ab_yes   = msg.addButton(outOfMax ? "Початковий екран" : "Так", QMessageBox::AcceptRole);
+    QAbstractButton* ab_retry = msg.addButton("Перезапустити рівень", QMessageBox::ActionRole);
+    if (ab_retry) ab_retry->setObjectName("ab_retry");
+    if (ab_yes && outOfMax) ab_yes->setObjectName("ab_startScreen");
+    else if (ab_yes) ab_yes->setObjectName("ab_yes");
+    msg.setStyleSheet(msg.styleSheet());
     msg.exec();
 
     QAbstractButton* clicked = msg.clickedButton();
-    if (clicked == yesBtn) {
-        if (outOfMax) QCoreApplication::quit();
+    if (clicked == ab_yes) {
+        if (outOfMax) { game.finishBox(); emit finishGameSession(); }
         else { game.advance(); game.finishBox(); }
     }
-    else if (clicked == retryBtn) { game.restart(); game.finishBox(); }
-    else if (clicked == menuBtn) { game.finishBox(); emit finishGameSession(); }
+    else if (clicked == ab_retry) { game.restart(); game.finishBox(); }
 }
 

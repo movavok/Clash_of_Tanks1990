@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include "../systems/audio.h"
 #include <QMessageBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QAbstractButton>
 #include <QCoreApplication>

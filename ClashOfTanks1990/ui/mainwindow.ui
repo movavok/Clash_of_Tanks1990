@@ -26,7 +26,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/* Pixel theme for start screen */
+    <string notr="true">/* Pixel theme for start screen */
 
 /* Tile the background to keep pixel crispness */
 #page_startScreen {
@@ -44,27 +44,40 @@ QToolTip {
     font-size: 10pt;
 }
 
-/* QMessageBox pixel theme (lighter gray palette) */
 QMessageBox {
-    background-color: #3e3e3e;   /* lighter gray */
+    background-color: #3e3e3e;
     color: #f0f0f0;
-    border: 2px solid #dcdcdc;   /* light border */
+    border: 2px solid #dcdcdc;
     border-radius: 0;
     padding: 8px 10px;
-    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-family: Fixedsys, "Lucida Console", "Courier New", monospace;
     font-size: 11pt;
 }
-/* Primary text label inside QMessageBox */
-QLabel#qt_msgbox_label {
+
+/* Primary text */
+QMessageBox QLabel#qt_msgbox_label {
     color: #f0f0f0;
     background: transparent;
-    padding: 6px 2px;            /* breathing room */
+    padding: 0;
+    margin: 6px 0 0 0;
+    qproperty-alignment: AlignCenter;
 }
-/* Detailed text label if present */
-QLabel#qt_msgboxex_detailedtext_label {
+
+QMessageBox QLabel#qt_msgboxex_icon_label {
+    min-width: 0px;
+    max-width: 0px;
+    width: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+/* Detailed text */
+QMessageBox QLabel#qt_msgboxex_detailedtext_label {
     color: #dcdcdc;
     background: transparent;
+    margin-top: 4px;
 }
+
 /* Center the buttons and add spacing */
 QMessageBox QDialogButtonBox {
     qproperty-centerButtons: true;
@@ -88,6 +101,50 @@ QMessageBox QPushButton:pressed {
     border-top-color: #2a2a2a;
     border-right-color: #777777;
     border-bottom-color: #777777;
+}
+
+/* Specific QMessageBox buttons by id */
+QMessageBox QPushButton#ab_yes {
+    background-color: #2b6f31;  
+    border: 2px solid #1d4f22;  
+    color: #ffffff;
+}
+
+QMessageBox QPushButton#ab_yes:hover { background-color: #357a3a; }
+QMessageBox QPushButton#ab_yes:pressed {
+    background-color: #235f26;  
+    border-left-color: #133516;  
+    border-top-color: #133516;   
+    border-right-color: #5b8f60; 
+    border-bottom-color: #5b8f60; 
+}
+
+QMessageBox QPushButton#ab_exit {
+    background-color: #8f2d2d;  
+    border: 2px solid #5e1e1e;  
+    color: #ffffff;
+}
+QMessageBox QPushButton#ab_exit:hover { background-color: #9b3a3a; }
+QMessageBox QPushButton#ab_exit:pressed {
+    background-color: #7a2424;  
+    border-left-color: #2e1515;  
+    border-top-color: #2e1515;   
+    border-right-color: #b76f6f; 
+    border-bottom-color: #b76f6f; 
+}
+
+QMessageBox QPushButton#ab_startScreen {
+    background-color: #1c4a80;  
+    border: 2px solid #0c325f;  
+    color: #ffffff;
+}
+QMessageBox QPushButton#ab_startScreen:hover { background-color: #245c9a; }
+QMessageBox QPushButton#ab_startScreen:pressed {
+    background-color: #163c68;  
+    border-left-color: #0a253f; 
+    border-top-color: #0a253f;  
+    border-right-color: #5a89b7; 
+    border-bottom-color: #5a89b7; 
 }
 
 /* QDialog pixel theme (lighter gray) */
