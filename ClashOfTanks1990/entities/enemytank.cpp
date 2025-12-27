@@ -1,43 +1,113 @@
 #include "enemytank.h"
 
-EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd)
-    : Tank(pos, wth, hgt, spd)
-{
-    srand(static_cast<unsigned int>(time(nullptr))); //random generator
-    baseSpeed = spd;
-}
+EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd, PlayerTank* player)
+    : Tank(pos, wth, hgt, spd), player(player), baseSpeed(spd) {}
+
+void EnemyTank::setTileSize(int size) { tileSize = size; }
+
+void EnemyTank::setSeesPlayer(bool flag) { seesPlayer = flag; }
 
 void EnemyTank::update(float deltaTime) {
+    updateBoosts(deltaTime);
+
+    decideBehavior(deltaTime);
+
+    if (isMoving) move(currentDirection, deltaTime);
+
+    tryShoot(deltaTime);
+}
+
+void EnemyTank::updateBoosts(float dt) {
     if (speedBoostTime > 0.0f) {
-        speedBoostTime -= deltaTime;
+        speedBoostTime -= dt;
         if (speedBoostTime <= 0.0f) {
             speedBoostTime = 0.0f;
             speedMultiplier = 1.0f;
         }
     }
     if (reloadBoostTime > 0.0f) {
-        reloadBoostTime -= deltaTime;
+        reloadBoostTime -= dt;
         if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
     }
 
     speed = baseSpeed * speedMultiplier;
+}
 
-    if (isMoving) move(currentDirection, deltaTime);
-    lastShotTime += deltaTime;
+void EnemyTank::decideBehavior(float dt) {
+    reactionTimer += dt;
 
-    float effectiveCooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
-    if (lastShotTime >= effectiveCooldown) {
-        Bullet* newBullet = shoot();
-        if (newBullet) emit bulletFired(newBullet);
-        Audio::play("shoot");
+    switch (state) {
+    case BehaviorState::Patrol: patrolBehavior(dt); break;
+    case BehaviorState::Chase: chaseBehavior(dt); break;
+    }
+}
+
+void EnemyTank::patrolBehavior(float dt) {
+    behaviorTimer += dt;
+
+    if (canSeePlayer())
+        if (reactionTimer > 0.6) {
+            currentDirection = turnToPlayer();
+            reactionTimer = 0.0f;
+            state = BehaviorState::Chase;
+            return;
+        }
+
+    if (behaviorTimer >= 1.0f && state == BehaviorState::Patrol) {
+        currentDirection = static_cast<Direction>(rand() % 4);
+        behaviorTimer = 0.0f;
     }
 
-    changeTimer += deltaTime;
-    if (changeTimer >= 0.5f) {
-        if (rand() % 2 == 0) //50%
-            currentDirection = static_cast<Direction>(rand() % 4);
-        changeTimer = 0.0f;
+    isMoving = true;
+}
+
+void EnemyTank::chaseBehavior(float dt) {
+    if (!canSeePlayer()) {
+        if (reactionTimer > 0.5f) {
+            state = BehaviorState::Patrol;
+            reactionTimer = 0.0f;
+        }
+        return;
     }
+
+    if (reactionTimer > 0.6f) {
+        currentDirection = turnToPlayer();
+        reactionTimer = 0.0f;
+    }
+
+}
+
+Tank::Direction EnemyTank::turnToPlayer() const {
+    if (!player) return currentDirection;
+    float dx = player->getPosition().x() - position.x();
+    float dy = player->getPosition().y() - position.y();
+
+    if (std::abs(dx) > std::abs(dy)) 
+        return dx > 0 ? Tank::Direction::RIGHT : Tank::Direction::LEFT;
+    else 
+        return dy > 0 ? Tank::Direction::DOWN : Tank::Direction::UP;
+}
+
+void EnemyTank::tryShoot(float dt) {
+    lastShotTime += dt;
+
+    float cooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
+    if (lastShotTime < cooldown) return;
+
+    Bullet* bullet = shoot();
+    if (bullet) emit bulletFired(bullet);
+
+    Audio::play("shoot");
+}
+
+bool EnemyTank::canSeePlayer() const {
+    if (!player || player->ifHidden()) return false;
+    if (!seesPlayer) return false;
+
+    QPointF distance = player->getPosition() - position;
+    const float maxRange = 6 * tileSize;
+
+    return (std::abs(distance.x()) < maxRange && std::abs(distance.y()) < maxRange);
 }
 
 Bullet* EnemyTank::shoot() {

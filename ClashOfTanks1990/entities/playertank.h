@@ -19,6 +19,8 @@ public:
     void render(QPainter*) override;
     Bullet* shoot() override;
 
+    bool ifHidden() const;
+    void setHidden(bool);
     void resetControls();
     
     void applySpeedBoost(float, float);
@@ -37,6 +39,7 @@ private:
     Qt::Key keyUp = Qt::Key_W, keyDown = Qt::Key_S, keyLeft = Qt::Key_A, keyRight = Qt::Key_D, keyShoot = Qt::Key_Space;
     Direction currentDirection = Direction::UP;
     bool isMoving = false;
+    bool isHidden = false;
     
     float baseSpeed = 0.0f;
     float speedBoostTime = 0.0f;

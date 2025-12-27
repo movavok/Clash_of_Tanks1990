@@ -12,6 +12,9 @@
 #include <QSlider>
 #include <QIcon>
 #include <QKeyCombination>
+#include <QApplication>
+#include <cstdlib>
+#include <ctime>
 #include "../game/gameview.h"
 #include "../systems/audio.h"
 

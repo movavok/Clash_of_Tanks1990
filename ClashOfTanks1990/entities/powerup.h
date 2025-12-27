@@ -10,7 +10,7 @@ public:
 
     PowerUp(const QPointF&, BoostType);
 
-    void update(float) override{};
+    void update(float) override {};
     void render(QPainter*) override;
     QRectF bounds() const override;
 

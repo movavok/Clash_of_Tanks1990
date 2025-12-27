@@ -73,6 +73,8 @@ private:
     bool handlePlayerDeath();
     void handleLevelClear();
 
+    bool enemySeesPlayer(const EnemyTank*) const;
+
     void detectMaxLevel();
     bool loadLevel(int);
     void advanceLevel();

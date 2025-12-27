@@ -47,7 +47,8 @@ void Game::spawnEnemiesDefault() {
         tileCenter(level->getCols() - 3, level->getRows() - 3)
     };
     for (const QPointF& position : enemySpawns) {
-        EnemyTank* enemy = new EnemyTank(position, 30, 30, 100.0f);
+        EnemyTank* enemy = new EnemyTank(position, 30, 30, 100.0f, player);
+        enemy->setTileSize(level->getTileSize());
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);
     }
@@ -113,6 +114,10 @@ void Game::removeEntity(Entity* entity) {
 
 void Game::update(float deltaTime, const QSize& windowSize) {
     if (paused) return;
+
+    if (player && level)
+        player->setHidden(level->intersectsAnyTiles(player->bounds(), { Level::TileType::Grass }));
+
     updateEntities(deltaTime, windowSize);
     powerUpSpawnTimer += deltaTime;
     int activePowerUps = 0;
@@ -159,6 +164,9 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
         if (!entity->isAlive()) continue;
 
         QPointF oldPos = entity->getPosition();
+        if (EnemyTank* enemy = dynamic_cast<EnemyTank*>(entity))
+            enemy->setSeesPlayer(enemySeesPlayer(enemy));
+
         entity->update(deltaTime);
 
         if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
@@ -212,6 +220,10 @@ void Game::handleLevelClear() {
 
         emit doLevelChoiceBox(levelIndex);
     }
+}
+
+bool Game::enemySeesPlayer(const EnemyTank* enemy) const {
+    return !level->checkBlockedLine(enemy->getPosition(), player->getPosition());
 }
 
 void Game::checkIfShotDown() {
@@ -291,7 +303,7 @@ void Game::render(QPainter* painter) {
 
         double opacity = originalOpacity;
         if (level->intersectsAnyTiles(entity->bounds(), { Level::TileType::Grass })) {
-            if (entity == player) opacity = 0.5;
+            if (entity == player) { opacity = 0.5; player->setHidden(true); }
             else if (dynamic_cast<EnemyTank*>(entity)) opacity = 0.0;
         }
         painter->setOpacity(opacity);

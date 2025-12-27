@@ -71,6 +71,34 @@ bool Level::intersectsAnyTiles(const QRectF& rect, const QVector<TileType>& tile
     return false;
 }
 
+bool Level::checkBlockedLine(const QPointF& start, const QPointF& end) const {
+    int startX = static_cast<int>(start.x()) / tileSize;
+    int startY = static_cast<int>(start.y()) / tileSize;
+    int endX = static_cast<int>(end.x()) / tileSize;
+    int endY = static_cast<int>(end.y()) / tileSize;
+
+    int distanceX = std::abs(endX - startX);
+    int distanceY = std::abs(endY - startY);
+    int stepX = (startX < endX) ? 1 : -1;
+    int stepY = (startY < endY) ? 1 : -1;
+    int offset = distanceX - distanceY;
+
+    int x = startX;
+    int y = startY;
+
+    while (true) {
+        QRect tileRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        if (intersectsBulletSolid(tileRect)) return true;
+        if (x == endX && y == endY) break;
+
+        int doobledOffset = 2 * offset;
+        if (doobledOffset > -distanceY) { offset -= distanceY; x += stepX; }
+        if (doobledOffset < distanceX)  { offset += distanceX; y += stepY; }
+    }
+
+    return false;
+}
+
 bool Level::destroyInRect(const QRectF& rect) {
     bool destroyed = false;
 

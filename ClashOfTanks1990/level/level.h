@@ -34,6 +34,7 @@ public:
     bool intersectsTankSolid(const QRectF&) const;
     bool intersectsBulletSolid(const QRectF&) const;
     bool intersectsAnyTiles(const QRectF&, const QVector<TileType>&) const;
+    bool checkBlockedLine(const QPointF&, const QPointF&) const;
     bool destroyInRect(const QRectF&);
 
     bool loadFromFile(const QString&);

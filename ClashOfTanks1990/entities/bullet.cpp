@@ -1,9 +1,10 @@
 #include "bullet.h"
+#include "enemytank.h"
 
 unsigned short Bullet::defaultSize = 8;
 
 Bullet::Bullet(const QPointF& pos, Tank::Direction dir, float spd, Tank* own, unsigned short sz)
-    : Entity(pos), direction(dir), owner(own), speed(spd), size(sz)
+    : Entity(pos), direction(dir), speed(spd), owner(own), size(sz)
 {
     fromEnemy = (own && dynamic_cast<EnemyTank*>(own) != nullptr);
 }

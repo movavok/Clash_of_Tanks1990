@@ -71,6 +71,9 @@ Bullet* PlayerTank::shoot() {
     return new Bullet(bulletPos, currentDirection, 150.0f, this, currentBulletSize);
 }
 
+bool PlayerTank::ifHidden() const { return isHidden; }
+void PlayerTank::setHidden(bool hidden) { isHidden = hidden; }
+
 void PlayerTank::render(QPainter* painter) {
     static QPixmap playerSprite(":/tanks/playerTank.png");
     drawShieldAura(painter);

@@ -2,7 +2,8 @@
 #define BULLET_H
 
 #include "tank.h"
-#include "enemytank.h"
+
+class EnemyTank;
 
 class Bullet : public Entity
 {
