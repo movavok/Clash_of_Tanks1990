@@ -61,7 +61,7 @@ void EnemyTank::patrolBehavior(float dt) {
     isMoving = true;
 }
 
-void EnemyTank::chaseBehavior(float dt) {
+void EnemyTank::chaseBehavior(float) {
     if (!canSeePlayer()) {
         if (reactionTimer > 0.5f) {
             state = BehaviorState::Patrol;
@@ -93,12 +93,15 @@ void EnemyTank::tryShoot(float dt) {
 
     float cooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
     if (lastShotTime < cooldown) return;
+    if (!canShoot()) return;
 
     Bullet* bullet = shoot();
     if (bullet) emit bulletFired(bullet);
 
-    Audio::play("shoot");
+    Audio::play(shootSoundID);
 }
+
+bool EnemyTank::canShoot() const { return true; }
 
 bool EnemyTank::canSeePlayer() const {
     if (!player || player->ifHidden()) return false;
@@ -112,24 +115,30 @@ bool EnemyTank::canSeePlayer() const {
 
 Bullet* EnemyTank::shoot() {
     lastShotTime = 0.0f;
-    QPointF bulletPos;
-    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
+    float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
+    Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, bulletSpeed, this, bulletType, sizeCoef);
+
+    float drawWth = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getHeight() : bullet->getWidth();
+    float drawHgt = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getWidth() : bullet->getHeight();
+
+    QPointF bulletPos;
     switch (currentDirection) {
     case Direction::UP:
-        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() - currentBulletSize); break;
+        bulletPos = QPointF(position.x() + width/2 - drawWth/2, position.y() - drawHgt); break;
     case Direction::DOWN:
-        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() + height); break;
+        bulletPos = QPointF(position.x() + width/2 - drawWth/2, position.y() + height); break;
     case Direction::LEFT:
-        bulletPos = QPointF(position.x() - currentBulletSize, position.y() + height/2 - currentBulletSize/2); break;
+        bulletPos = QPointF(position.x() - drawWth, position.y() + height/2 - drawHgt/2); break;
     case Direction::RIGHT:
-        bulletPos = QPointF(position.x() + width, position.y() + height/2 - currentBulletSize/2); break;
+        bulletPos = QPointF(position.x() + width, position.y() + height/2 - drawHgt/2); break;
     }
-    return new Bullet(bulletPos, currentDirection, 150.0f, this, currentBulletSize);
+    bullet->setPosition(bulletPos);
+    return bullet;
 }
 
 void EnemyTank::render(QPainter* painter) {
-    static QPixmap enemySprite(":/tanks/enemyTank.png");
+    QPixmap enemySprite(spritePath);
     drawShieldAura(painter);
 
     if (!enemySprite.isNull()) {

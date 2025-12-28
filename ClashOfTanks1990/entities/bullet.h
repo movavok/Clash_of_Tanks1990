@@ -8,7 +8,9 @@ class EnemyTank;
 class Bullet : public Entity
 {
 public:
-    Bullet(const QPointF&, Tank::Direction, float, Tank*, unsigned short);
+    enum class BulletType { Default, Sniper };
+
+    Bullet(const QPointF&, Tank::Direction, float, Tank*, BulletType, float);
 
     void update(float) override;
     void render(QPainter*) override;
@@ -16,16 +18,20 @@ public:
 
     Tank* getOwner() const;
     void clearOwner();
+
+    unsigned short getWidth();
+    unsigned short getHeight();
+
     bool isFromEnemy() const;
-    static unsigned short getDefaultBulletSize() { return defaultSize; }
 
 private:
     Tank* owner;
     Tank::Direction direction;
     float speed;
-    unsigned short size;
+    unsigned short width;
+    unsigned short height;
     bool fromEnemy = false;
-    static unsigned short defaultSize;
+    QString spritePath;
 };
 
 #endif // BULLET_H

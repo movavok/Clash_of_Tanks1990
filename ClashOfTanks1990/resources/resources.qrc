@@ -2,9 +2,11 @@
 	<qresource prefix="/tanks">
 		<file alias="playerTank.png">../assets/tanks/playerTank.png</file>
 		<file alias="enemyTank.png">../assets/tanks/enemyTank.png</file>
+		<file alias="enemySniper.png">../assets/tanks/enemySniper.png</file>
 	</qresource>
 	<qresource prefix="/bullets">
 		<file alias="bullet.png">../assets/bullets/bullet.png</file>
+		<file alias="sniperBullet.png">../assets/bullets/sniperBullet.png</file>
 	</qresource>
 	<qresource prefix="/tiles">
 		<file alias="background.png">../assets/tiles/background.png</file>
@@ -48,6 +50,7 @@
 		<file alias="speedPowerUp.mp3">../assets/sounds/speedPowerUp.mp3</file>
 		<file alias="tankDestroyed.mp3">../assets/sounds/tankDestroyed.mp3</file>
 		<file alias="shoot.mp3">../assets/sounds/shoot.mp3</file>
+		<file alias="shootLaser.mp3">../assets/sounds/shootLaser.mp3</file>
 		<file alias="win.mp3">../assets/sounds/win.mp3</file>
 		<file alias="lose.mp3">../assets/sounds/lose.mp3</file>
 	</qresource>

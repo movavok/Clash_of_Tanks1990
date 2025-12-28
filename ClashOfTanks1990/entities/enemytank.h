@@ -9,9 +9,8 @@ class EnemyTank : public Tank
 public:
     EnemyTank(const QPointF&, unsigned short, unsigned short, float, PlayerTank*);
 
-    void update(float) override;
+    virtual void update(float) override;
     void render(QPainter*) override;
-    Bullet* shoot() override;
 
     void setTileSize(int);
     void setSeesPlayer(bool);
@@ -23,10 +22,29 @@ public:
     void consumeShield();
     void clearAllBuffs();
 
-private:
+protected:
     PlayerTank* player = nullptr;
-
+    QString spritePath = ":/tanks/enemyTank.png";
+    QString shootSoundID = "shoot";
+    float bulletSpeed = 150.0f;
     float shootCooldown = 1.5f;
+
+    float behaviorTimer = 0.0f;
+    float reactionTimer = 0.0f;
+
+    Bullet::BulletType bulletType = Bullet::BulletType::Default;
+
+    Direction currentDirection = Direction::DOWN;
+    bool isMoving = true;
+    bool seesPlayer = false;
+
+    virtual Bullet* shoot() override;
+
+    Direction turnToPlayer() const;
+    virtual bool canShoot() const;
+    void tryShoot(float);
+
+private:
     float lastShotTime = 0.0f;
 
     enum class BehaviorState { Patrol, Chase };
@@ -34,12 +52,6 @@ private:
     void decideBehavior(float);
     void patrolBehavior(float);
     void chaseBehavior(float);
-
-    float behaviorTimer = 0.0f;
-    float reactionTimer = 0.0f;
-
-    Direction currentDirection = Direction::DOWN;
-    bool isMoving = true;
 
     int tileSize = 0;
 
@@ -53,11 +65,7 @@ private:
 
     void updateBoosts(float);
 
-    Direction turnToPlayer() const;
-    void tryShoot(float);
-
-    bool seesPlayer = false;
-    bool canSeePlayer() const;
+    virtual bool canSeePlayer() const;
 
     void drawShieldAura(QPainter*) const;
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;

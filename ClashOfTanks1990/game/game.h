@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #include <QRandomGenerator>
 #include "../entities/playertank.h"
-#include "../entities/enemytank.h"
+#include "../entities/enemyTypes/enemysniper.h"
 #include "../entities/bullet.h"
 #include "../entities/powerup.h"
 #include "../entities/deathmark.h"

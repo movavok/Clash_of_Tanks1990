@@ -55,20 +55,26 @@ void PlayerTank::update(float deltaTime) {
 
 Bullet* PlayerTank::shoot() {
     lastShotTime = 0.0f;
-    QPointF bulletPos;
-    unsigned short currentBulletSize = reloadBoostTime > 0.0f ? 12 : Bullet::getDefaultBulletSize();
+    float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
+    Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, 150.0f, this, Bullet::BulletType::Default, sizeCoef);
+
+    float drawWth = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getHeight() : bullet->getWidth();
+    float drawHgt = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getWidth() : bullet->getHeight();
+
+    QPointF bulletPos;
     switch (currentDirection) {
     case Direction::UP:
-        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() - currentBulletSize); break;
+        bulletPos = QPointF(position.x() + width/2 - drawWth/2, position.y() - drawHgt); break;
     case Direction::DOWN:
-        bulletPos = QPointF(position.x() + width/2 - currentBulletSize/2, position.y() + height); break;
+        bulletPos = QPointF(position.x() + width/2 - drawWth/2, position.y() + height); break;
     case Direction::LEFT:
-        bulletPos = QPointF(position.x() - currentBulletSize, position.y() + height/2 - currentBulletSize/2); break;
+        bulletPos = QPointF(position.x() - drawWth, position.y() + height/2 - drawHgt/2); break;
     case Direction::RIGHT:
-        bulletPos = QPointF(position.x() + width, position.y() + height/2 - currentBulletSize/2); break;
+        bulletPos = QPointF(position.x() + width, position.y() + height/2 - drawHgt/2); break;
     }
-    return new Bullet(bulletPos, currentDirection, 150.0f, this, currentBulletSize);
+    bullet->setPosition(bulletPos);
+    return bullet;
 }
 
 bool PlayerTank::ifHidden() const { return isHidden; }

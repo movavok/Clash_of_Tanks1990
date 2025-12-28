@@ -47,7 +47,12 @@ void Game::spawnEnemiesDefault() {
         tileCenter(level->getCols() - 3, level->getRows() - 3)
     };
     for (const QPointF& position : enemySpawns) {
-        EnemyTank* enemy = new EnemyTank(position, 30, 30, 100.0f, player);
+        bool spawnSniper = QRandomGenerator::global()->bounded(100) < 30;
+        EnemyTank* enemy = nullptr;
+
+        if (spawnSniper) enemy = new EnemySniper(position, player);
+        else enemy = new EnemyTank(position, 30, 30, 100.0f, player);
+
         enemy->setTileSize(level->getTileSize());
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
         addEntity(enemy);

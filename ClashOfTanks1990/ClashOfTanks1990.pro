@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     entities/bullet.cpp \
+    entities/enemyTypes/enemysniper.cpp \
     entities/enemytank.cpp \
     entities/entity.cpp \
     entities/playertank.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 
 HEADERS += \
     entities/bullet.h \
+    entities/enemyTypes/enemysniper.h \
     entities/enemytank.h \
     entities/entity.h \
     entities/playertank.h \
