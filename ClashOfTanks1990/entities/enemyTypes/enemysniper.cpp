@@ -22,10 +22,8 @@ void EnemySniper::update(float dt) {
             currentDirection = turnToPlayer();
             reactionTimer = 0.0f;
         }
-        if (aimedAtPlayer()) {
-            isMoving = false;
-            tryShoot(dt);
-        } else isMoving = true;
+        if (aimedAtPlayer()) isMoving = false;
+        else isMoving = true;
     }
     EnemyTank::update(dt);
 }
