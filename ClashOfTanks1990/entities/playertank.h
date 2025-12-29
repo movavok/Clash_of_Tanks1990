@@ -33,7 +33,9 @@ public:
 
 private:
     float shootCooldown = 3.0f;
-    float lastShotTime = 0.0f;
+    float cdRemaining = 0.0f;
+    bool reloadBoostWasActive = false;
+    float cdMaxAtShot = 0.0f;
     bool isShooting = false;
 
     Qt::Key keyUp = Qt::Key_W, keyDown = Qt::Key_S, keyLeft = Qt::Key_A, keyRight = Qt::Key_D, keyShoot = Qt::Key_Space;
@@ -53,7 +55,7 @@ private:
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
     void drawCooldownBar(QPainter*) const;
-    void drawBoostBar(QPainter*, int& barY, float time, float duration, const QColor& color) const;
+    void drawBoostBar(QPainter*, int&, float, float, const QColor&) const;
 
 signals:
     void bulletFired(Bullet*);

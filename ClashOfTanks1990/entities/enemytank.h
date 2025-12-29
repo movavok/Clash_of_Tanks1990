@@ -61,6 +61,7 @@ private:
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
     float reloadBoostDuration = 0.0f;
+    bool reloadBoostWasActive = false;
     int shieldCharges = 0;
 
     void updateBoosts(float);

@@ -44,8 +44,8 @@ Tank* Bullet::getOwner() const { return owner; }
 
 void Bullet::clearOwner() { owner = nullptr; }
 
-unsigned short Bullet::getWidth() { return width; }
-unsigned short Bullet::getHeight() { return height; }
+unsigned short Bullet::getWidth() const { return width; }
+unsigned short Bullet::getHeight() const { return height; }
 
 bool Bullet::isFromEnemy() const { return fromEnemy; }
 

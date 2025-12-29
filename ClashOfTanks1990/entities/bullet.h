@@ -19,8 +19,8 @@ public:
     Tank* getOwner() const;
     void clearOwner();
 
-    unsigned short getWidth();
-    unsigned short getHeight();
+    unsigned short getWidth() const;
+    unsigned short getHeight() const;
 
     bool isFromEnemy() const;
 

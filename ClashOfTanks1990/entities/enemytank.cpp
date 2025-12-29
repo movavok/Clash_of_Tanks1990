@@ -18,6 +18,7 @@ void EnemyTank::update(float deltaTime) {
 }
 
 void EnemyTank::updateBoosts(float dt) {
+    bool prevActive = reloadBoostWasActive;
     if (speedBoostTime > 0.0f) {
         speedBoostTime -= dt;
         if (speedBoostTime <= 0.0f) {
@@ -25,12 +26,31 @@ void EnemyTank::updateBoosts(float dt) {
             speedMultiplier = 1.0f;
         }
     }
+
+    speed = baseSpeed * speedMultiplier;
+
     if (reloadBoostTime > 0.0f) {
         reloadBoostTime -= dt;
         if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
     }
 
-    speed = baseSpeed * speedMultiplier;
+    bool nowActive = reloadBoostTime > 0.0f;
+    if (!prevActive && nowActive && lastShotTime > 0.0f) {
+        float prevMax = shootCooldown > 0.0f ? shootCooldown : 0.001f;
+        float progress = lastShotTime / prevMax;
+        if (progress < 0.0f) progress = 0.0f; else if (progress > 1.0f) progress = 1.0f;
+        float newMax = 1.0f;
+        lastShotTime = newMax * progress;
+    }
+    if (prevActive && !nowActive && lastShotTime > 0.0f) {
+        float prevMax = 1.0f;
+        float progress = lastShotTime / prevMax;
+        if (progress < 0.0f) progress = 0.0f; else if (progress > 1.0f) progress = 1.0f;
+        float newMax = shootCooldown > 0.0f ? shootCooldown : 0.001f;
+        lastShotTime = newMax * progress;
+    }
+
+    reloadBoostWasActive = nowActive;
 }
 
 void EnemyTank::decideBehavior(float dt) {

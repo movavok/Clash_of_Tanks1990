@@ -4,7 +4,7 @@ EnemySniper::EnemySniper(const QPointF& pos, PlayerTank* player)
     : EnemyTank(pos, 30, 30, 70.0f, player)
 {
     bulletSpeed = 450.0f;
-    shootCooldown = 3.0f;
+    shootCooldown = 4.0f;
     spritePath = ":/tanks/enemySniper.png";
     shootSoundID = "shootLaser";
     bulletType = Bullet::BulletType::Sniper;

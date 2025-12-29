@@ -1,7 +1,7 @@
 #include "playertank.h"
 
 PlayerTank::PlayerTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd)
-    : Tank(pos, wth, hgt, spd) { baseSpeed = spd; }
+    : Tank(pos, wth, hgt, spd), cdMaxAtShot(shootCooldown) { baseSpeed = spd; }
 
 void PlayerTank::handleKeyPress(Qt::Key key) {
     if (key == keyUp) { currentDirection = Direction::UP;    isMoving = true; }
@@ -34,19 +34,39 @@ void PlayerTank::update(float deltaTime) {
             speedMultiplier = 1.0f;
         }
     }
-    if (reloadBoostTime > 0.0f) {
-        reloadBoostTime -= deltaTime;
-        if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
-    }
 
     speed = baseSpeed * speedMultiplier;
 
+    cdRemaining -= deltaTime;
+    if (cdRemaining < 0.0f) cdRemaining = 0.0f;
+
+    bool reloadActiveNow = reloadBoostTime > 0.0f;
+
+    if (!reloadBoostWasActive && reloadActiveNow && cdRemaining > 0.0f) {
+        float prevMax = std::max(cdMaxAtShot, 0.001f);
+        float progress = 1.0f - (cdRemaining / prevMax);
+        progress = std::clamp(progress, 0.0f, 1.0f);
+        cdMaxAtShot = 1.0f;
+        cdRemaining = cdMaxAtShot * (1.0f - progress);
+    }
+    if (reloadBoostTime > 0.0f) {
+        reloadBoostTime -= deltaTime;
+        if (reloadBoostTime < 0.0f) reloadBoostTime = 0.0f;
+    }
+
+    if (reloadBoostWasActive && reloadBoostTime <= 0.0f && cdRemaining > 0.0f) {
+        float prevMax = std::max(cdMaxAtShot, 0.001f);
+        float progress = 1.0f - (cdRemaining / prevMax);
+        progress = std::clamp(progress, 0.0f, 1.0f);
+        cdMaxAtShot = shootCooldown;
+        cdRemaining = cdMaxAtShot * (1.0f - progress);
+    }
+
+    reloadBoostWasActive = reloadActiveNow;
+
     if (isMoving) move(currentDirection, deltaTime);
-    lastShotTime += deltaTime;
 
-    float effectiveCooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
-
-    if (isShooting && lastShotTime >= effectiveCooldown) {
+    if (isShooting && cdRemaining <= 0.0f) {
         Bullet* newBullet = shoot();
         if (newBullet) emit bulletFired(newBullet);
         Audio::play("shoot");
@@ -54,7 +74,8 @@ void PlayerTank::update(float deltaTime) {
 }
 
 Bullet* PlayerTank::shoot() {
-    lastShotTime = 0.0f;
+    cdMaxAtShot = (reloadBoostTime > 0.0f) ? 1.0f : shootCooldown;
+    cdRemaining = cdMaxAtShot;
     float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
     Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, 150.0f, this, Bullet::BulletType::Default, sizeCoef);
@@ -87,11 +108,6 @@ void PlayerTank::render(QPainter* painter) {
         QPixmap scaledSprite;
         QPoint drawPos = drawRotatedSprite(painter, playerSprite, scaledSprite);
         drawSpeedTrail(painter, drawPos, scaledSprite);
-    } else {
-        QColor tankColor = shieldCharges > 0 ? QColor(70, 200, 255) : QColor(0, 0, 255);
-        painter->setBrush(tankColor);
-        painter->setPen(Qt::NoPen);
-        painter->drawRect(bounds());
     }
 
     drawCooldownBar(painter);
@@ -155,11 +171,10 @@ void PlayerTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, co
 }
 
 void PlayerTank::drawCooldownBar(QPainter* painter) const {
-    float effective = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
-    float denom = effective > 0.0f ? effective : 1.0f;
-    float percent = lastShotTime / denom;
-    if (percent < 0.0f) percent = 0.0f; 
-    else if (percent > 1.0f) percent = 1.0f;
+    float cdMax = std::max(cdMaxAtShot, 0.001f);
+
+    float percent = 1.0f - (cdRemaining / cdMax);
+    percent = std::clamp(percent, 0.0f, 1.0f);
     QRectF barBg(position.x(), position.y() - 6.0, width, 4.0);
     painter->setBrush(QColor(60, 60, 60));
     painter->drawRect(barBg);
