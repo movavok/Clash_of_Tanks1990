@@ -30,6 +30,22 @@ void EnemySniper::update(float dt) {
     EnemyTank::update(dt);
 }
 
+void EnemySniper::render(QPainter* painter) {
+    canShowEye = !aimedAtPlayer();
+
+    EnemyTank::render(painter);
+
+    if (aimedAtPlayer()) {
+        static QPixmap crosshair(":/indicators/aimAtPlayer.png");
+        if (!crosshair.isNull()) {
+            QPixmap scaledCross = crosshair.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QPoint posIndicator(position.x() + width / 2 - scaledCross.width() / 2,
+                                position.y() + height + 2);
+            painter->drawPixmap(posIndicator, scaledCross);
+        }
+    }
+}
+
 bool EnemySniper::canShoot() const { return aimedAtPlayer(); }
 
 bool EnemySniper::aimedAtPlayer() const {

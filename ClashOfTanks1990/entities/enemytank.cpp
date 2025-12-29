@@ -159,6 +159,17 @@ Bullet* EnemyTank::shoot() {
 
 void EnemyTank::render(QPainter* painter) {
     QPixmap enemySprite(spritePath);
+
+    if (canShowEye && canSeePlayer()) {
+        static QPixmap eye(":/indicators/canSeePlayer.png");
+        if (!eye.isNull()) {
+            QPixmap scaledEye = eye.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QPoint posIndicator(position.x() + width / 2 - scaledEye.width() / 2,
+                                position.y() + height + 2);
+            painter->drawPixmap(posIndicator, scaledEye);
+        }
+    }
+
     drawShieldAura(painter);
 
     if (!enemySprite.isNull()) {

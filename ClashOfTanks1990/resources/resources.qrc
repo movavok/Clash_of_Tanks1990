@@ -40,6 +40,10 @@
 		<file alias="lose.png">../assets/icon/lose.png</file>
 		<file alias="volume.png">../assets/icon/volume.png</file>
 	</qresource>
+	<qresource prefix="/indicators">
+	        <file alias="canSeePlayer.png">../assets/indicators/canSeePlayer.png</file>
+		<file alias="aimAtPlayer.png">../assets/indicators/aimAtPlayer.png</file>
+	</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>
 		<file alias="bulletToBullet.mp3">../assets/sounds/bulletToBullet.mp3</file>

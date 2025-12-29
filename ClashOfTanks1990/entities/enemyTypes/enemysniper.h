@@ -10,6 +10,7 @@ public:
     EnemySniper(const QPointF&, PlayerTank*);
 
     void update(float) override;
+    void render(QPainter*) override;
 
 protected:
     bool canShoot() const override;

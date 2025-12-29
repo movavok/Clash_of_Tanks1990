@@ -10,7 +10,7 @@ public:
     EnemyTank(const QPointF&, unsigned short, unsigned short, float, PlayerTank*);
 
     virtual void update(float) override;
-    void render(QPainter*) override;
+    virtual void render(QPainter*) override;
 
     void setTileSize(int);
     void setSeesPlayer(bool);
@@ -33,6 +33,7 @@ protected:
     float reactionTimer = 0.0f;
 
     Bullet::BulletType bulletType = Bullet::BulletType::Default;
+    bool canShowEye = true;
 
     Direction currentDirection = Direction::DOWN;
     bool isMoving = true;
