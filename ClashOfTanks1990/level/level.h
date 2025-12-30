@@ -51,7 +51,7 @@ private:
     void tilesInRect(const QRectF&, QVector<QPoint>&) const;
 
     bool generateFromText(const QStringList&);
-    TileType mapTileChar(QChar symbol) const;
+    TileType mapTileChar(QChar) const;
 };
 
 #endif // LEVEL_H

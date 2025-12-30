@@ -49,6 +49,7 @@ bool EnemySniper::canShoot() const { return aimedAtPlayer(); }
 bool EnemySniper::aimedAtPlayer() const {
     QPointF delta = player->getPosition() - position;
     if (!seesPlayer) return false;
+    if (player && player->ifHidden()) return false;
 
     switch (currentDirection) {
     case Direction::UP:    return std::abs(delta.x()) < 10 && delta.y() < 0;
