@@ -7,7 +7,7 @@ class EnemySniper : public EnemyTank
 {
     Q_OBJECT
 public:
-    EnemySniper(const QPointF&, PlayerTank*);
+    EnemySniper(const QPointF&, PlayerTank*, const QList<Entity*>*);
 
     void update(float) override;
     void render(QPainter*) override;

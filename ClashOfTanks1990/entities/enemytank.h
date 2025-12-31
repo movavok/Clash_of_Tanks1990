@@ -7,7 +7,7 @@ class EnemyTank : public Tank
 {
     Q_OBJECT
 public:
-    EnemyTank(const QPointF&, unsigned short, unsigned short, float, PlayerTank*);
+    EnemyTank(const QPointF&, unsigned short, unsigned short, float, PlayerTank*, const QList<Entity*>*);
 
     virtual void update(float) override;
     virtual void render(QPainter*) override;
@@ -48,11 +48,19 @@ protected:
 private:
     float lastShotTime = 0.0f;
 
-    enum class BehaviorState { Patrol, Chase };
+    enum class BehaviorState { Patrol, Chase, Dodge };
     BehaviorState state = BehaviorState::Patrol;
     void decideBehavior(float);
     void patrolBehavior(float);
-    void chaseBehavior(float);
+    void chaseBehavior();
+    void dodgeBehavior(float);
+
+    float dodgeCooldown = 0.0f;
+    float dodgeTimer = 0.0f;
+    float dodgeSpeedCoef = 1.6f;
+    QPointF lastBullet;
+    const QList<Entity*>* entities;
+    bool bulletNearby();
 
     int tileSize = 0;
 

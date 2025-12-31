@@ -43,6 +43,7 @@
 	<qresource prefix="/indicators">
 	        <file alias="canSeePlayer.png">../assets/indicators/canSeePlayer.png</file>
 		<file alias="aimAtPlayer.png">../assets/indicators/aimAtPlayer.png</file>
+		<file alias="dodgeBullets.png">../assets/indicators/dodgeBullets.png</file>
 	</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>

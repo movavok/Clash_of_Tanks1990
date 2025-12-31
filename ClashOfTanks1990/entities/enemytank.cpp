@@ -1,7 +1,7 @@
 #include "enemytank.h"
 
-EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd, PlayerTank* player)
-    : Tank(pos, wth, hgt, spd), player(player), baseSpeed(spd) {}
+EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd, PlayerTank* player, const QList<Entity*>* list)
+    : Tank(pos, wth, hgt, spd), player(player), entities(list), baseSpeed(spd) {}
 
 void EnemyTank::setTileSize(int size) { tileSize = size; }
 
@@ -10,6 +10,7 @@ void EnemyTank::setSeesPlayer(bool flag) { seesPlayer = flag; }
 void EnemyTank::update(float deltaTime) {
     updateBoosts(deltaTime);
 
+    if (dodgeCooldown > 0.0f) dodgeCooldown -= deltaTime;
     decideBehavior(deltaTime);
 
     if (isMoving) move(currentDirection, deltaTime);
@@ -58,7 +59,8 @@ void EnemyTank::decideBehavior(float dt) {
 
     switch (state) {
     case BehaviorState::Patrol: patrolBehavior(dt); break;
-    case BehaviorState::Chase: chaseBehavior(dt); break;
+    case BehaviorState::Chase: chaseBehavior(); break;
+    case BehaviorState::Dodge: dodgeBehavior(dt); break;
     }
 }
 
@@ -73,6 +75,17 @@ void EnemyTank::patrolBehavior(float dt) {
             return;
         }
 
+    float effectiveCooldown = reloadBoostWasActive
+                                  ? shootCooldown * 1.6f
+                                  : shootCooldown;
+
+    if (dodgeCooldown <= 0.0f && lastShotTime < effectiveCooldown && bulletNearby()) {
+        state = BehaviorState::Dodge;
+        dodgeTimer = 0.25f;
+        dodgeCooldown = 1.0f;
+        return;
+    }
+
     if (behaviorTimer >= 1.0f && state == BehaviorState::Patrol) {
         currentDirection = static_cast<Direction>(rand() % 4);
         behaviorTimer = 0.0f;
@@ -81,7 +94,7 @@ void EnemyTank::patrolBehavior(float dt) {
     isMoving = true;
 }
 
-void EnemyTank::chaseBehavior(float) {
+void EnemyTank::chaseBehavior() {
     if (!canSeePlayer()) {
         if (reactionTimer > 0.5f) {
             state = BehaviorState::Patrol;
@@ -95,6 +108,42 @@ void EnemyTank::chaseBehavior(float) {
         reactionTimer = 0.0f;
     }
 
+}
+
+void EnemyTank::dodgeBehavior(float dt) {
+    dodgeTimer -= dt;
+    if (dodgeTimer <= 0.0f) {
+        speed = baseSpeed;
+        state = BehaviorState::Chase;
+        return;
+    }
+
+    speed = baseSpeed * dodgeSpeedCoef;
+    QPointF evade(-lastBullet.y(), lastBullet.x());
+
+    if (std::abs(evade.x()) > std::abs(evade.y()))
+        currentDirection = evade.x() > 0 ? Direction::RIGHT : Direction::LEFT;
+    else
+        currentDirection = evade.y() > 0 ? Direction::DOWN : Direction::UP;
+
+    isMoving = true;
+}
+
+bool EnemyTank::bulletNearby() {
+    float reactionRange = 20.0f;
+    QRectF dangerZone = bounds().adjusted((-1) * reactionRange, (-1) * reactionRange, reactionRange, reactionRange);
+
+    for (Entity* entity : *entities) {
+        if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
+            if (!bullet->isAlive()) continue;
+            if (bullet->isFromEnemy()) continue;
+            if (dangerZone.intersects(bullet->bounds())) {
+                lastBullet = bounds().center() - bullet->bounds().center();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 Tank::Direction EnemyTank::turnToPlayer() const {
@@ -167,6 +216,15 @@ void EnemyTank::render(QPainter* painter) {
             QPoint posIndicator(position.x() + width / 2 - scaledEye.width() / 2,
                                 position.y() + height + 2);
             painter->drawPixmap(posIndicator, scaledEye);
+        }
+    }
+    if (state == BehaviorState::Dodge) {
+        static QPixmap dodge(":/indicators/dodgeBullets.png");
+        if (!dodge.isNull()) {
+            QPixmap scaledDodge = dodge.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QPoint posIndicator(position.x() + width / 2 - scaledDodge.width() / 2,
+                                position.y() + height + 2);
+            painter->drawPixmap(posIndicator, scaledDodge);
         }
     }
 

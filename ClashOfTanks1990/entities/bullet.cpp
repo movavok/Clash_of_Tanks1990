@@ -41,8 +41,9 @@ void Bullet::render(QPainter* painter) {
 }
 
 Tank* Bullet::getOwner() const { return owner; }
-
 void Bullet::clearOwner() { owner = nullptr; }
+
+Tank::Direction Bullet::getDirection() const { return direction; }
 
 unsigned short Bullet::getWidth() const { return width; }
 unsigned short Bullet::getHeight() const { return height; }

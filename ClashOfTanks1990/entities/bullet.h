@@ -19,6 +19,8 @@ public:
     Tank* getOwner() const;
     void clearOwner();
 
+    Tank::Direction getDirection() const;
+
     unsigned short getWidth() const;
     unsigned short getHeight() const;
 
