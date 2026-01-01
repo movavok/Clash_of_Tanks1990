@@ -10,7 +10,7 @@ public:
     EnemyTank(const QPointF&, unsigned short, unsigned short, float, PlayerTank*, const QList<Entity*>*);
 
     virtual void update(float) override;
-    virtual void render(QPainter*) override;
+    void render(QPainter*) override;
 
     void setTileSize(int);
     void setSeesPlayer(bool);
@@ -33,6 +33,8 @@ protected:
     float reactionTimer = 0.0f;
 
     Bullet::BulletType bulletType = Bullet::BulletType::Default;
+    enum class IndicatorType { None, Chase, Dodge, Aim };
+    virtual EnemyTank::IndicatorType currentIndicator() const;
     bool canShowEye = true;
 
     Direction currentDirection = Direction::DOWN;
@@ -58,7 +60,8 @@ private:
     float dodgeCooldown = 0.0f;
     float dodgeTimer = 0.0f;
     float dodgeSpeedCoef = 1.6f;
-    QPointF lastBullet;
+    QPointF lastBulletPos;
+    QPointF lastBulletDir;
     const QList<Entity*>* entities;
     bool bulletNearby();
 

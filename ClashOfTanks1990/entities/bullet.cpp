@@ -45,6 +45,16 @@ void Bullet::clearOwner() { owner = nullptr; }
 
 Tank::Direction Bullet::getDirection() const { return direction; }
 
+QPointF Bullet::getDirectionVector() const {
+    switch (direction) {
+    case Tank::Direction::UP:    return QPointF(0, -1);
+    case Tank::Direction::DOWN:  return QPointF(0, 1);
+    case Tank::Direction::LEFT:  return QPointF(-1, 0);
+    case Tank::Direction::RIGHT: return QPointF(1, 0);
+    }
+    return QPointF(0,0);
+}
+
 unsigned short Bullet::getWidth() const { return width; }
 unsigned short Bullet::getHeight() const { return height; }
 

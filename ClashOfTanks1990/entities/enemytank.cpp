@@ -57,6 +57,12 @@ void EnemyTank::updateBoosts(float dt) {
 void EnemyTank::decideBehavior(float dt) {
     reactionTimer += dt;
 
+    if (dodgeCooldown <= 0.0f && bulletNearby()) {
+        state = BehaviorState::Dodge;
+        dodgeTimer = 0.25f;
+        dodgeCooldown = 1.0f;
+    }
+
     switch (state) {
     case BehaviorState::Patrol: patrolBehavior(dt); break;
     case BehaviorState::Chase: chaseBehavior(); break;
@@ -75,17 +81,6 @@ void EnemyTank::patrolBehavior(float dt) {
             return;
         }
 
-    float effectiveCooldown = reloadBoostWasActive
-                                  ? shootCooldown * 1.6f
-                                  : shootCooldown;
-
-    if (dodgeCooldown <= 0.0f && lastShotTime < effectiveCooldown && bulletNearby()) {
-        state = BehaviorState::Dodge;
-        dodgeTimer = 0.25f;
-        dodgeCooldown = 1.0f;
-        return;
-    }
-
     if (behaviorTimer >= 1.0f && state == BehaviorState::Patrol) {
         currentDirection = static_cast<Direction>(rand() % 4);
         behaviorTimer = 0.0f;
@@ -95,6 +90,8 @@ void EnemyTank::patrolBehavior(float dt) {
 }
 
 void EnemyTank::chaseBehavior() {
+    if (state == BehaviorState::Dodge) return;
+
     if (!canSeePlayer()) {
         if (reactionTimer > 0.5f) {
             state = BehaviorState::Patrol;
@@ -119,8 +116,19 @@ void EnemyTank::dodgeBehavior(float dt) {
     }
 
     speed = baseSpeed * dodgeSpeedCoef;
-    QPointF evade(-lastBullet.y(), lastBullet.x());
+    QPointF perp1(-lastBulletDir.y(), lastBulletDir.x());
+    QPointF perp2(lastBulletDir.y(), -lastBulletDir.x());
 
+    QPointF pos1 = position + perp1;
+    QPointF pos2 = position + perp2;
+
+    float distance1 = (pos1.x() - lastBulletPos.x()) * (pos1.x() - lastBulletPos.x()) +
+                      (pos1.y() - lastBulletPos.y()) * (pos1.y() - lastBulletPos.y());
+
+    float distance2 = (pos2.x() - lastBulletPos.x()) * (pos2.x() - lastBulletPos.x()) +
+                      (pos2.y() - lastBulletPos.y()) * (pos2.y() - lastBulletPos.y());
+
+    QPointF evade = (distance1 > distance2) ? perp1 : perp2;
     if (std::abs(evade.x()) > std::abs(evade.y()))
         currentDirection = evade.x() > 0 ? Direction::RIGHT : Direction::LEFT;
     else
@@ -138,7 +146,8 @@ bool EnemyTank::bulletNearby() {
             if (!bullet->isAlive()) continue;
             if (bullet->isFromEnemy()) continue;
             if (dangerZone.intersects(bullet->bounds())) {
-                lastBullet = bounds().center() - bullet->bounds().center();
+                lastBulletPos = bullet->bounds().center();
+                lastBulletDir = bullet->getDirectionVector();
                 return true;
             }
         }
@@ -207,27 +216,22 @@ Bullet* EnemyTank::shoot() {
 }
 
 void EnemyTank::render(QPainter* painter) {
+    IndicatorType indicator = currentIndicator();
+
+    QPixmap icon;
+    switch (indicator) {
+    case IndicatorType::Dodge: icon = QPixmap(":/indicators/dodgeBullets.png"); break;
+    case IndicatorType::Chase: icon = QPixmap(":/indicators/canSeePlayer.png"); break;
+    case IndicatorType::Aim: icon = QPixmap(":/indicators/aimAtPlayer.png"); break;
+    default: break;
+    }
+
+    if (!icon.isNull()) {
+        QPixmap scaled = icon.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        painter->drawPixmap(position.x() + width / 2 - scaled.width() / 2, position.y() + height + 2, scaled);
+    }
+
     QPixmap enemySprite(spritePath);
-
-    if (canShowEye && canSeePlayer()) {
-        static QPixmap eye(":/indicators/canSeePlayer.png");
-        if (!eye.isNull()) {
-            QPixmap scaledEye = eye.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            QPoint posIndicator(position.x() + width / 2 - scaledEye.width() / 2,
-                                position.y() + height + 2);
-            painter->drawPixmap(posIndicator, scaledEye);
-        }
-    }
-    if (state == BehaviorState::Dodge) {
-        static QPixmap dodge(":/indicators/dodgeBullets.png");
-        if (!dodge.isNull()) {
-            QPixmap scaledDodge = dodge.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            QPoint posIndicator(position.x() + width / 2 - scaledDodge.width() / 2,
-                                position.y() + height + 2);
-            painter->drawPixmap(posIndicator, scaledDodge);
-        }
-    }
-
     drawShieldAura(painter);
 
     if (!enemySprite.isNull()) {
@@ -242,6 +246,12 @@ void EnemyTank::render(QPainter* painter) {
     int barY = static_cast<int>(position.y() - 12.0);
     drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(200, 90, 255));
     drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(247, 129, 32));
+}
+
+EnemyTank::IndicatorType EnemyTank::currentIndicator() const {
+    if (state == BehaviorState::Dodge) return IndicatorType::Dodge;
+    if (canShowEye && canSeePlayer()) return IndicatorType::Chase;
+    return IndicatorType::None;
 }
 
 void EnemyTank::drawShieldAura(QPainter* painter) const {
@@ -277,12 +287,18 @@ QPoint EnemyTank::drawRotatedSprite(QPainter* painter, const QPixmap& sprite, QP
 }
 
 void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, const QPixmap& scaledSprite) const {
-    if (!(speedBoostTime > 0.0f) || !isMoving) return;
+    if (!isMoving) return;
+    bool dodge = state == BehaviorState::Dodge;
+    if (!(speedBoostTime > 0.0f || dodge)) return;
     if (painter->opacity() <= 0.01) return;
-    const int offset1 = 10;
-    const int offset2 = 20;
+
+    int offset1 = dodge ? 6 : 10;
+    int offset2 = dodge ? 12 : 20;
+    double opacity1 = dodge ? 0.45 : 0.35;
+    double opacity2 = dodge ? 0.25 : 0.18;
     int dx1 = 0, dy1 = 0;
     int dx2 = 0, dy2 = 0;
+
     switch (currentDirection) {
     case Direction::UP:    dy1 = offset1; dy2 = offset2; break;
     case Direction::DOWN:  dy1 = -offset1; dy2 = -offset2; break;
@@ -290,9 +306,9 @@ void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, con
     case Direction::RIGHT: dx1 = -offset1; dx2 = -offset2; break;
     }
     painter->save();
-    painter->setOpacity(0.35);
+    painter->setOpacity(opacity1);
     painter->drawPixmap(mainDrawPos.x() + dx1, mainDrawPos.y() + dy1, scaledSprite);
-    painter->setOpacity(0.18);
+    painter->setOpacity(opacity2);
     painter->drawPixmap(mainDrawPos.x() + dx2, mainDrawPos.y() + dy2, scaledSprite);
     painter->restore();
 }

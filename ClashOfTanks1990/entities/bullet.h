@@ -20,6 +20,7 @@ public:
     void clearOwner();
 
     Tank::Direction getDirection() const;
+    QPointF getDirectionVector() const;
 
     unsigned short getWidth() const;
     unsigned short getHeight() const;
