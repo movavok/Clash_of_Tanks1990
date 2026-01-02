@@ -59,4 +59,10 @@ void DeathMark::render(QPainter* painter) {
     painter->restore();
 }
 
-QRectF DeathMark::bounds() const { return QRectF(position.x(), position.y(), width, height); }
+QRectF DeathMark::bounds() const {
+    const float cw = width * collisionScale;
+    const float ch = height * collisionScale;
+    const float ox = (width - cw) / 2.0f;
+    const float oy = (height - ch) / 2.0f;
+    return QRectF(position.x() + ox, position.y() + oy, cw, ch);
+}

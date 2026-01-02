@@ -19,6 +19,8 @@ private:
     float width;
     float height;
 
+    float collisionScale = 0.5f;
+
     QVector<QPixmap> frames;
     int currentFrame = 0;
     float frameTime;

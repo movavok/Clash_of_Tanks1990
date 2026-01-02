@@ -182,11 +182,16 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
 
         if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
             if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
-            if (bullet->isAlive() && (level->intersectsBulletSolid(bullet->bounds()))) {
+            if (bullet->isAlive() && level->intersectsBulletSolid(bullet->bounds())) {
                 level->destroyInRect(bullet->bounds());
                 Audio::play("bulletToWall");
                 bullet->destroy();
-            }   
+            }
+            for (Entity* &other : entities) {
+                DeathMark* corpse = dynamic_cast<DeathMark*>(other);
+                if (!corpse || !corpse->isAlive()) continue;
+                if (bullet->bounds().intersects(corpse->bounds())) { bullet->destroy(); break; }
+            }
         } else {
             bool collided = false;
             if (checkCollision(entity)) collided = true;
@@ -292,7 +297,7 @@ bool Game::checkCollision(Entity* entity) {
 
     QRectF eBounds = entity->bounds();
     for (Entity* &other : entities) {
-        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<DeathMark*>(other) || !other->isAlive())
+        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || !other->isAlive())
             continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
@@ -308,7 +313,7 @@ void Game::render(QPainter* painter) {
     if (level) level->render(painter);
 
     double originalOpacity = painter->opacity();
-    for (Entity* entity : entities) {
+    for (Entity* &entity : entities) {
         if (!entity->isAlive()) continue;
         if (dynamic_cast<Bullet*>(entity)) continue;
 
@@ -330,8 +335,14 @@ void Game::render(QPainter* painter) {
         DeathMark* mark = dynamic_cast<DeathMark*>(entity);
         if (!bullet && !mark) continue;
         painter->setOpacity(1.0);
-        if (bullet) bullet->render(painter);
-        else if (mark) mark->render(painter);
+        if (bullet) {
+            painter->setOpacity(1.0);
+            bullet->render(painter);
+        }
+        else if (mark) {
+            painter->setOpacity(0.5);
+            mark->render(painter);
+        }
     }
     painter->setOpacity(originalOpacity);
 }
