@@ -16,5 +16,6 @@ void Tank::move(Direction dir, float dt) {
 }
 
 void Tank::setDirection(Direction dir) { direction = dir; }
+Tank::Direction Tank::getDirection() const { return direction; }
 
 QRectF Tank::bounds() const { return QRectF(position.x(), position.y(), width, height); }

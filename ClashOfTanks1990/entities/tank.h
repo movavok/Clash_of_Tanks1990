@@ -19,6 +19,7 @@ public:
     QRectF bounds() const override;
 
     void setDirection(Direction);
+    Direction getDirection() const;
 
 protected:
     unsigned short width, height;

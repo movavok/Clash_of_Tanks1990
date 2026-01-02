@@ -7,7 +7,7 @@ Bullet::Bullet(const QPointF& pos, Tank::Direction dir, float spd, Tank* own, Bu
     fromEnemy = (own && dynamic_cast<EnemyTank*>(own) != nullptr);
     switch (type) {
     case BulletType::Default: width = 8; height = 8; spritePath = ":/bullets/bullet.png"; break;
-    case BulletType::Sniper: width = 10; height = 20; spritePath = ":/bullets/sniperBullet.png"; break;
+    case BulletType::Sniper: width = 4; height = 12; spritePath = ":/bullets/sniperBullet.png"; break;
     }
     width  = static_cast<unsigned short>(width * sizeCoef);
     height = static_cast<unsigned short>(height * sizeCoef);

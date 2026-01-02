@@ -277,7 +277,7 @@ void Game::checkIfShotDown() {
                         QRectF tankBounds = tank->bounds();
                         QPointF center = tankBounds.center();
                         float markSize = static_cast<float>(std::max(tankBounds.width(), tankBounds.height()));
-                        addEntity(new DeathMark(center, markSize, 1.5f));
+                        addEntity(new DeathMark(center, markSize * 2, 0.125f, tank->getDirection()));
                     }
                     break;
                 }

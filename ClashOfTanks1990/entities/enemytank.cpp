@@ -60,7 +60,7 @@ void EnemyTank::decideBehavior(float dt) {
     if (dodgeCooldown <= 0.0f && bulletNearby()) {
         state = BehaviorState::Dodge;
         dodgeTimer = 0.25f;
-        dodgeCooldown = 1.0f;
+        dodgeCooldown = 1.5f;
     }
 
     switch (state) {

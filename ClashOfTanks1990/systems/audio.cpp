@@ -12,7 +12,7 @@ static double masterVolume = 1.0;
 static double volumeFor(const QString& id) {
 	if (id == "brickBreaking") return 0.05;
 	if (id == "bulletToWall") return 0.05;
-    if (id == "shoot") return 0.4;
+    if (id == "shoot") return 0.8;
     if (id == "shootLaser") return 0.5;
     if (id == "win") return 0.8;
     if (id == "lose") return 0.8;
@@ -32,6 +32,7 @@ static SoundPool getPool(const QString& id) {
 	else if (id == "tankDestroyed") path = "qrc:/sounds/tankDestroyed.mp3";
 	else if (id == "shoot") path = "qrc:/sounds/shoot.mp3";
     else if (id == "shootLaser") path = "qrc:/sounds/shootLaser.mp3";
+    else if (id == "sniperShot") path = "qrc:/sounds/sniperShot.mp3";
     else if (id == "win") path = "qrc:/sounds/win.mp3";
 	else if (id == "lose") path = "qrc:/sounds/lose.mp3";
 	SoundPool pool;
