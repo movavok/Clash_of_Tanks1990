@@ -15,7 +15,7 @@ void EnemyTank::update(float deltaTime) {
 
     if (isMoving) move(currentDirection, deltaTime);
 
-    tryShoot(deltaTime);
+    if (!(bulletType == Bullet::BulletType::None)) tryShoot(deltaTime);
 }
 
 void EnemyTank::updateBoosts(float dt) {
@@ -138,7 +138,6 @@ void EnemyTank::dodgeBehavior(float dt) {
 }
 
 bool EnemyTank::bulletNearby() {
-    float reactionRange = 20.0f;
     QRectF dangerZone = bounds().adjusted((-1) * reactionRange, (-1) * reactionRange, reactionRange, reactionRange);
 
     for (Entity* entity : *entities) {
@@ -186,7 +185,7 @@ bool EnemyTank::canSeePlayer() const {
     if (!seesPlayer) return false;
 
     QPointF distance = player->getPosition() - position;
-    const float maxRange = 6 * tileSize;
+    const float maxRange = viewRange * tileSize;
 
     return (std::abs(distance.x()) < maxRange && std::abs(distance.y()) < maxRange);
 }
@@ -223,6 +222,7 @@ void EnemyTank::render(QPainter* painter) {
     case IndicatorType::Dodge: icon = QPixmap(":/indicators/dodgeBullets.png"); break;
     case IndicatorType::Chase: icon = QPixmap(":/indicators/canSeePlayer.png"); break;
     case IndicatorType::Aim: icon = QPixmap(":/indicators/aimAtPlayer.png"); break;
+    case IndicatorType::Focus: icon = QPixmap(":/indicators/shootingLaser.png"); break;
     default: break;
     }
 
@@ -242,7 +242,6 @@ void EnemyTank::render(QPainter* painter) {
 
     drawCooldownBar(painter);
 
-    // Boost duration bars
     int barY = static_cast<int>(position.y() - 12.0);
     drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(200, 90, 255));
     drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(247, 129, 32));

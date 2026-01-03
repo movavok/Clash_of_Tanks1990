@@ -8,6 +8,7 @@
 #include <QRandomGenerator>
 #include "../entities/playertank.h"
 #include "../entities/enemyTypes/enemysniper.h"
+#include "../entities/enemyTypes/enemylaser.h"
 #include "../entities/bullet.h"
 #include "../entities/powerup.h"
 #include "../entities/deathmark.h"
@@ -44,6 +45,8 @@ public:
 
     void newGame();
     void restart();
+
+    float calculateLaserLength(const QPointF&, Tank::Direction, float) const;
 
 private:
     PlayerTank* player;
@@ -82,6 +85,10 @@ private:
 
     void spawnPowerUpRandom();
     void applyPowerUp(PowerUp*);
+    void handleTankHit(Tank*);
+
+private slots:
+    void onFireLaser(LaserRay* ray);
 
 signals:
     void levelChanged(int);

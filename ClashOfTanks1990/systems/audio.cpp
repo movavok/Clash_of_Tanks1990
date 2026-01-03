@@ -12,8 +12,10 @@ static double masterVolume = 1.0;
 static double volumeFor(const QString& id) {
 	if (id == "brickBreaking") return 0.05;
 	if (id == "bulletToWall") return 0.05;
-    if (id == "shoot") return 0.8;
+    if (id == "bulletToBullet") return 0.7;
+    if (id == "shoot") return 0.2;
     if (id == "shootLaser") return 0.5;
+    if (id == "tankDestroyed") return 1.0;
     if (id == "win") return 0.8;
     if (id == "lose") return 0.8;
 	return 0.9;
@@ -95,6 +97,13 @@ void Audio::stopAll() {
 			if (bundle.player) bundle.player->stop();
 		}
 	}
+}
+
+void Audio::stopSound(const QString& id) {
+	SoundPool pool = getPool(id);
+    for (PlayerBundle& bundle : pool.players)
+		if (bundle.player && bundle.player->playbackState() == QMediaPlayer::PlayingState)
+			bundle.player->stop();
 }
 
 void Audio::setMasterVolume(double volume) {

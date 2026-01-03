@@ -10,9 +10,11 @@ CONFIG += c++17
 
 SOURCES += \
     entities/bullet.cpp \
+    entities/enemyTypes/enemylaser.cpp \
     entities/enemyTypes/enemysniper.cpp \
     entities/enemytank.cpp \
     entities/entity.cpp \
+    entities/laserray.cpp \
     entities/playertank.cpp \
     entities/powerup.cpp \
     entities/deathmark.cpp \
@@ -28,9 +30,11 @@ SOURCES += \
 
 HEADERS += \
     entities/bullet.h \
+    entities/enemyTypes/enemylaser.h \
     entities/enemyTypes/enemysniper.h \
     entities/enemytank.h \
     entities/entity.h \
+    entities/laserray.h \
     entities/playertank.h \
     entities/powerup.h \
     entities/deathmark.h \

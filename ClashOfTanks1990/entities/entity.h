@@ -14,7 +14,7 @@ public:
 
     virtual void update(float) = 0;
     virtual void render(QPainter*) = 0;
-    virtual QRectF bounds() const = 0; //collision
+    virtual QRectF bounds() const = 0;
 
     void setPosition(const QPointF&);
     QPointF getPosition() const;

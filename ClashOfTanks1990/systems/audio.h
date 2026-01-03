@@ -14,6 +14,7 @@ public:
     static void play(const QString& id);
     static void preloadAll();
     static void stopAll();
+    static void stopSound(const QString&);
     static void setMasterVolume(double);
     static double getMasterVolume();
 };

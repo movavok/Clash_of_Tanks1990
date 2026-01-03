@@ -5,15 +5,11 @@ EnemySniper::EnemySniper(const QPointF& pos, PlayerTank* player, const QList<Ent
 {
     bulletSpeed = 450.0f;
     shootCooldown = 4.0f;
+    viewRange = 19;
+    reactionRange = 60.0f;
     spritePath = ":/tanks/enemySniper.png";
     shootSoundID = "sniperShot";
     bulletType = Bullet::BulletType::Sniper;
-}
-
-bool EnemySniper::canSeePlayer() const {
-    if (!player || player->ifHidden()) return false;
-    if (!seesPlayer) return false;
-    return true;
 }
 
 void EnemySniper::update(float dt) {

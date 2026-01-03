@@ -8,7 +8,7 @@ class EnemyTank;
 class Bullet : public Entity
 {
 public:
-    enum class BulletType { Default, Sniper };
+    enum class BulletType { None, Default, Sniper };
 
     Bullet(const QPointF&, Tank::Direction, float, Tank*, BulletType, float);
 

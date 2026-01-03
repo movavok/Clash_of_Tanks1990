@@ -47,21 +47,25 @@ void Game::spawnEnemiesDefault() {
         tileCenter(level->getCols() - 3, level->getRows() - 3)
     };
 
-    bool sniperSpawned = false;
+    bool eliteSpawned = false;
 
     for (const QPointF& position : enemySpawns) {
-        bool spawnSniper = !sniperSpawned && QRandomGenerator::global()->bounded(100) < 45;
+        bool spawnSniper = !eliteSpawned && QRandomGenerator::global()->bounded(100) < 45;
+        bool spawnLaser = !eliteSpawned && QRandomGenerator::global()->bounded(100) < 70;
         EnemyTank* enemy = nullptr;
 
         if (spawnSniper) {
             enemy = new EnemySniper(position, player, &entities);
+            eliteSpawned = true;
+        } else if (spawnLaser) {
+            enemy = new EnemyLaser(position, player, &entities);
             enemy->addShield();
-            sniperSpawned = true;
-        }
-        else enemy = new EnemyTank(position, 30, 30, 100.0f, player, &entities);
+            eliteSpawned = true;
+        } else enemy = new EnemyTank(position, 30, 30, 100.0f, player, &entities);
 
         enemy->setTileSize(level->getTileSize());
         connect(enemy, &EnemyTank::bulletFired, this, &Game::addEntity);
+        connect(enemy, &EnemyLaser::laserFired, this, &Game::onFireLaser);
         addEntity(enemy);
     }
 }
@@ -113,10 +117,18 @@ void Game::removeEntity(Entity* entity) {
     int index = entities.indexOf(entity);
     if (index != -1) {
         entities.removeAt(index);
-        if (Tank* removedTank = dynamic_cast<Tank*>(entity))
-            for (Entity* &entity : entities)
-                if (Bullet* bullet = dynamic_cast<Bullet*>(entity))
+        if (Tank* removedTank = dynamic_cast<Tank*>(entity)) {
+            for (Entity* &e : entities) {
+                if (Bullet* bullet = dynamic_cast<Bullet*>(e))
                     if (bullet->getOwner() == removedTank) bullet->clearOwner();
+            }
+            QList<Entity*> lasersToRemove;
+            for (Entity* &e : entities) {
+                if (LaserRay* laser = dynamic_cast<LaserRay*>(e))
+                    if (laser->getOwner() == removedTank) lasersToRemove.append(laser);
+            }
+            for (Entity* laserEntity : lasersToRemove) { removeEntity(laserEntity); Audio::stopSound("shootLaser"); }
+        }
 
         if (QObject* obj = dynamic_cast<QObject*>(entity)) obj->disconnect();
         delete entity;
@@ -179,8 +191,13 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
             enemy->setSeesPlayer(enemySeesPlayer(enemy));
 
         entity->update(deltaTime);
-
-        if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
+        if (LaserRay* laser = dynamic_cast<LaserRay*>(entity)) {
+            if (level) {
+                QRectF area = laser->bounds();
+                level->destroyInRect(area);
+                if (level->intersectsBulletSolid(area)) Audio::play("brickBreaking");
+            }
+        } else if (Bullet* bullet = dynamic_cast<Bullet*>(entity)) {
             if (bullet->isAlive() && checkWindowBounds(bullet, windowSize)) bullet->destroy();
             if (bullet->isAlive() && level->intersectsBulletSolid(bullet->bounds())) {
                 level->destroyInRect(bullet->bounds());
@@ -199,6 +216,51 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
             if (collided) entity->setPosition(oldPos);
         }
     }
+}
+
+void Game::onFireLaser(LaserRay* ray) {
+    ray->setFullLength(calculateLaserLength(ray->getPosition(), ray->getDirection(), ray->getThickness()));
+    addEntity(ray);
+}
+
+float Game::calculateLaserLength(const QPointF& origin, Tank::Direction dir, float thickness) const {
+    if (!level) return 0.0f;
+
+    const float step = 8.0f;
+    float travelled = step * 0.5f;
+
+    while (travelled <= 608.0f) {
+        QRectF probeRect;
+        switch (dir) {
+        case Tank::Direction::RIGHT:
+            probeRect = QRectF(origin.x() + travelled, origin.y(), step, thickness);
+            break;
+        case Tank::Direction::LEFT:
+            probeRect = QRectF(origin.x() - travelled - step + thickness, origin.y(), step, thickness);
+            break;
+        case Tank::Direction::DOWN:
+            probeRect = QRectF(origin.x(), origin.y() + travelled, thickness, step);
+            break;
+        case Tank::Direction::UP:
+            probeRect = QRectF(origin.x(), origin.y() - travelled - step + thickness, thickness, step);
+            break;
+        }
+
+        if (level->intersectsBulletSolid(probeRect)) { travelled += std::max(thickness, step); break; }
+
+        bool hitTank = false;
+        for (Entity* entity : entities) {
+            if (!entity->isAlive()) continue;
+            if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<LaserRay*>(entity))
+                continue;
+            if (probeRect.intersects(entity->bounds())) { hitTank = true; break; }
+        }
+        if (hitTank) { travelled += std::max(thickness, step); break; }
+
+        travelled += step;
+    }
+
+    return travelled;
 }
 
 void Game::cleanupDeadEntities() {
@@ -268,7 +330,6 @@ void Game::checkIfShotDown() {
                     if (bullet->bounds().intersects(tank->bounds())) bullet->destroy();
                     continue;
                 }
-
                 if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
                     if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
@@ -289,15 +350,24 @@ void Game::checkIfShotDown() {
             }
         }
     }
+
+    for (Entity* &entity : entities) {
+        LaserRay* laser = dynamic_cast<LaserRay*>(entity);
+        if (!laser || !laser->isAlive()) continue;
+
+        if (player && player->isAlive() && laser->bounds().intersects(player->bounds())) {
+            handleTankHit(player);
+        }
+    }
 }
 
 bool Game::checkCollision(Entity* entity) {
-    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<DeathMark*>(entity) || !entity->isAlive())
+    if (dynamic_cast<Bullet*>(entity) || dynamic_cast<PowerUp*>(entity) || dynamic_cast<DeathMark*>(entity) || dynamic_cast<LaserRay*>(entity) || !entity->isAlive())
         return false;
 
     QRectF eBounds = entity->bounds();
     for (Entity* &other : entities) {
-        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || !other->isAlive())
+        if (other == entity || dynamic_cast<Bullet*>(other) || dynamic_cast<PowerUp*>(other) || dynamic_cast<LaserRay*>(other) || !other->isAlive())
             continue;
         if (eBounds.intersects(other->bounds())) return true;
     }
@@ -403,4 +473,32 @@ void Game::applyPowerUp(PowerUp* boost) {
     case PowerUp::BoostType::Shield: player->addShield(); Audio::play("shieldPowerUp"); break;
     }
     boost->destroy();
+}
+
+void Game::handleTankHit(Tank* tank) {
+    if (!tank || !tank->isAlive()) return;
+    if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
+        if (playerTankHit->hasShield()) { playerTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
+        else {
+            tank->destroy(); Audio::play("tankDestroyed");
+            QRectF tankBounds = tank->bounds();
+            QPointF center = tankBounds.center();
+            float markSize = static_cast<float>(std::max(tankBounds.width(), tankBounds.height()));
+            addEntity(new DeathMark(center, markSize * 2, 0.125f, tank->getDirection()));
+        }
+    } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
+        if (enemyTankHit->hasShield()) { enemyTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
+        else { tank->destroy(); Audio::play("tankDestroyed");
+            QRectF tankBounds = tank->bounds();
+            QPointF center = tankBounds.center();
+            float markSize = static_cast<float>(std::max(tankBounds.width(), tankBounds.height()));
+            addEntity(new DeathMark(center, markSize * 2, 0.125f, tank->getDirection()));
+        }
+    } else {
+        tank->destroy(); Audio::play("tankDestroyed");
+        QRectF tankBounds = tank->bounds();
+        QPointF center = tankBounds.center();
+        float markSize = static_cast<float>(std::max(tankBounds.width(), tankBounds.height()));
+        addEntity(new DeathMark(center, markSize * 2, 0.125f, tank->getDirection()));
+    }
 }

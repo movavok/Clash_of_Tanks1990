@@ -15,7 +15,6 @@ protected:
     IndicatorType currentIndicator() const override;
 
 private:
-    bool canSeePlayer() const override;
     bool aimedAtPlayer() const;
 };
 

@@ -3,11 +3,17 @@
 		<file alias="playerTank.png">../assets/tanks/playerTank.png</file>
 		<file alias="enemyTank.png">../assets/tanks/enemyTank.png</file>
 		<file alias="enemySniper.png">../assets/tanks/enemySniper.png</file>
+		<file alias="enemyLaser.png">../assets/tanks/enemyLaser.png</file>
 		<file alias="deadTank.png">../assets/tanks/deadTank.png</file>
 	</qresource>
 	<qresource prefix="/bullets">
 		<file alias="bullet.png">../assets/bullets/bullet.png</file>
 		<file alias="sniperBullet.png">../assets/bullets/sniperBullet.png</file>
+	</qresource>
+	<qresource prefix="/bullets/laserRay">
+		<file alias="start.png">../assets/bullets/laserRay/start.png</file>
+		<file alias="mid.png">../assets/bullets/laserRay/mid.png</file>
+		<file alias="end.png">../assets/bullets/laserRay/end.png</file>
 	</qresource>
 	<qresource prefix="/tiles">
 		<file alias="background.png">../assets/tiles/background.png</file>
@@ -51,6 +57,7 @@
 	        <file alias="canSeePlayer.png">../assets/indicators/canSeePlayer.png</file>
 		<file alias="aimAtPlayer.png">../assets/indicators/aimAtPlayer.png</file>
 		<file alias="dodgeBullets.png">../assets/indicators/dodgeBullets.png</file>
+		<file alias="shootingLaser.png">../assets/indicators/shootingLaser.png</file>
 	</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>

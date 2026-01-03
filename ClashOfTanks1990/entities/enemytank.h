@@ -2,6 +2,7 @@
 #define ENEMYTANK_H
 
 #include "playertank.h"
+#include "laserray.h"
 
 class EnemyTank : public Tank
 {
@@ -28,12 +29,14 @@ protected:
     QString shootSoundID = "shoot";
     float bulletSpeed = 150.0f;
     float shootCooldown = 1.5f;
+    unsigned short viewRange = 6;
 
     float behaviorTimer = 0.0f;
     float reactionTimer = 0.0f;
+    float reactionRange = 20.0f;
 
     Bullet::BulletType bulletType = Bullet::BulletType::Default;
-    enum class IndicatorType { None, Chase, Dodge, Aim };
+    enum class IndicatorType { None, Chase, Dodge, Aim, Focus };
     virtual EnemyTank::IndicatorType currentIndicator() const;
     bool canShowEye = true;
 
@@ -41,15 +44,24 @@ protected:
     bool isMoving = true;
     bool seesPlayer = false;
 
-    virtual Bullet* shoot() override;
+    Bullet* shoot() override;
 
     Direction turnToPlayer() const;
     virtual bool canShoot() const;
-    void tryShoot(float);
+    bool canSeePlayer() const;
+    virtual void tryShoot(float);
+
+    float lastShotTime = 0.0f;
+    float baseSpeed = 0.0f;
+    float speedBoostTime = 0.0f;
+    float speedBoostDuration = 0.0f;
+    float speedMultiplier = 1.0f;
+    float reloadBoostTime = 0.0f;
+    float reloadBoostDuration = 0.0f;
+    bool reloadBoostWasActive = false;
+    int shieldCharges = 0;
 
 private:
-    float lastShotTime = 0.0f;
-
     enum class BehaviorState { Patrol, Chase, Dodge };
     BehaviorState state = BehaviorState::Patrol;
     void decideBehavior(float);
@@ -67,18 +79,7 @@ private:
 
     int tileSize = 0;
 
-    float baseSpeed = 0.0f;
-    float speedBoostTime = 0.0f;
-    float speedBoostDuration = 0.0f;
-    float speedMultiplier = 1.0f;
-    float reloadBoostTime = 0.0f;
-    float reloadBoostDuration = 0.0f;
-    bool reloadBoostWasActive = false;
-    int shieldCharges = 0;
-
     void updateBoosts(float);
-
-    virtual bool canSeePlayer() const;
 
     void drawShieldAura(QPainter*) const;
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
@@ -88,6 +89,7 @@ private:
 
 signals:
     void bulletFired(Bullet*);
+    void laserFired(LaserRay* ray);
 };
 
 #endif // ENEMYTANK_H
