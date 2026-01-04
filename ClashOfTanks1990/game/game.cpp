@@ -205,9 +205,12 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
                 bullet->destroy();
             }
             for (Entity* &other : entities) {
-                DeathMark* corpse = dynamic_cast<DeathMark*>(other);
-                if (!corpse || !corpse->isAlive()) continue;
-                if (bullet->bounds().intersects(corpse->bounds())) { bullet->destroy(); break; }
+                if (!other->isAlive()) continue;
+                if (DeathMark* corpse = dynamic_cast<DeathMark*>(other)) {
+                    if (bullet->bounds().intersects(corpse->bounds())) { bullet->destroy(); break; }
+                } else if (LaserRay* laser = dynamic_cast<LaserRay*>(other)) {
+                    if (bullet->bounds().intersects(laser->bounds())) { bullet->applyLaserBoost(); break; }
+                }
             }
         } else {
             bool collided = false;

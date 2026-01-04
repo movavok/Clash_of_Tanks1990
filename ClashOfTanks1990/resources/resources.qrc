@@ -9,6 +9,7 @@
 	<qresource prefix="/bullets">
 		<file alias="bullet.png">../assets/bullets/bullet.png</file>
 		<file alias="sniperBullet.png">../assets/bullets/sniperBullet.png</file>
+		<file alias="laserBullet.png">../assets/bullets/laserBullet.png</file>
 	</qresource>
 	<qresource prefix="/bullets/laserRay">
 		<file alias="start.png">../assets/bullets/laserRay/start.png</file>

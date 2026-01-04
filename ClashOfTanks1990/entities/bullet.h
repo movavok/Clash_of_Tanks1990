@@ -27,6 +27,8 @@ public:
 
     bool isFromEnemy() const;
 
+    void applyLaserBoost();
+
 private:
     Tank* owner;
     Tank::Direction direction;
@@ -35,6 +37,9 @@ private:
     unsigned short height;
     bool fromEnemy = false;
     QString spritePath;
+
+    bool laserBoosted = false;
+    float speedMult = 1.0;
 };
 
 #endif // BULLET_H

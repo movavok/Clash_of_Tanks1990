@@ -16,6 +16,7 @@ void EnemyLaser::update(float dt) {
         isMoving = false;
 
         lastShotTime += dt;
+        if (reloadBoostTime > 0.0f) reloadBoostTime -= dt;
         if (laserTimer >= laserDuration) {
             isShootingLaser = false;
             laserTimer = 0.0f;

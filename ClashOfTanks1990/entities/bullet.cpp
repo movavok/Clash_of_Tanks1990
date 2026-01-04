@@ -15,7 +15,7 @@ Bullet::Bullet(const QPointF& pos, Tank::Direction dir, float spd, Tank* own, Bu
 }
 
 void Bullet::update(float deltaTime) {
-    float distance = speed * deltaTime;
+    float distance = speed * speedMult * deltaTime;
 
     switch(direction) {
     case Tank::Direction::UP:    position.ry() -= distance; break;
@@ -26,7 +26,7 @@ void Bullet::update(float deltaTime) {
 }
 
 void Bullet::render(QPainter* painter) {
-    QPixmap sprite(spritePath);
+    QPixmap sprite(laserBoosted ? ":/bullets/laserBullet.png" : spritePath);
     QPixmap scaled = sprite.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     if (!sprite.isNull()) {
         QTransform rot;
@@ -60,5 +60,14 @@ unsigned short Bullet::getWidth() const { return width; }
 unsigned short Bullet::getHeight() const { return height; }
 
 bool Bullet::isFromEnemy() const { return fromEnemy; }
+
+void Bullet::applyLaserBoost() {
+    if (!laserBoosted) {
+        laserBoosted = true;
+        speedMult = 2.0f;
+        width *= 1.6f;
+        height *= 1.6f;
+    }
+}
 
 QRectF Bullet::bounds() const { return QRectF(position.x(), position.y(), width, height); }
