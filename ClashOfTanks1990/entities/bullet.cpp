@@ -70,4 +70,5 @@ void Bullet::applyLaserBoost() {
     }
 }
 
+bool Bullet::isLaserBoosted() const { return laserBoosted; }
 QRectF Bullet::bounds() const { return QRectF(position.x(), position.y(), width, height); }

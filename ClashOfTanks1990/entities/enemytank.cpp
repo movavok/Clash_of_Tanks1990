@@ -192,9 +192,10 @@ bool EnemyTank::canSeePlayer() const {
 
 Bullet* EnemyTank::shoot() {
     lastShotTime = 0.0f;
+    chargeTimer = 0.0f;
     float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
-    Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, bulletSpeed, this, bulletType, sizeCoef);
+    Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, bulletSpeed * bulletSpeedMult, this, bulletType, sizeCoef);
 
     float drawWth = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getHeight() : bullet->getWidth();
     float drawHgt = (currentDirection == Direction::LEFT || currentDirection == Direction::RIGHT) ? bullet->getWidth() : bullet->getHeight();
@@ -227,8 +228,18 @@ void EnemyTank::render(QPainter* painter) {
     }
 
     if (!icon.isNull()) {
-        QPixmap scaled = icon.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        painter->drawPixmap(position.x() + width / 2 - scaled.width() / 2, position.y() + height + 2, scaled);
+        float iconSize = 16;
+        QPixmap scaled = icon.scaled(iconSize, iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+        if (indicator == IndicatorType::Aim) {
+            QPointF center(position.x() + width / 2, position.y() + height + iconSize / 2 + 2);
+            painter->save();
+            painter->translate(center);
+            float rotationAngle = chargeTimer * chargeTimer * 180.0f;
+            painter->rotate(rotationAngle);
+            painter->drawPixmap(-scaled.width() / 2, -scaled.height() / 2, scaled);
+            painter->restore();
+        } else painter->drawPixmap(position.x() + width / 2 - scaled.width() / 2, position.y() + height + 2, scaled);
     }
 
     QPixmap enemySprite(spritePath);

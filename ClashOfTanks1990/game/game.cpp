@@ -60,6 +60,7 @@ void Game::spawnEnemiesDefault() {
         } else if (spawnLaser) {
             enemy = new EnemyLaser(position, player, &entities);
             enemy->addShield();
+            //enemy->applyReloadBoost(8.0f);
             eliteSpawned = true;
         } else enemy = new EnemyTank(position, 30, 30, 100.0f, player, &entities);
 
@@ -335,13 +336,22 @@ void Game::checkIfShotDown() {
                 }
                 if (bullet->bounds().intersects(tank->bounds())) {
                     bullet->destroy();
+                    bool boosted = bullet->isLaserBoosted();
                     if (PlayerTank* playerTankHit = dynamic_cast<PlayerTank*>(tank)) {
-                        if (playerTankHit->hasShield()) { playerTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
-                        else tank->destroy();
-                    } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
-                        if (enemyTankHit->hasShield()) { enemyTankHit->consumeShield(); Audio::play("shieldDestroyed"); }
+                        if (playerTankHit->hasShield()) {
+                            playerTankHit->consumeShield();
+                            Audio::play("shieldDestroyed");
+                            if (boosted) { tank->destroy(); Audio::play("tankDestroyed"); }
+                        }
                         else { tank->destroy(); Audio::play("tankDestroyed"); }
-                    } else tank->destroy();
+                    } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
+                        if (enemyTankHit->hasShield()) {
+                            enemyTankHit->consumeShield();
+                            Audio::play("shieldDestroyed");
+                            if (boosted) { tank->destroy(); Audio::play("tankDestroyed"); }
+                        }
+                        else { tank->destroy(); Audio::play("tankDestroyed"); }
+                    } else { tank->destroy(); Audio::play("tankDestroyed"); }
                     if (!tank->isAlive()) {
                         QRectF tankBounds = tank->bounds();
                         QPointF center = tankBounds.center();

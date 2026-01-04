@@ -28,6 +28,7 @@ public:
     bool isFromEnemy() const;
 
     void applyLaserBoost();
+    bool isLaserBoosted() const;
 
 private:
     Tank* owner;

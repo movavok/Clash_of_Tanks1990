@@ -3,7 +3,7 @@
 EnemySniper::EnemySniper(const QPointF& pos, PlayerTank* player, const QList<Entity*>* list)
     : EnemyTank(pos, 30, 30, 70.0f, player, list)
 {
-    bulletSpeed = 450.0f;
+    bulletSpeed = 400.0f;
     shootCooldown = 4.0f;
     viewRange = 19;
     reactionRange = 60.0f;
@@ -18,9 +18,15 @@ void EnemySniper::update(float dt) {
             currentDirection = turnToPlayer();
             reactionTimer = 0.0f;
         }
-        if (aimedAtPlayer()) isMoving = false;
-        else isMoving = true;
+        if (aimedAtPlayer()) {
+            chargeTimer += dt;
+            isMoving = false;
+        } else {
+            isMoving = true;
+        }
     }
+    bulletSpeedMult = 1.0f + chargeTimer * 0.5f;
+    sizeChargeCoef = 1.0f + std::min(chargeTimer, 1.25f) * 0.5;
     EnemyTank::update(dt);
 }
 

@@ -31,6 +31,10 @@ protected:
     float shootCooldown = 1.5f;
     unsigned short viewRange = 6;
 
+    float chargeTimer = 0.0f;
+    float bulletSpeedMult = 1.0f;
+    float sizeChargeCoef = 1.0f;
+
     float behaviorTimer = 0.0f;
     float reactionTimer = 0.0f;
     float reactionRange = 20.0f;
