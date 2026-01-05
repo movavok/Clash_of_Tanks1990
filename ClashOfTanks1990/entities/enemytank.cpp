@@ -1,17 +1,30 @@
 #include "enemytank.h"
 
 EnemyTank::EnemyTank(const QPointF& pos, unsigned short wth, unsigned short hgt, float spd, PlayerTank* player, const QList<Entity*>* list)
-    : Tank(pos, wth, hgt, spd), player(player), entities(list), baseSpeed(spd) {}
+    : Tank(pos, wth, hgt, spd), player(player), entities(list), baseSpeed(spd) {
+    lastSeenPos = pos;
+}
 
 void EnemyTank::setTileSize(int size) { tileSize = size; }
+int EnemyTank::getTileSize() const { return tileSize; }
 
 void EnemyTank::setSeesPlayer(bool flag) { seesPlayer = flag; }
+void EnemyTank::setSeesBoost(bool flag) { seesBoost = flag; }
+unsigned short EnemyTank::getViewRange() const { return viewRange; }
 
 void EnemyTank::update(float deltaTime) {
+    checkPrevPosition(deltaTime);
     updateBoosts(deltaTime);
 
     if (dodgeCooldown > 0.0f) dodgeCooldown -= deltaTime;
     decideBehavior(deltaTime);
+
+    if (stuckTimer > 0.45f && currentIndicator() != IndicatorType::Aim && state != BehaviorState::Dodge) {
+        currentDirection = unstuckDirection();
+        stuckTimer = 0.0f;
+        reactionTimer = 0.0f;
+        isMoving = true;
+    }
 
     if (isMoving) move(currentDirection, deltaTime);
 
@@ -67,6 +80,7 @@ void EnemyTank::decideBehavior(float dt) {
     case BehaviorState::Patrol: patrolBehavior(dt); break;
     case BehaviorState::Chase: chaseBehavior(); break;
     case BehaviorState::Dodge: dodgeBehavior(dt); break;
+    case BehaviorState::Collect: collectBehavior(); break;
     }
 }
 
@@ -81,6 +95,8 @@ void EnemyTank::patrolBehavior(float dt) {
             return;
         }
 
+    if (!canSeePlayer() && seesBoost) { state = BehaviorState::Collect; return; }
+
     if (behaviorTimer >= 1.0f && state == BehaviorState::Patrol) {
         currentDirection = static_cast<Direction>(rand() % 4);
         behaviorTimer = 0.0f;
@@ -94,7 +110,7 @@ void EnemyTank::chaseBehavior() {
 
     if (!canSeePlayer()) {
         if (reactionTimer > 0.5f) {
-            state = BehaviorState::Patrol;
+            state = seesBoost ? BehaviorState::Collect : BehaviorState::Patrol;
             reactionTimer = 0.0f;
         }
         return;
@@ -137,6 +153,96 @@ void EnemyTank::dodgeBehavior(float dt) {
     isMoving = true;
 }
 
+void EnemyTank::collectBehavior() {
+    if (canSeePlayer()) { state = BehaviorState::Chase; return; }
+
+    if (!seesBoost) { state = BehaviorState::Patrol; isMoving = true; return; }
+
+    QPointF targetCenter;
+    if (!nearestPowerUp(targetCenter)) { state = BehaviorState::Patrol; isMoving = true; return; }
+
+    // QPointF selfCenter(position.x() + width  * 0.5f, position.y() + height * 0.5f);
+    // QPointF delta = targetCenter - selfCenter;
+    // float distSq = delta.x()*delta.x() + delta.y()*delta.y();
+    //float pickupRadius = tileSize * 0.4f;
+
+    // if (distSq <= pickupRadius * pickupRadius) {
+    //     isMoving = false;
+    //     return;
+    // }
+
+    if (reactionTimer > 0.5f) {
+        currentDirection = turnToPoint(targetCenter);
+        reactionTimer = 0.0f;
+    }
+    isMoving = true;
+}
+
+PowerUp* EnemyTank::nearestPowerUp(QPointF& outCenter) const {
+    PowerUp* nearest = nullptr;
+    float bestDistance = 0.0f;
+    for (Entity* entity : *entities) {
+        if (PowerUp* boost = dynamic_cast<PowerUp*>(entity)) {
+            if (!boost->isAlive()) continue;
+            const QPointF center = boost->bounds().center();
+            float deltaX = static_cast<float>(center.x() - position.x());
+            float deltaY = static_cast<float>(center.y() - position.y());
+            float maxViewRange = static_cast<float>(viewRange * tileSize);
+            float distance = deltaX * deltaX + deltaY * deltaY;
+            if (distance > pow(maxViewRange, 2)) continue;
+            if (!nearest) { nearest = boost; outCenter = center; bestDistance = distance; }
+            else if (distance < bestDistance) { bestDistance = distance; nearest = boost; outCenter = center; }
+        }
+    }
+    return nearest;
+}
+
+Tank::Direction EnemyTank::turnToPoint(const QPointF& target) const {
+    const float deltaX = static_cast<float>(target.x() - (position.x() + width  * 0.5f));
+    const float deltaY = static_cast<float>(target.y() - (position.y() + height * 0.5f));
+    if (std::abs(deltaX) > std::abs(deltaY))
+        return deltaX > 0 ? Tank::Direction::RIGHT : Tank::Direction::LEFT;
+    else
+        return deltaY > 0 ? Tank::Direction::DOWN : Tank::Direction::UP;
+}
+
+void EnemyTank::checkPrevPosition(float deltaTime) {
+    const float minMovementSquared = 0.25f;
+    float deltaX = static_cast<float>(position.x() - lastSeenPos.x());
+    float deltaY = static_cast<float>(position.y() - lastSeenPos.y());
+    float movedSquared = deltaX * deltaX + deltaY * deltaY;
+    if (movedSquared <= minMovementSquared) stuckTimer += deltaTime;
+    else { stuckTimer = 0.0f; lastSeenPos = position; }
+}
+
+Tank::Direction EnemyTank::unstuckDirection() const {
+    if (canSeePlayer() && player) {
+        const float targetDeltaX = static_cast<float>(player->getPosition().x() - position.x());
+        const float targetDeltaY = static_cast<float>(player->getPosition().y() - position.y());
+        if (currentDirection == Tank::Direction::LEFT || currentDirection == Tank::Direction::RIGHT)
+            return (targetDeltaY > 0) ? Tank::Direction::DOWN : Tank::Direction::UP;
+        else
+            return (targetDeltaX > 0) ? Tank::Direction::RIGHT : Tank::Direction::LEFT;
+    }
+
+    if (seesBoost) {
+        QPointF boostCenter;
+        if (nearestPowerUp(boostCenter)) {
+            const float targetDeltaX = static_cast<float>(boostCenter.x() - position.x());
+            const float targetDeltaY = static_cast<float>(boostCenter.y() - position.y());
+            if (currentDirection == Tank::Direction::LEFT || currentDirection == Tank::Direction::RIGHT)
+                return (targetDeltaY > 0) ? Tank::Direction::DOWN : Tank::Direction::UP;
+            else
+                return (targetDeltaX > 0) ? Tank::Direction::RIGHT : Tank::Direction::LEFT;
+        }
+    }
+
+    if (currentDirection == Tank::Direction::LEFT || currentDirection == Tank::Direction::RIGHT)
+        return (rand() % 2) ? Tank::Direction::UP : Tank::Direction::DOWN;
+    else
+        return (rand() % 2) ? Tank::Direction::LEFT : Tank::Direction::RIGHT;
+}
+
 bool EnemyTank::bulletNearby() {
     QRectF dangerZone = bounds().adjusted((-1) * reactionRange, (-1) * reactionRange, reactionRange, reactionRange);
 
@@ -159,9 +265,9 @@ Tank::Direction EnemyTank::turnToPlayer() const {
     float dx = player->getPosition().x() - position.x();
     float dy = player->getPosition().y() - position.y();
 
-    if (std::abs(dx) > std::abs(dy)) 
+    if (std::abs(dx) > std::abs(dy))
         return dx > 0 ? Tank::Direction::RIGHT : Tank::Direction::LEFT;
-    else 
+    else
         return dy > 0 ? Tank::Direction::DOWN : Tank::Direction::UP;
 }
 
@@ -224,6 +330,7 @@ void EnemyTank::render(QPainter* painter) {
     case IndicatorType::Chase: icon = QPixmap(":/indicators/canSeePlayer.png"); break;
     case IndicatorType::Aim: icon = QPixmap(":/indicators/aimAtPlayer.png"); break;
     case IndicatorType::Focus: icon = QPixmap(":/indicators/shootingLaser.png"); break;
+    case IndicatorType::Gift: icon = QPixmap(":/indicators/collectingPowerUps.png"); break;
     default: break;
     }
 
@@ -260,6 +367,7 @@ void EnemyTank::render(QPainter* painter) {
 
 EnemyTank::IndicatorType EnemyTank::currentIndicator() const {
     if (state == BehaviorState::Dodge) return IndicatorType::Dodge;
+    if (state == BehaviorState::Collect) return IndicatorType::Gift;
     if (canShowEye && canSeePlayer()) return IndicatorType::Chase;
     return IndicatorType::None;
 }

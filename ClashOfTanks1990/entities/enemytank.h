@@ -3,6 +3,7 @@
 
 #include "playertank.h"
 #include "laserray.h"
+#include "powerup.h"
 
 class EnemyTank : public Tank
 {
@@ -14,7 +15,10 @@ public:
     void render(QPainter*) override;
 
     void setTileSize(int);
+    int getTileSize() const;
     void setSeesPlayer(bool);
+    void setSeesBoost(bool);
+    unsigned short getViewRange() const;
 
     void applySpeedBoost(float, float);
     void applyReloadBoost(float);
@@ -33,20 +37,20 @@ protected:
 
     float chargeTimer = 0.0f;
     float bulletSpeedMult = 1.0f;
-    float sizeChargeCoef = 1.0f;
 
     float behaviorTimer = 0.0f;
     float reactionTimer = 0.0f;
     float reactionRange = 20.0f;
 
     Bullet::BulletType bulletType = Bullet::BulletType::Default;
-    enum class IndicatorType { None, Chase, Dodge, Aim, Focus };
+    enum class IndicatorType { None, Chase, Dodge, Aim, Focus, Gift };
     virtual EnemyTank::IndicatorType currentIndicator() const;
     bool canShowEye = true;
 
     Direction currentDirection = Direction::DOWN;
     bool isMoving = true;
     bool seesPlayer = false;
+    bool seesBoost = false;
 
     Bullet* shoot() override;
 
@@ -66,12 +70,16 @@ protected:
     int shieldCharges = 0;
 
 private:
-    enum class BehaviorState { Patrol, Chase, Dodge };
+    enum class BehaviorState { Patrol, Chase, Dodge, Collect };
     BehaviorState state = BehaviorState::Patrol;
     void decideBehavior(float);
     void patrolBehavior(float);
     void chaseBehavior();
     void dodgeBehavior(float);
+    void collectBehavior();
+
+    PowerUp* nearestPowerUp(QPointF&) const;
+    Direction turnToPoint(const QPointF&) const;
 
     float dodgeCooldown = 0.0f;
     float dodgeTimer = 0.0f;
@@ -79,8 +87,8 @@ private:
     QPointF lastBulletPos;
     QPointF lastBulletDir;
     const QList<Entity*>* entities;
-    bool bulletNearby();
 
+    bool bulletNearby();
     int tileSize = 0;
 
     void updateBoosts(float);
@@ -90,6 +98,12 @@ private:
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
     void drawCooldownBar(QPainter*) const;
     void drawBoostBar(QPainter*, int&, float, float, const QColor&) const;
+
+    void checkPrevPosition(float);
+    QPointF lastSeenPos;
+    float stuckTimer = 0.0f;
+    Tank::Direction unstuckDirection() const;
+
 
 signals:
     void bulletFired(Bullet*);

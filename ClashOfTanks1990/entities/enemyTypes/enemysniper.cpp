@@ -26,7 +26,6 @@ void EnemySniper::update(float dt) {
         }
     }
     bulletSpeedMult = 1.0f + chargeTimer * 0.5f;
-    sizeChargeCoef = 1.0f + std::min(chargeTimer, 1.25f) * 0.5;
     EnemyTank::update(dt);
 }
 

@@ -188,8 +188,10 @@ void Game::updateEntities(float deltaTime, const QSize& windowSize) {
         if (!entity->isAlive()) continue;
 
         QPointF oldPos = entity->getPosition();
-        if (EnemyTank* enemy = dynamic_cast<EnemyTank*>(entity))
+        if (EnemyTank* enemy = dynamic_cast<EnemyTank*>(entity)) {
             enemy->setSeesPlayer(enemySeesPlayer(enemy));
+            enemy->setSeesBoost(enemySeesBoost(enemy));
+        }
 
         entity->update(deltaTime);
         if (LaserRay* laser = dynamic_cast<LaserRay*>(entity)) {
@@ -306,6 +308,28 @@ void Game::handleLevelClear() {
 
 bool Game::enemySeesPlayer(const EnemyTank* enemy) const {
     return !level->checkBlockedLine(enemy->getPosition(), player->getPosition());
+}
+
+bool Game::enemySeesBoost(const EnemyTank* enemy) const {
+    if (!level || !enemy) return false;
+
+    const float maxRange = static_cast<float>(enemy->getViewRange() * enemy->getTileSize());
+    const float maxRange2 = maxRange * maxRange;
+    const QPointF origin = enemy->getPosition();
+
+    for (Entity* entity : entities) {
+        PowerUp* boost = dynamic_cast<PowerUp*>(entity);
+        if (!boost || !boost->isAlive()) continue;
+
+        const QPointF center = boost->bounds().center();
+        const float dx = static_cast<float>(center.x() - origin.x());
+        const float dy = static_cast<float>(center.y() - origin.y());
+        const float dist2 = dx * dx + dy * dy;
+        if (dist2 > maxRange2) continue;
+
+        if (!level->checkBlockedLine(origin, center)) return true;
+    }
+    return false;
 }
 
 void Game::checkIfShotDown() {

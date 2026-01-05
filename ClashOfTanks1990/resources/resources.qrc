@@ -59,6 +59,7 @@
 		<file alias="aimAtPlayer.png">../assets/indicators/aimAtPlayer.png</file>
 		<file alias="dodgeBullets.png">../assets/indicators/dodgeBullets.png</file>
 		<file alias="shootingLaser.png">../assets/indicators/shootingLaser.png</file>
+		<file alias="collectingPowerUps.png">../assets/indicators/collectingPowerUps.png</file>
 	</qresource>
 	<qresource prefix="/sounds">
 		<file alias="brickBreaking.mp3">../assets/sounds/brickBreaking.mp3</file>

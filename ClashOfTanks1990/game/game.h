@@ -77,6 +77,7 @@ private:
     void handleLevelClear();
 
     bool enemySeesPlayer(const EnemyTank*) const;
+    bool enemySeesBoost(const EnemyTank*) const;
 
     void detectMaxLevel();
     bool loadLevel(int);
