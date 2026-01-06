@@ -16,6 +16,8 @@ void EnemyTank::update(float deltaTime) {
     checkPrevPosition(deltaTime);
     updateBoosts(deltaTime);
 
+    doRecoil(deltaTime);
+
     if (dodgeCooldown > 0.0f) dodgeCooldown -= deltaTime;
     decideBehavior(deltaTime);
 
@@ -161,16 +163,6 @@ void EnemyTank::collectBehavior() {
     QPointF targetCenter;
     if (!nearestPowerUp(targetCenter)) { state = BehaviorState::Patrol; isMoving = true; return; }
 
-    // QPointF selfCenter(position.x() + width  * 0.5f, position.y() + height * 0.5f);
-    // QPointF delta = targetCenter - selfCenter;
-    // float distSq = delta.x()*delta.x() + delta.y()*delta.y();
-    //float pickupRadius = tileSize * 0.4f;
-
-    // if (distSq <= pickupRadius * pickupRadius) {
-    //     isMoving = false;
-    //     return;
-    // }
-
     if (reactionTimer > 0.5f) {
         currentDirection = turnToPoint(targetCenter);
         reactionTimer = 0.0f;
@@ -298,7 +290,10 @@ bool EnemyTank::canSeePlayer() const {
 
 Bullet* EnemyTank::shoot() {
     lastShotTime = 0.0f;
-    chargeTimer = 0.0f;
+    if (chargeTimer > 0.0f) {
+        checkRecoilDirection();
+        chargeTimer = 0.0f;
+    }
     float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
     Bullet* bullet = new Bullet(QPointF(0, 0), currentDirection, bulletSpeed * bulletSpeedMult, this, bulletType, sizeCoef);
@@ -319,6 +314,34 @@ Bullet* EnemyTank::shoot() {
     }
     bullet->setPosition(bulletPos);
     return bullet;
+}
+
+void EnemyTank::checkRecoilDirection() {
+    float recoilDistance = 10.0f * chargeTimer;
+    switch(currentDirection) {
+    case Direction::UP: recoilY = recoilDistance; break;
+    case Direction::DOWN: recoilY = -recoilDistance; break;
+    case Direction::LEFT: recoilX = recoilDistance; break;
+    case Direction::RIGHT: recoilX = -recoilDistance; break;
+    }
+    isRecoiling = true;
+}
+
+void EnemyTank::doRecoil(float dt) {
+    float step = 200.0f * dt;
+
+    if (recoilX != 0.0f) {
+        float move = std::min(step, std::abs(recoilX));
+        position.rx() += (recoilX > 0 ? move : -move);
+        recoilX += (recoilX > 0 ? -move : move);
+    }
+    if (recoilY != 0.0f) {
+        float move = std::min(step, std::abs(recoilY));
+        position.ry() += (recoilY > 0 ? move : -move);
+        recoilY += (recoilY > 0 ? -move : move);
+    }
+
+    if (recoilX == 0.0f && recoilY == 0.0f) isRecoiling = false;
 }
 
 void EnemyTank::render(QPainter* painter) {
@@ -355,7 +378,11 @@ void EnemyTank::render(QPainter* painter) {
     if (!enemySprite.isNull()) {
         QPixmap scaledSprite;
         QPoint drawPos = drawRotatedSprite(painter, enemySprite, scaledSprite);
-        drawSpeedTrail(painter, drawPos, scaledSprite);
+        QPixmap drawSprite = (chargeTimer > 0.0f) ? redOverlay(scaledSprite)
+                                                  : scaledSprite;
+
+        painter->drawPixmap(drawPos, drawSprite);
+        drawSpeedTrail(painter, drawPos, drawSprite);
     }
 
     drawCooldownBar(painter);
@@ -363,6 +390,22 @@ void EnemyTank::render(QPainter* painter) {
     int barY = static_cast<int>(position.y() - 12.0);
     drawBoostBar(painter, barY, speedBoostTime,  speedBoostDuration,  QColor(200, 90, 255));
     drawBoostBar(painter, barY, reloadBoostTime, reloadBoostDuration, QColor(247, 129, 32));
+}
+
+QPixmap EnemyTank::redOverlay(const QPixmap& source) {
+    QColor redOverlay(255, 40, 40);
+    redOverlay.setAlphaF(0.7f * (chargeTimer / 4.0f));
+
+    QPixmap tinted(source.size());
+    tinted.fill(Qt::transparent);
+
+    QPainter overlayPainter(&tinted);
+    overlayPainter.drawPixmap(0, 0, source);
+    overlayPainter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    overlayPainter.fillRect(tinted.rect(), redOverlay);
+    overlayPainter.end();
+
+    return tinted;
 }
 
 EnemyTank::IndicatorType EnemyTank::currentIndicator() const {

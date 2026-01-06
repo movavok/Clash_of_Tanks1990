@@ -98,16 +98,22 @@ private:
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
     void drawCooldownBar(QPainter*) const;
     void drawBoostBar(QPainter*, int&, float, float, const QColor&) const;
+    QPixmap redOverlay(const QPixmap&);
 
     void checkPrevPosition(float);
     QPointF lastSeenPos;
     float stuckTimer = 0.0f;
     Tank::Direction unstuckDirection() const;
 
+    bool isRecoiling = false;
+    float recoilX = 0.0f;
+    float recoilY = 0.0f;
+    void checkRecoilDirection();
+    void doRecoil(float);
 
 signals:
     void bulletFired(Bullet*);
-    void laserFired(LaserRay* ray);
+    void laserFired(LaserRay*);
 };
 
 #endif // ENEMYTANK_H
