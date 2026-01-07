@@ -96,6 +96,7 @@ private:
     void drawShieldAura(QPainter*) const;
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;
     void drawSpeedTrail(QPainter*, const QPoint&, const QPixmap&) const;
+    float lastCharge = 0.0f;
     void drawCooldownBar(QPainter*) const;
     void drawBoostBar(QPainter*, int&, float, float, const QColor&) const;
     QPixmap redOverlay(const QPixmap&);
@@ -113,7 +114,7 @@ private:
 
 signals:
     void bulletFired(Bullet*);
-    void laserFired(LaserRay*);
+    void laserFired(LaserRay* ray);
 };
 
 #endif // ENEMYTANK_H

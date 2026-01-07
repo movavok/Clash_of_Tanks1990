@@ -16,8 +16,6 @@ void EnemyTank::update(float deltaTime) {
     checkPrevPosition(deltaTime);
     updateBoosts(deltaTime);
 
-    doRecoil(deltaTime);
-
     if (dodgeCooldown > 0.0f) dodgeCooldown -= deltaTime;
     decideBehavior(deltaTime);
 
@@ -28,6 +26,7 @@ void EnemyTank::update(float deltaTime) {
         isMoving = true;
     }
 
+    if (isRecoiling) doRecoil(deltaTime);
     if (isMoving) move(currentDirection, deltaTime);
 
     if (!(bulletType == Bullet::BulletType::None)) tryShoot(deltaTime);
@@ -291,6 +290,7 @@ bool EnemyTank::canSeePlayer() const {
 Bullet* EnemyTank::shoot() {
     lastShotTime = 0.0f;
     if (chargeTimer > 0.0f) {
+        lastCharge = chargeTimer;
         checkRecoilDirection();
         chargeTimer = 0.0f;
     }
@@ -317,7 +317,7 @@ Bullet* EnemyTank::shoot() {
 }
 
 void EnemyTank::checkRecoilDirection() {
-    float recoilDistance = 10.0f * chargeTimer;
+    float recoilDistance = 20.0f * chargeTimer;
     switch(currentDirection) {
     case Direction::UP: recoilY = recoilDistance; break;
     case Direction::DOWN: recoilY = -recoilDistance; break;
@@ -448,15 +448,16 @@ QPoint EnemyTank::drawRotatedSprite(QPainter* painter, const QPixmap& sprite, QP
 }
 
 void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, const QPixmap& scaledSprite) const {
-    if (!isMoving) return;
+    if (!isMoving && !isRecoiling) return;
     bool dodge = state == BehaviorState::Dodge;
-    if (!(speedBoostTime > 0.0f || dodge)) return;
+    if (!(speedBoostTime > 0.0f || dodge || isRecoiling)) return;
     if (painter->opacity() <= 0.01) return;
 
-    int offset1 = dodge ? 6 : 10;
-    int offset2 = dodge ? 12 : 20;
-    double opacity1 = dodge ? 0.45 : 0.35;
-    double opacity2 = dodge ? 0.25 : 0.18;
+    int recoilOffset = static_cast<int>(-18 * lastCharge / 4.0f);
+    int offset1 = isRecoiling ? recoilOffset : dodge ? 6 : 10;
+    int offset2 = isRecoiling ? 2 * recoilOffset : dodge ? 12 : 20;
+    double opacity1 = dodge || isRecoiling ? 0.45 : 0.35;
+    double opacity2 = dodge || isRecoiling ? 0.25 : 0.18;
     int dx1 = 0, dy1 = 0;
     int dx2 = 0, dy2 = 0;
 
@@ -466,6 +467,8 @@ void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, con
     case Direction::LEFT:  dx1 = offset1; dx2 = offset2; break;
     case Direction::RIGHT: dx1 = -offset1; dx2 = -offset2; break;
     }
+    qDebug() << "charge:" << lastCharge
+             << "recoil:" << recoilOffset;
     painter->save();
     painter->setOpacity(opacity1);
     painter->drawPixmap(mainDrawPos.x() + dx1, mainDrawPos.y() + dy1, scaledSprite);
