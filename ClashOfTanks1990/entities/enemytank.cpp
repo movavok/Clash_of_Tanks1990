@@ -25,6 +25,11 @@ void EnemyTank::update(float deltaTime) {
         reactionTimer = 0.0f;
         isMoving = true;
     }
+    if (stunTimer > 0.0f) {
+        stunTimer -= deltaTime;
+        isMoving = false;
+        return;
+    }
 
     if (isRecoiling) doRecoil(deltaTime);
     if (isMoving) move(currentDirection, deltaTime);
@@ -518,6 +523,8 @@ void EnemyTank::applyReloadBoost(float durationSeconds) {
 
 void EnemyTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
 
+void EnemyTank::applyStun(float durationSeconds) { stunTimer = durationSeconds; }
+
 bool EnemyTank::hasShield() const { return shieldCharges > 0; }
 
 void EnemyTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
@@ -530,4 +537,5 @@ void EnemyTank::clearAllBuffs() {
     reloadBoostDuration = 0.0f;
     shieldCharges = 0;
     speed = baseSpeed;
+    stunTimer = 0.0f;
 }

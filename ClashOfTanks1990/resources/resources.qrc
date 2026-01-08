@@ -34,6 +34,7 @@
 		<file alias="speedPowerUp.png">../assets/powerups/speedPowerUp.png</file>
 		<file alias="reloadPowerUp.png">../assets/powerups/reloadPowerUp.png</file>
 		<file alias="shieldPowerUp.png">../assets/powerups/shieldPowerUp.png</file>
+		<file alias="trapPowerUp.png">../assets/powerups/trapPowerUp.png</file>
 	</qresource>
 	<qresource prefix="/deathmark">
 		<file alias="deathMark.png">../assets/deathmark/deathMark.png</file>

@@ -23,6 +23,7 @@ public:
     void applySpeedBoost(float, float);
     void applyReloadBoost(float);
     void addShield();
+    void applyStun(float);
     bool hasShield() const;
     void consumeShield();
     void clearAllBuffs();
@@ -68,6 +69,7 @@ protected:
     float reloadBoostDuration = 0.0f;
     bool reloadBoostWasActive = false;
     int shieldCharges = 0;
+    float stunTimer = 0.0f;
 
 private:
     enum class BehaviorState { Patrol, Chase, Dodge, Collect };

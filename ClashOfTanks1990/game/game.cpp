@@ -495,7 +495,7 @@ void Game::spawnPowerUpRandom() {
 
         if (level->intersectsTankSolid(spawnRect)) continue;
 
-        const PowerUp::BoostType chosenType = static_cast<PowerUp::BoostType>(QRandomGenerator::global()->bounded(3));
+        const PowerUp::BoostType chosenType = static_cast<PowerUp::BoostType>(QRandomGenerator::global()->bounded(4));
         PowerUp* boost = new PowerUp(spawnPos, chosenType);
         addEntity(boost);
         return;

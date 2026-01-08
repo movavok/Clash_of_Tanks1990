@@ -19,6 +19,7 @@ SOURCES += \
     entities/powerup.cpp \
     entities/deathmark.cpp \
     entities/tank.cpp \
+    entities/trapability.cpp \
     game/game.cpp \
     game/gameview.cpp \
     level/level.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     entities/powerup.h \
     entities/deathmark.h \
     entities/tank.h \
+    entities/trapability.h \
     game/game.h \
     game/gameview.h \
     level/level.h \

@@ -34,6 +34,11 @@ void PlayerTank::update(float deltaTime) {
             speedMultiplier = 1.0f;
         }
     }
+    if (stunTimer > 0.0f) {
+        stunTimer -= deltaTime;
+        isMoving = false;
+        return;
+    }
 
     speed = baseSpeed * speedMultiplier;
 
@@ -211,6 +216,8 @@ void PlayerTank::applyReloadBoost(float durationSeconds) { reloadBoostTime = dur
 
 void PlayerTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
 
+void PlayerTank::applyStun(float durationSeconds) { stunTimer = durationSeconds; }
+
 bool PlayerTank::hasShield() const { return shieldCharges > 0; }
 
 void PlayerTank::consumeShield() { if (shieldCharges > 0) shieldCharges -= 1; }
@@ -223,4 +230,5 @@ void PlayerTank::clearAllBuffs() {
     reloadBoostDuration = 0.0f;
     shieldCharges = 0;
     speed = baseSpeed;
+    stunTimer = 0.0f;
 }

@@ -26,6 +26,7 @@ public:
     void applySpeedBoost(float, float);
     void applyReloadBoost(float);
     void addShield();
+    void applyStun(float);
     bool hasShield() const;
     void consumeShield();
     void clearAllBuffs();
@@ -50,6 +51,7 @@ private:
     float reloadBoostTime = 0.0f;
     float reloadBoostDuration = 0.0f;
     int shieldCharges = 0;
+    float stunTimer = 0.0f;
 
     void drawShieldAura(QPainter*) const;
     QPoint drawRotatedSprite(QPainter*, const QPixmap&, QPixmap&) const;

@@ -6,7 +6,7 @@
 class PowerUp : public Entity
 {
 public:
-    enum class BoostType { Speed, Reload, Shield };
+    enum class BoostType { Speed, Reload, Shield, Trap };
 
     PowerUp(const QPointF&, BoostType);
 

@@ -7,11 +7,13 @@ void PowerUp::render(QPainter* painter) {
 	static QPixmap speedPx(":/powerups/speedPowerUp.png");
 	static QPixmap reloadPx(":/powerups/reloadPowerUp.png");
 	static QPixmap shieldPx(":/powerups/shieldPowerUp.png");
+    static QPixmap trapPx(":/powerups/trapPowerUp.png");
 	const QPixmap* sprite = nullptr;
 	switch (type) {
     case BoostType::Speed:  sprite = &speedPx;  break;
     case BoostType::Reload: sprite = &reloadPx; break;
     case BoostType::Shield: sprite = &shieldPx; break;
+    case BoostType::Trap: sprite = &trapPx; break;
 	}
 	if (sprite && !sprite->isNull()) {
 		QPixmap scaled = sprite->scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
