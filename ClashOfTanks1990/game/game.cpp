@@ -60,7 +60,6 @@ void Game::spawnEnemiesDefault() {
         } else if (spawnLaser) {
             enemy = new EnemyLaser(position, player, &entities);
             enemy->addShield();
-            //enemy->applyReloadBoost(8.0f);
             eliteSpawned = true;
         } else enemy = new EnemyTank(position, 30, 30, 100.0f, player, &entities);
 
@@ -167,7 +166,7 @@ void Game::update(float deltaTime, const QSize& windowSize) {
                     if (enemy->isAlive() && enemy->bounds().intersects(boost->bounds())) {
                         switch (boost->getType()) {
                         case PowerUp::BoostType::Speed:  enemy->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
-                        case PowerUp::BoostType::Reload: enemy->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+                        case PowerUp::BoostType::Reload: enemy->applyReloadBoost(8.0f, 2.0f); Audio::play("reloadPowerUp"); break;
                         case PowerUp::BoostType::Shield: enemy->addShield(); Audio::play("shieldPowerUp"); break;
                         }
                         boost->destroy();
@@ -506,7 +505,7 @@ void Game::applyPowerUp(PowerUp* boost) {
     if (!player || !boost) return;
     switch (boost->getType()) {
     case PowerUp::BoostType::Speed: player->applySpeedBoost(8.0f, 1.5f); Audio::play("speedPowerUp"); break;
-    case PowerUp::BoostType::Reload: player->applyReloadBoost(8.0f); Audio::play("reloadPowerUp"); break;
+    case PowerUp::BoostType::Reload: player->applyReloadBoost(8.0f, 2.0f); Audio::play("reloadPowerUp"); break;
     case PowerUp::BoostType::Shield: player->addShield(); Audio::play("shieldPowerUp"); break;
     }
     boost->destroy();

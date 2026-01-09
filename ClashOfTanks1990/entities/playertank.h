@@ -24,7 +24,7 @@ public:
     void resetControls();
     
     void applySpeedBoost(float, float);
-    void applyReloadBoost(float);
+    void applyReloadBoost(float, float);
     void addShield();
     void applyStun(float);
     bool hasShield() const;
@@ -50,6 +50,7 @@ private:
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
     float reloadBoostDuration = 0.0f;
+    float reloadMultiplier = 1.0f;
     int shieldCharges = 0;
     float stunTimer = 0.0f;
 

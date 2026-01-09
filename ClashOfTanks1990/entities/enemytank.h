@@ -21,7 +21,7 @@ public:
     unsigned short getViewRange() const;
 
     void applySpeedBoost(float, float);
-    void applyReloadBoost(float);
+    void applyReloadBoost(float, float);
     void addShield();
     void applyStun(float);
     bool hasShield() const;
@@ -33,7 +33,7 @@ protected:
     QString spritePath = ":/tanks/enemyTank.png";
     QString shootSoundID = "shoot";
     float bulletSpeed = 150.0f;
-    float shootCooldown = 1.5f;
+    float shootCooldown = 2.0f;
     unsigned short viewRange = 6;
 
     float chargeTimer = 0.0f;
@@ -67,6 +67,7 @@ protected:
     float speedMultiplier = 1.0f;
     float reloadBoostTime = 0.0f;
     float reloadBoostDuration = 0.0f;
+    float reloadMultiplier = 1.0f;
     bool reloadBoostWasActive = false;
     int shieldCharges = 0;
     float stunTimer = 0.0f;

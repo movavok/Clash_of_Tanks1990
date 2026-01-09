@@ -51,20 +51,27 @@ void PlayerTank::update(float deltaTime) {
         float prevMax = std::max(cdMaxAtShot, 0.001f);
         float progress = 1.0f - (cdRemaining / prevMax);
         progress = std::clamp(progress, 0.0f, 1.0f);
-        cdMaxAtShot = 1.0f;
-        cdRemaining = cdMaxAtShot * (1.0f - progress);
+
+        float newMax = shootCooldown / reloadMultiplier;
+        cdMaxAtShot = newMax;
+        cdRemaining = newMax * (1.0f - progress);
     }
     if (reloadBoostTime > 0.0f) {
         reloadBoostTime -= deltaTime;
-        if (reloadBoostTime < 0.0f) reloadBoostTime = 0.0f;
+        if (reloadBoostTime < 0.0f) {
+            reloadBoostTime = 0.0f;
+            reloadMultiplier = 1.0f;
+        }
     }
 
     if (reloadBoostWasActive && reloadBoostTime <= 0.0f && cdRemaining > 0.0f) {
         float prevMax = std::max(cdMaxAtShot, 0.001f);
         float progress = 1.0f - (cdRemaining / prevMax);
         progress = std::clamp(progress, 0.0f, 1.0f);
+
         cdMaxAtShot = shootCooldown;
-        cdRemaining = cdMaxAtShot * (1.0f - progress);
+        cdRemaining = shootCooldown * (1.0f - progress);
+        reloadMultiplier = 1.0f;
     }
 
     reloadBoostWasActive = reloadActiveNow;
@@ -79,7 +86,7 @@ void PlayerTank::update(float deltaTime) {
 }
 
 Bullet* PlayerTank::shoot() {
-    cdMaxAtShot = (reloadBoostTime > 0.0f) ? 1.0f : shootCooldown;
+    cdMaxAtShot = shootCooldown / reloadMultiplier;
     cdRemaining = cdMaxAtShot;
     float sizeCoef = (reloadBoostTime > 0.0f) ? 1.6f : 1.0f;
 
@@ -212,7 +219,11 @@ void PlayerTank::applySpeedBoost(float durationSeconds, float multiplier) {
     speedMultiplier = multiplier > 0.0f ? multiplier : 1.0f;
 }
 
-void PlayerTank::applyReloadBoost(float durationSeconds) { reloadBoostTime = durationSeconds; reloadBoostDuration = durationSeconds; }
+void PlayerTank::applyReloadBoost(float durationSeconds, float multiplier) {
+    reloadBoostTime = durationSeconds;
+    reloadBoostDuration = durationSeconds;
+    reloadMultiplier = multiplier;
+}
 
 void PlayerTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
 
@@ -228,6 +239,7 @@ void PlayerTank::clearAllBuffs() {
     speedMultiplier = 1.0f;
     reloadBoostTime = 0.0f;
     reloadBoostDuration = 0.0f;
+    reloadMultiplier = 1.0f;
     shieldCharges = 0;
     speed = baseSpeed;
     stunTimer = 0.0f;

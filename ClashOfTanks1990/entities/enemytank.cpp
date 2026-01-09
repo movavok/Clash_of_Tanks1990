@@ -39,6 +39,7 @@ void EnemyTank::update(float deltaTime) {
 
 void EnemyTank::updateBoosts(float dt) {
     bool prevActive = reloadBoostWasActive;
+    float prevReloadMul = reloadMultiplier;
     if (speedBoostTime > 0.0f) {
         speedBoostTime -= dt;
         if (speedBoostTime <= 0.0f) {
@@ -51,21 +52,26 @@ void EnemyTank::updateBoosts(float dt) {
 
     if (reloadBoostTime > 0.0f) {
         reloadBoostTime -= dt;
-        if (reloadBoostTime <= 0.0f) reloadBoostTime = 0.0f;
+        if (reloadBoostTime <= 0.0f) {
+            reloadBoostTime = 0.0f;
+            reloadMultiplier = 1.0f;
+        }
     }
 
     bool nowActive = reloadBoostTime > 0.0f;
     if (!prevActive && nowActive && lastShotTime > 0.0f) {
-        float prevMax = shootCooldown > 0.0f ? shootCooldown : 0.001f;
+        float prevMax = shootCooldown;
         float progress = lastShotTime / prevMax;
-        if (progress < 0.0f) progress = 0.0f; else if (progress > 1.0f) progress = 1.0f;
-        float newMax = 1.0f;
+        progress = std::clamp(progress, 0.0f, 1.0f);
+
+        float newMax = shootCooldown / reloadMultiplier;
         lastShotTime = newMax * progress;
     }
     if (prevActive && !nowActive && lastShotTime > 0.0f) {
-        float prevMax = 1.0f;
+        float prevMax = shootCooldown / prevReloadMul;
         float progress = lastShotTime / prevMax;
-        if (progress < 0.0f) progress = 0.0f; else if (progress > 1.0f) progress = 1.0f;
+        progress = std::clamp(progress, 0.0f, 1.0f);
+
         float newMax = shootCooldown > 0.0f ? shootCooldown : 0.001f;
         lastShotTime = newMax * progress;
     }
@@ -270,7 +276,7 @@ Tank::Direction EnemyTank::turnToPlayer() const {
 void EnemyTank::tryShoot(float dt) {
     lastShotTime += dt;
 
-    float cooldown = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
+    float cooldown = shootCooldown / reloadMultiplier;
     if (lastShotTime < cooldown) return;
     if (!canShoot()) return;
 
@@ -483,7 +489,7 @@ void EnemyTank::drawSpeedTrail(QPainter* painter, const QPoint& mainDrawPos, con
 }
 
 void EnemyTank::drawCooldownBar(QPainter* painter) const {
-    float effective = reloadBoostTime > 0.0f ? 1.0f : shootCooldown;
+    float effective = shootCooldown / reloadMultiplier;
     float denom = effective > 0.0f ? effective : 1.0f;
     float percent = lastShotTime / denom;
     if (percent < 0.0f) percent = 0.0f;
@@ -516,9 +522,10 @@ void EnemyTank::applySpeedBoost(float durationSeconds, float multiplier) {
     speedMultiplier = multiplier > 0.0f ? multiplier : 1.0f;
 }
 
-void EnemyTank::applyReloadBoost(float durationSeconds) {
+void EnemyTank::applyReloadBoost(float durationSeconds, float multiplier) {
     reloadBoostTime = durationSeconds;
     reloadBoostDuration = durationSeconds;
+    reloadMultiplier = multiplier;
 }
 
 void EnemyTank::addShield() { if (shieldCharges < 1) shieldCharges = 1; }
@@ -535,6 +542,7 @@ void EnemyTank::clearAllBuffs() {
     speedMultiplier = 1.0f;
     reloadBoostTime = 0.0f;
     reloadBoostDuration = 0.0f;
+    reloadMultiplier = 1.0f;
     shieldCharges = 0;
     speed = baseSpeed;
     stunTimer = 0.0f;
