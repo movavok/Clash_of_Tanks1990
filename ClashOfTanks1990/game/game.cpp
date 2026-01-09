@@ -489,13 +489,13 @@ void Game::spawnPowerUpRandom() {
         const int tileX = QRandomGenerator::global()->bounded(totalCols);
         const int tileY = QRandomGenerator::global()->bounded(totalRows);
 
-        const QPointF spawnPos(tileX * tileSize + (tileSize - 16) / 2.0,
-                               tileY * tileSize + (tileSize - 16) / 2.0);
-        const QRectF spawnRect(spawnPos.x(), spawnPos.y(), 16, 16);
+        const QPointF spawnPos(tileX * tileSize + (tileSize - 26) / 2.0,
+                               tileY * tileSize + (tileSize - 26) / 2.0);
+        const QRectF spawnRect(spawnPos.x(), spawnPos.y(), 26, 26);
 
         if (level->intersectsTankSolid(spawnRect)) continue;
 
-        const PowerUp::BoostType chosenType = static_cast<PowerUp::BoostType>(QRandomGenerator::global()->bounded(4));
+        const PowerUp::BoostType chosenType = static_cast<PowerUp::BoostType>(QRandomGenerator::global()->bounded(3));
         PowerUp* boost = new PowerUp(spawnPos, chosenType);
         addEntity(boost);
         return;

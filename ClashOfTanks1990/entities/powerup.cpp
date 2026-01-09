@@ -3,6 +3,11 @@
 PowerUp::PowerUp(const QPointF& position, BoostType boostType)
     : Entity(position), type(boostType) {}
 
+void PowerUp::update(float dt) {
+    rotation += 90.0f * dt;
+    if (rotation >= 360.0f) rotation -= 360.0f;
+}
+
 void PowerUp::render(QPainter* painter) {
 	static QPixmap speedPx(":/powerups/speedPowerUp.png");
 	static QPixmap reloadPx(":/powerups/reloadPowerUp.png");
@@ -17,9 +22,13 @@ void PowerUp::render(QPainter* painter) {
 	}
 	if (sprite && !sprite->isNull()) {
 		QPixmap scaled = sprite->scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-		const int drawX = static_cast<int>(position.x() + (width - scaled.width()) / 2.0f);
-		const int drawY = static_cast<int>(position.y() + (height - scaled.height()) / 2.0f);
-		painter->drawPixmap(drawX, drawY, scaled);
+        QPointF center(position.x() + width / 2.0f, position.y() + height / 2.0f);
+        painter->save();
+        painter->translate(center);
+        painter->rotate(rotation);
+        painter->translate(-scaled.width() / 2.0f, -scaled.height() / 2.0f);
+        painter->drawPixmap(0, 0, scaled);
+        painter->restore();
     }
 }
 
