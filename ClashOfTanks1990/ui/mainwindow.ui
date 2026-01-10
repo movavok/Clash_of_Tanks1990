@@ -362,10 +362,9 @@ QDialog QSlider::handle:horizontal {
 
 /* Specific small '?' button */
 #page_startScreen QPushButton#b_aboutBoosts {
-    background-color: transparent; /* transparent fill */
+    background-color: transparent;
     border: 2px solid #ffffff;     /* white outline */
     border-radius: 12px;           /* circle for 25x25 */
-    color: #4a4a4a;
     font-weight: bold;
     padding: 0;                    /* prevent size inflation */
     margin: 0;                     /* keep compact */
@@ -637,7 +636,7 @@ QDialog QSlider::handle:horizontal {
                         <string>Про посилювачі</string>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">color: #4a4a4a;</string>
+                        <string notr="true">border: 2px solid #ffffff;</string>
                        </property>
                        <property name="text">
                         <string>?</string>
@@ -652,7 +651,7 @@ QDialog QSlider::handle:horizontal {
                         <bool>false</bool>
                        </property>
                        <property name="flat">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                       </widget>
                      </item>
@@ -675,7 +674,7 @@ QDialog QSlider::handle:horizontal {
               </property>
               <property name="maximumSize">
                <size>
-                <width>310</width>
+                <width>320</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -704,7 +703,7 @@ QDialog QSlider::handle:horizontal {
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>62</width>
+                       <width>90</width>
                        <height>16777215</height>
                       </size>
                      </property>
@@ -854,19 +853,19 @@ QWidget#page_gameView QLabel#l_fpsNumber {
        <rect>
         <x>65</x>
         <y>4</y>
-        <width>30</width>
+        <width>45</width>
         <height>24</height>
        </rect>
       </property>
       <property name="minimumSize">
        <size>
-        <width>30</width>
+        <width>45</width>
         <height>24</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>30</width>
+        <width>45</width>
         <height>16777215</height>
        </size>
       </property>

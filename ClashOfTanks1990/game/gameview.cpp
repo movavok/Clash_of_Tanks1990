@@ -2,8 +2,6 @@
 
 GameView::GameView(QWidget *parent)
     : QWidget{parent} {
-    lastTime = QDateTime::currentMSecsSinceEpoch();
-
     connect(&timer, &QTimer::timeout, this, &GameView::onTick);
 
     setFocusPolicy(Qt::StrongFocus);
@@ -21,17 +19,27 @@ void GameView::onTick() {
     double dt = (now - lastTime) / 1000.0;
     lastTime = now;
 
+    dt = std::min(dt, 0.05);
+    accumulator += dt;
+
+    const double frameTime = 1.0 / maxFPS;
+    while (accumulator >= frameTime) {
+        if (!game.isPaused()) {
+            game.update(frameTime, size());
+        }
+        accumulator -= frameTime;
+    }
+
+    update();
+
     frameCount++;
     fpsTimer += dt;
     if (fpsTimer >= 1.0){
         int fps = static_cast<int>(frameCount / fpsTimer);
+        emit framesDrawed(fps);
         frameCount = 0;
         fpsTimer = 0.0;
-        emit framesDrawed(fps);
     }
-
-    game.update(dt, size());
-    update();
 }
 
 void GameView::paintEvent(QPaintEvent*) {
@@ -46,12 +54,21 @@ void GameView::paintEvent(QPaintEvent*) {
 void GameView::keyPressEvent(QKeyEvent* event) { game.handleKeyPress(static_cast<Qt::Key>(event->key())); }
 void GameView::keyReleaseEvent(QKeyEvent* event) { game.handleKeyRelease(static_cast<Qt::Key>(event->key())); }
 
+void GameView::resetTimer() {
+    lastTime = QDateTime::currentMSecsSinceEpoch();
+    accumulator = 0.0;
+}
+
 void GameView::setMaxFPS(int fps) {
-    timer.setInterval(1000 / fps);
+    maxFPS = fps;
+    timer.setInterval(4);
+    resetTimer();
     timer.start();
 }
 
 void GameView::pauseGame() {
+    timer.stop();
+
     game.setPaused(true);
     QMessageBox msg(parentWidget());
     msg.setIcon(QMessageBox::NoIcon);
@@ -61,11 +78,14 @@ void GameView::pauseGame() {
     msg.setStandardButtons(QMessageBox::Ok);
     if (QAbstractButton* ok = msg.button(QMessageBox::Ok)) ok->setText("Продовжити");
     msg.exec();
-    lastTime = QDateTime::currentMSecsSinceEpoch();
+    resetTimer();
     game.setPaused(false);
+
+    timer.start();
 }
 
-void GameView::restartLevel() { game.restart(); }
+void GameView::restartLevel() { game.restart(); resetTimer(); }
+
 Game* GameView::getGame() { return &game; }
 
 void GameView::onPlayerDeathBox() {
@@ -81,7 +101,7 @@ void GameView::onPlayerDeathBox() {
     if (ab_exit)  ab_exit->setObjectName("ab_exit");
     msg.setStyleSheet(msg.styleSheet());
     msg.exec();
-    lastTime = QDateTime::currentMSecsSinceEpoch();
+    resetTimer();
 
     QAbstractButton* clicked = msg.clickedButton();
     if (clicked == ab_retry) { game.restart(); game.finishBox(); }
@@ -110,7 +130,7 @@ void GameView::onLevelChoiceBox(int levelIndex) {
     else if (ab_yes) ab_yes->setObjectName("ab_yes");
     msg.setStyleSheet(msg.styleSheet());
     msg.exec();
-    lastTime = QDateTime::currentMSecsSinceEpoch();
+    resetTimer();
 
     QAbstractButton* clicked = msg.clickedButton();
     if (clicked == ab_yes) {

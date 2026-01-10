@@ -42,7 +42,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::onLevelChanged(int level) { setWindowTitle(QString("Clash Of Tanks 1990 | lvl %1").arg(level)); }
 
-void MainWindow::fpsUpdated(int fps) { ui->l_fpsNumber->setText(QString::number(fps)); }
+void MainWindow::fpsUpdated(int fps) {
+    unsigned short maxFPS = ui->sb_maxFPS->value();
+    ui->l_fpsNumber->setText(fps < maxFPS ? QString::number(fps) : QString::number(maxFPS));
+}
 
 void MainWindow::onPageChanged(int index) {
     bool inGame = (ui->stackedWidget->widget(index) == ui->page_gameView);

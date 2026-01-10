@@ -29,10 +29,13 @@ private:
     Game game;
     QTimer timer;
     long long lastTime = 0;
-    double targetDelta = 0.0;
+    double accumulator = 0.0;
 
     int frameCount = 0;
     double fpsTimer = 0.0;
+    unsigned short maxFPS = 0;
+
+    void resetTimer();
 
 private slots:
     void onTick();
