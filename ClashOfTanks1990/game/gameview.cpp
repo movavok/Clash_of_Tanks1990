@@ -24,8 +24,16 @@ void GameView::onTick() {
 
     lastTime = now;
 
+    frameCount++;
+    fpsTimer += dt;
+    if (fpsTimer >= 1.0){
+        int fps = static_cast<int>(frameCount / fpsTimer);
+        frameCount = 0;
+        fpsTimer = 0.0;
+        emit framesDrawed(fps);
+    }
+
     game.update(dt, size());
-    QRect bounds(0, 0, width(), height());
     update();
 }
 

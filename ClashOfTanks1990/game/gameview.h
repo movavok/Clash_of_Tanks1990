@@ -29,6 +29,9 @@ private:
     QTimer timer;
     long long lastTime = 0;
 
+    int frameCount = 0;
+    double fpsTimer = 0.0;
+
 private slots:
     void onTick();
     void onPlayerDeathBox();
@@ -42,6 +45,7 @@ public slots:
 signals:
     void levelChanged(int);
     void finishGameSession();
+    void framesDrawed(int);
 };
 
 #endif // GAMEVIEW_H

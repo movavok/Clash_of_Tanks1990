@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(gameView, &GameView::levelChanged, this, &MainWindow::onLevelChanged);
     connect(gameView, &GameView::finishGameSession, this, &MainWindow::onFinishedGame);
+    connect(gameView, &GameView::framesDrawed, this, &MainWindow::fpsUpdated);
     connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::onPageChanged);
 
     connect(ui->act_pause, &QAction::triggered, gameView, &GameView::pauseGame);
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::onLevelChanged(int level) { setWindowTitle(QString("Clash Of Tanks 1990 | lvl %1").arg(level)); }
+
+void MainWindow::fpsUpdated(int fps) { ui->l_fpsNumber->setText(QString::number(fps)); }
 
 void MainWindow::onPageChanged(int index) {
     bool inGame = (ui->stackedWidget->widget(index) == ui->page_gameView);

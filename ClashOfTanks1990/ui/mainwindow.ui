@@ -26,7 +26,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-    <string notr="true">/* Pixel theme for start screen */
+   <string notr="true">/* Pixel theme for start screen */
 
 /* Tile the background to keep pixel crispness */
 #page_startScreen {
@@ -50,7 +50,7 @@ QMessageBox {
     border: 2px solid #dcdcdc;
     border-radius: 0;
     padding: 8px 10px;
-    font-family: Fixedsys, "Lucida Console", "Courier New", monospace;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
     font-size: 11pt;
 }
 
@@ -287,7 +287,7 @@ QPushButton#b_continue:enabled {
 }
 
 /* Specific small '?' button */
-QPushButton#b_aboutBoosts {
+#page_startScreen QPushButton#b_aboutBoosts {
     background-color: transparent; /* transparent fill */
     border: 2px solid #ffffff;     /* white outline */
     border-radius: 12px;           /* circle for 25x25 */
@@ -296,10 +296,26 @@ QPushButton#b_aboutBoosts {
     padding: 0;                    /* prevent size inflation */
     margin: 0;                     /* keep compact */
 }
-QPushButton#b_aboutBoosts:hover {
+#page_startScreen QPushButton#b_aboutBoosts:hover {
     background-color: transparent;
     border: 2px solid #ffffff;   /* keep size consistent */
 }
+
+/* FPS display labels in game view */
+QLabel#l_fps,
+QLabel#l_fpsNumber {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace; 
+    font-size: 6pt; 
+    font-weight: normal; 
+    color: rgba(255, 255, 255, 0.75); 
+    background-color: rgba(0, 0, 0, 0.25); 
+    border: 1px solid rgba(0, 0, 0, 0.45); 
+    border-radius: 0;
+}
+
+QLabel#l_fps { qproperty-alignment: AlignVCenter | AlignLeft; }
+QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
+
      </string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -311,7 +327,7 @@ QPushButton#b_aboutBoosts:hover {
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>611</width>
+      <width>608</width>
       <height>608</height>
      </rect>
     </property>
@@ -631,7 +647,61 @@ QPushButton#b_aboutBoosts:hover {
       </item>
      </layout>
     </widget>
-    <widget class="GameView" name="page_gameView"/>
+    <widget class="GameView" name="page_gameView">
+     <widget class="QLabel" name="l_fps">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>4</y>
+        <width>55</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>55</width>
+        <height>24</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>55</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>FPS:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="l_fpsNumber">
+      <property name="geometry">
+       <rect>
+        <x>65</x>
+        <y>4</y>
+        <width>30</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>30</width>
+        <height>24</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">

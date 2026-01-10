@@ -46,6 +46,7 @@ protected:
 private slots:
     void onLevelChanged(int);
     void onPageChanged(int);
+    void fpsUpdated(int);
     void onFinishedGame();
 
     void openGame(bool);
