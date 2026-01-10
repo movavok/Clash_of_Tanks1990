@@ -18,6 +18,7 @@ class GameView : public QWidget
     Q_OBJECT
 public:
     explicit GameView(QWidget *parent = nullptr);
+    void setMaxFPS(int);
 
 protected:
     void paintEvent(QPaintEvent*) override;
@@ -28,6 +29,7 @@ private:
     Game game;
     QTimer timer;
     long long lastTime = 0;
+    double targetDelta = 0.0;
 
     int frameCount = 0;
     double fpsTimer = 0.0;

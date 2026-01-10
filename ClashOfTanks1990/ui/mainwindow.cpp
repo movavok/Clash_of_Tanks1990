@@ -74,6 +74,7 @@ void MainWindow::openGame(bool restart) {
     }
     ui->stackedWidget->setCurrentWidget(ui->page_gameView);
     gameView->getGame()->setMovementScheme(ui->cb_movement->currentIndex(), ui->kse_shoot->keySequence()[0].key());
+    gameView->setMaxFPS(ui->sb_maxFPS->value());
 }
 
 void MainWindow::startNewGame() { openGame(true); }

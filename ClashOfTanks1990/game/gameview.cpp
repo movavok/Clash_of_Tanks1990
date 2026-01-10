@@ -3,12 +3,10 @@
 GameView::GameView(QWidget *parent)
     : QWidget{parent} {
     lastTime = QDateTime::currentMSecsSinceEpoch();
-    timer.setInterval(16); // 1000/16 = ~60fps
 
     connect(&timer, &QTimer::timeout, this, &GameView::onTick);
-    timer.start();
 
-    setFocusPolicy(Qt::StrongFocus); // working keyboard
+    setFocusPolicy(Qt::StrongFocus);
     setFixedSize(19 * 32, 19 * 32);
 
     connect(&game, &Game::levelChanged, this, &GameView::levelChanged);
@@ -21,7 +19,6 @@ GameView::GameView(QWidget *parent)
 void GameView::onTick() {
     long long now = QDateTime::currentMSecsSinceEpoch();
     double dt = (now - lastTime) / 1000.0;
-
     lastTime = now;
 
     frameCount++;
@@ -47,8 +44,12 @@ void GameView::paintEvent(QPaintEvent*) {
 }
 
 void GameView::keyPressEvent(QKeyEvent* event) { game.handleKeyPress(static_cast<Qt::Key>(event->key())); }
-
 void GameView::keyReleaseEvent(QKeyEvent* event) { game.handleKeyRelease(static_cast<Qt::Key>(event->key())); }
+
+void GameView::setMaxFPS(int fps) {
+    timer.setInterval(1000 / fps);
+    timer.start();
+}
 
 void GameView::pauseGame() {
     game.setPaused(true);
@@ -60,6 +61,7 @@ void GameView::pauseGame() {
     msg.setStandardButtons(QMessageBox::Ok);
     if (QAbstractButton* ok = msg.button(QMessageBox::Ok)) ok->setText("Продовжити");
     msg.exec();
+    lastTime = QDateTime::currentMSecsSinceEpoch();
     game.setPaused(false);
 }
 
@@ -79,6 +81,7 @@ void GameView::onPlayerDeathBox() {
     if (ab_exit)  ab_exit->setObjectName("ab_exit");
     msg.setStyleSheet(msg.styleSheet());
     msg.exec();
+    lastTime = QDateTime::currentMSecsSinceEpoch();
 
     QAbstractButton* clicked = msg.clickedButton();
     if (clicked == ab_retry) { game.restart(); game.finishBox(); }
@@ -107,6 +110,7 @@ void GameView::onLevelChoiceBox(int levelIndex) {
     else if (ab_yes) ab_yes->setObjectName("ab_yes");
     msg.setStyleSheet(msg.styleSheet());
     msg.exec();
+    lastTime = QDateTime::currentMSecsSinceEpoch();
 
     QAbstractButton* clicked = msg.clickedButton();
     if (clicked == ab_yes) {

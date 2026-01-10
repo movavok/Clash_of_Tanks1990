@@ -26,7 +26,8 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/* Pixel theme for start screen */
+   <string notr="true">
+/* Pixel theme for start screen */
 
 /* Tile the background to keep pixel crispness */
 #page_startScreen {
@@ -203,7 +204,10 @@ QDialog QSlider::handle:horizontal {
 #page_startScreen QPushButton,
 #page_startScreen QGroupBox,
 #page_startScreen QComboBox,
-#page_startScreen QKeySequenceEdit {
+#page_startScreen QKeySequenceEdit,
+#page_startScreen QSpinBox,
+#page_startScreen QDoubleSpinBox,
+#page_startScreen QAbstractSpinBox {
     font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
     font-size: 10pt;
     color: #ffffff;
@@ -225,17 +229,17 @@ QDialog QSlider::handle:horizontal {
 }
 
 /* Buttons */
-#page_startScreen QPushButton {
+#page_startScreen QPushButton#b_startGame {
     background-color: #3a3a3a;
     border: 2px solid #000000;
     border-radius: 0;
     padding: 6px 10px;
     color: #ffffff;
 }
-#page_startScreen QPushButton:hover {
+#page_startScreen QPushButton#b_startGame:hover {
     background-color: #4a4a4a;
 }
-#page_startScreen QPushButton:pressed {
+#page_startScreen QPushButton#b_startGame:pressed {
     background-color: #2a2a2a;
     border-left-color: #111111;
     border-top-color: #111111;
@@ -243,16 +247,30 @@ QDialog QSlider::handle:horizontal {
     border-bottom-color: #555555;
 }
 
-/* Continue button states */
-QPushButton#b_continue:disabled {
+/* Continue button states (keep green when enabled) */
+#page_startScreen QPushButton#b_continue:disabled {
     background-color: #1f1f1f;
     border: 2px solid #444444;
+    border-radius: 0;
+    padding: 6px 10px;
     color: #888888;
 }
-QPushButton#b_continue:enabled {
+#page_startScreen QPushButton#b_continue:enabled {
     background-color: #2e5f2e;
     border: 2px solid #163816;
+    border-radius: 0;
+    padding: 6px 10px;
     color: #c8ffc8;
+}
+#page_startScreen QPushButton#b_continue:enabled:hover {
+    background-color: #357a3a;
+}
+#page_startScreen QPushButton#b_continue:enabled:pressed {
+    background-color: #235f26;
+    border-left-color: #133516;
+    border-top-color: #133516;
+    border-right-color: #5b8f60;
+    border-bottom-color: #5b8f60;
 }
 
 /* ComboBox */
@@ -281,6 +299,62 @@ QPushButton#b_continue:enabled {
     color: #ffffff;
 }
 
+/* SpinBox (QAbstractSpinBox) */
+#page_startScreen QSpinBox,
+#page_startScreen QDoubleSpinBox,
+#page_startScreen QAbstractSpinBox {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 6px;
+    padding-right: 14px; /* room for up/down buttons */
+    color: #ffffff;
+    selection-background-color: #5a5a5a;
+    selection-color: #ffffff;
+}
+
+#page_startScreen QAbstractSpinBox QLineEdit {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    qproperty-alignment: AlignVCenter | AlignRight;
+}
+
+#page_startScreen QAbstractSpinBox::up-button,
+#page_startScreen QAbstractSpinBox::down-button {
+    width: 12px;
+    background-color: #3a3a3a;
+    border-left: 2px solid #000000;
+}
+
+#page_startScreen QAbstractSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    height: 50%;
+    border-bottom: 1px solid #000000;
+}
+
+#page_startScreen QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    height: 50%;
+    border-top: 1px solid #000000;
+}
+
+#page_startScreen QAbstractSpinBox::up-button:hover,
+#page_startScreen QAbstractSpinBox::down-button:hover {
+    background-color: #4a4a4a;
+}
+
+#page_startScreen QAbstractSpinBox::up-button:pressed,
+#page_startScreen QAbstractSpinBox::down-button:pressed {
+    background-color: #2a2a2a;
+}
+
 /* Labels */
 #page_startScreen QLabel {
     background-color: transparent;
@@ -291,7 +365,7 @@ QPushButton#b_continue:enabled {
     background-color: transparent; /* transparent fill */
     border: 2px solid #ffffff;     /* white outline */
     border-radius: 12px;           /* circle for 25x25 */
-    color: #ffffff;
+    color: #4a4a4a;
     font-weight: bold;
     padding: 0;                    /* prevent size inflation */
     margin: 0;                     /* keep compact */
@@ -301,9 +375,14 @@ QPushButton#b_continue:enabled {
     border: 2px solid #ffffff;   /* keep size consistent */
 }
 
+#page_startScreen QPushButton#b_aboutBoosts:pressed {
+    background-color: transparent;
+    border: 2px solid #ffffff;
+}
+
 /* FPS display labels in game view */
-QLabel#l_fps,
-QLabel#l_fpsNumber {
+#page_gameView QLabel#l_fps,
+#page_gameView QLabel#l_fpsNumber {
     font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace; 
     font-size: 6pt; 
     font-weight: normal; 
@@ -311,10 +390,16 @@ QLabel#l_fpsNumber {
     background-color: rgba(0, 0, 0, 0.25); 
     border: 1px solid rgba(0, 0, 0, 0.45); 
     border-radius: 0;
+    padding: 0px 4px;
 }
 
-QLabel#l_fps { qproperty-alignment: AlignVCenter | AlignLeft; }
-QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
+#page_gameView QLabel#l_fps {
+    qproperty-alignment: AlignVCenter | AlignLeft;
+}
+
+#page_gameView QLabel#l_fpsNumber {
+    qproperty-alignment: AlignCenter;
+}
 
      </string>
   </property>
@@ -551,6 +636,9 @@ QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
                        <property name="toolTip">
                         <string>Про посилювачі</string>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color: #4a4a4a;</string>
+                       </property>
                        <property name="text">
                         <string>?</string>
                        </property>
@@ -576,6 +664,67 @@ QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="gb_view">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>310</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="title">
+               <string>Вигляд</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_4">
+                   <item>
+                    <widget class="QLabel" name="l_maxFPS">
+                     <property name="text">
+                      <string>Максимальна частота кадрів</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="sb_maxFPS">
+                     <property name="minimumSize">
+                      <size>
+                       <width>62</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>62</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="minimum">
+                      <number>15</number>
+                     </property>
+                     <property name="maximum">
+                      <number>400</number>
+                     </property>
+                     <property name="value">
+                      <number>60</number>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
             </item>
             <item>
              <widget class="QGroupBox" name="gb_startGame">
@@ -669,6 +818,33 @@ QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
         <height>16777215</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">/* FPS display labels in game view */
+QWidget#page_gameView QLabel#l_fps,
+QWidget#page_gameView QLabel#l_fpsNumber {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 6pt;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 191);
+    background-color: rgba(0, 0, 0, 64);
+    border: 1px solid rgba(0, 0, 0, 115);
+    border-radius: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+QWidget#page_gameView QLabel#l_fps {
+    qproperty-alignment: AlignVCenter | AlignLeft;
+}
+
+QWidget#page_gameView QLabel#l_fpsNumber {
+    qproperty-alignment: AlignCenter;
+}
+
+</string>
+      </property>
       <property name="text">
        <string>FPS:</string>
       </property>
@@ -693,6 +869,32 @@ QLabel#l_fpsNumber { qproperty-alignment: AlignVCenter | AlignRight; }
         <width>30</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">/* FPS display labels in game view */
+QWidget#page_gameView QLabel#l_fps,
+QWidget#page_gameView QLabel#l_fpsNumber {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 6pt;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 191);
+    background-color: rgba(0, 0, 0, 64);
+    border: 1px solid rgba(0, 0, 0, 115);
+    border-radius: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+QWidget#page_gameView QLabel#l_fps {
+    qproperty-alignment: AlignVCenter | AlignLeft;
+}
+
+QWidget#page_gameView QLabel#l_fpsNumber {
+    qproperty-alignment: AlignCenter;
+}
+</string>
       </property>
       <property name="text">
        <string>0</string>
