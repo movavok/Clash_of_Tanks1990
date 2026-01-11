@@ -56,7 +56,14 @@ void MainWindow::onPageChanged(int index) {
     if (inGame) {
         gameView->getGame()->setPaused(false);
         gameView->setFocus();
-    } else gameView->getGame()->setPaused(true);
+    } else {
+        gameView->getGame()->setPaused(true);
+
+        unsigned short streak = gameView->getGame()->getDestroyStreak();
+        maxDestroyStreak = streak > maxDestroyStreak ? streak : maxDestroyStreak;
+        ui->lcd_streakNumber->display(maxDestroyStreak);
+        Audio::stopAll();
+    }
 }
 
 bool MainWindow::event(QEvent* event) {

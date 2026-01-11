@@ -21,6 +21,7 @@ void Game::initLevel() {
 
 void Game::detectMaxLevel() { maxLevel = QDir(":/levels").entryList(QStringList() << "*.txt", QDir::Files).size(); }
 int Game::getMaxLevel() const { return maxLevel; }
+unsigned short Game::getDestroyStreak() const { return playerDestroyStreak; }
 
 void Game::newGame() { levelIndex = 1; restartLevel(); }
 
@@ -281,6 +282,7 @@ bool Game::handlePlayerDeath() {
     if (!player) {
         paused = true;
         Audio::play("lose");
+        playerDestroyStreak = 0;
         emit doPlayerDeathBox();
         return true;
     }
@@ -368,12 +370,15 @@ void Game::checkIfShotDown() {
                         }
                         else { tank->destroy(); Audio::play("tankDestroyed"); }
                     } else if (EnemyTank* enemyTankHit = dynamic_cast<EnemyTank*>(tank)) {
+                        bool killed = false;
                         if (enemyTankHit->hasShield()) {
                             enemyTankHit->consumeShield();
                             Audio::play("shieldDestroyed");
-                            if (boosted) { tank->destroy(); Audio::play("tankDestroyed"); }
+                            if (boosted) { tank->destroy(); Audio::play("tankDestroyed"); killed = true;}
                         }
-                        else { tank->destroy(); Audio::play("tankDestroyed"); }
+                        else { tank->destroy(); Audio::play("tankDestroyed"); killed = true; }
+                        if (killed && bullet->getOwner() == player)
+                            ++playerDestroyStreak;
                     } else { tank->destroy(); Audio::play("tankDestroyed"); }
                     if (!tank->isAlive()) {
                         QRectF tankBounds = tank->bounds();

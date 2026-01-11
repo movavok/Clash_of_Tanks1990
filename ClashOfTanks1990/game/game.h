@@ -48,6 +48,8 @@ public:
 
     float calculateLaserLength(const QPointF&, Tank::Direction, float) const;
 
+    unsigned short getDestroyStreak() const;
+
 private:
     PlayerTank* player;
     QList<Entity*> entities;
@@ -64,6 +66,8 @@ private:
 
     float powerUpSpawnTimer = 0.0;
     float powerUpSpawnInterval = 8.0;
+
+    unsigned short playerDestroyStreak = 0;
 
     void initLevel();
     QPointF tileCenter(int, int) const;

@@ -40,6 +40,8 @@ private:
 
     bool canContinue = false;
 
+    unsigned short maxDestroyStreak = 0;
+
 protected:
     bool event(QEvent*) override;
 

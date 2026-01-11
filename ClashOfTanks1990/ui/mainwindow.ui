@@ -400,6 +400,16 @@ QDialog QSlider::handle:horizontal {
     qproperty-alignment: AlignCenter;
 }
 
+/* Streak counter LCD */
+#page_startScreen QLCDNumber#lcd_streakNumber {
+    qproperty-segmentStyle: Flat;
+    background-color: rgba(0, 0, 0, 0.55);
+    color: rgb(80, 255, 120);
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 4px;
+}
+
      </string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -425,9 +435,9 @@ QDialog QSlider::handle:horizontal {
      <number>0</number>
     </property>
     <widget class="QWidget" name="page_startScreen">
-     <layout class="QVBoxLayout" name="verticalLayout_12">
+     <layout class="QVBoxLayout" name="verticalLayout_13">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_10">
+       <layout class="QVBoxLayout" name="verticalLayout_12">
         <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
@@ -665,65 +675,109 @@ QDialog QSlider::handle:horizontal {
              </layout>
             </item>
             <item>
-             <widget class="QGroupBox" name="gb_view">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>320</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="title">
-               <string>Вигляд</string>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_13">
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QGroupBox" name="gb_view">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>320</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Вигляд</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_10">
                  <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <layout class="QHBoxLayout" name="horizontalLayout_6">
                    <item>
-                    <widget class="QLabel" name="l_maxFPS">
-                     <property name="text">
-                      <string>Максимальна частота кадрів</string>
+                    <layout class="QHBoxLayout" name="horizontalLayout_4">
+                     <item>
+                      <widget class="QLabel" name="l_maxFPS">
+                       <property name="text">
+                        <string>Максимальна частота кадрів</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="sb_maxFPS">
+                       <property name="minimumSize">
+                        <size>
+                         <width>62</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>90</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>15</number>
+                       </property>
+                       <property name="maximum">
+                        <number>400</number>
+                       </property>
+                       <property name="value">
+                        <number>60</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="gb_streak">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Серія</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_14">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <item>
+                    <widget class="QLCDNumber" name="lcd_streakNumber">
+                     <property name="styleSheet">
+                      <string notr="true">#page_startScreen QLCDNumber#lcd_streakNumber {
+    qproperty-segmentStyle: Flat;
+    background-color: rgba(0, 0, 0, 0.55);
+    color: rgb(80, 255, 120);
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 4px;
+}</string>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QSpinBox" name="sb_maxFPS">
-                     <property name="minimumSize">
-                      <size>
-                       <width>62</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>90</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="minimum">
-                      <number>15</number>
-                     </property>
-                     <property name="maximum">
-                      <number>400</number>
-                     </property>
-                     <property name="value">
-                      <number>60</number>
+                    <widget class="QLabel" name="l_pieces">
+                     <property name="text">
+                      <string>шт.</string>
                      </property>
                     </widget>
                    </item>
                   </layout>
                  </item>
                 </layout>
-               </item>
-              </layout>
-             </widget>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
              <widget class="QGroupBox" name="gb_startGame">
